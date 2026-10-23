@@ -21,33 +21,53 @@ namespace SeaPowerPopOut;
 /// so a click there doesn't also select, deselect or order something in the world.</item>
 /// <item><c>MainGameViewModel.OnStart</c> / <c>GameMain.OnDestroy</c> — mission ready / mission unloading.</item>
 /// </list>
+/// <para>Two stages. The window hooks must wait until NoesisGUI runs: patching a method JIT-compiles it, which runs
+/// its class's static constructor, and <c>WindowHost</c> / <c>Window</c> register Noesis dependency properties
+/// there – before Noesis is initialised that is a native crash on startup. <see cref="PopOutScreen"/> applies them
+/// once the first game window host exists (the main menu has one).</para>
 /// </summary>
 internal static class Patches
 {
     private sealed class Hook
     {
         public string Type, Method, Prefix, Postfix;
+        public Type[] Args;                   // null = unique by name
     }
 
-    private static readonly Hook[] Hooks =
+    private static readonly Hook[] GameHooks =
+    {
+        new Hook { Type = "SeaPower.MouseControlState", Method = "OnUpdate", Args = Type.EmptyTypes, Postfix = nameof(MouseUpdated) },
+        new Hook { Type = "SeapowerUI.ViewModels.MainGameViewModel", Method = "OnStart", Args = Type.EmptyTypes, Postfix = nameof(MissionReady) },
+        new Hook { Type = "SeaPower.GameMain", Method = "OnDestroy", Args = Type.EmptyTypes, Prefix = nameof(MissionUnloading) },
+    };
+
+    private static readonly Hook[] WindowHooks =
     {
         new Hook { Type = "SeapowerUI.WindowHost", Method = "OpenNewWindow", Prefix = nameof(OpenNewWindow) },
         new Hook { Type = "SeapowerUI.WindowHost", Method = "CanCloseWindow", Postfix = nameof(CanCloseWindow) },
         new Hook { Type = "SeapowerUI.WindowHost", Method = "CloseWindow", Prefix = nameof(CloseWindow) },
-        new Hook { Type = "SeapowerUI.Window", Method = "OnInitialized", Postfix = nameof(WindowLoaded) },
-        new Hook { Type = "SeaPower.MouseControlState", Method = "OnUpdate", Postfix = nameof(MouseUpdated) },
-        new Hook { Type = "SeapowerUI.ViewModels.MainGameViewModel", Method = "OnStart", Postfix = nameof(MissionReady) },
-        new Hook { Type = "SeaPower.GameMain", Method = "OnDestroy", Prefix = nameof(MissionUnloading) },
+        new Hook { Type = "SeapowerUI.Window", Method = "OnInitialized", Args = Type.EmptyTypes, Postfix = nameof(WindowLoaded) },
     };
 
-    public static bool Apply(Harmony harmony)
+    private static Harmony harmony;
+
+    /// <summary>Stage one, at plugin load: hooks on plain game classes.</summary>
+    public static bool ApplyGameHooks(Harmony instance)
+    {
+        harmony = instance;
+        return Apply(GameHooks);
+    }
+
+    /// <summary>Stage two, once NoesisGUI is up: hooks on the game's Noesis window classes.</summary>
+    public static bool ApplyWindowHooks() => harmony != null && Apply(WindowHooks);
+
+    private static bool Apply(Hook[] hooks)
     {
         var resolved = new List<(Hook hook, MethodBase target)>();
-        foreach (Hook hook in Hooks)
+        foreach (Hook hook in hooks)
         {
             Type type = AccessTools.TypeByName(hook.Type);
-            MethodBase target = type == null ? null : AccessTools.Method(type, hook.Method, Type.EmptyTypes)
-                                                      ?? AccessTools.Method(type, hook.Method);
+            MethodBase target = type == null ? null : AccessTools.Method(type, hook.Method, hook.Args);
             if (target == null)
             {
                 ModLog.Error($"{hook.Type}.{hook.Method} not found (game updated?) - mod inactive.");

@@ -39,9 +39,9 @@ public class Plugin : IAnchorChainMod
                 return;
             }
             Layout.Load();
-            LogDisplays();
 
-            if (!Patches.Apply(new Harmony(Guid)))
+            // Only the hooks on plain game classes now; the window hooks follow once NoesisGUI runs (see Patches).
+            if (!Patches.ApplyGameHooks(new Harmony(Guid)))
                 return;
 
             var host = new GameObject("SeaPowerPopOut");
@@ -49,21 +49,12 @@ public class Plugin : IAnchorChainMod
             host.hideFlags = HideFlags.HideAndDontSave;
             host.AddComponent<PopOutScreen>();
 
-            ModLog.Info($"{Name} {Version} loaded. Pop-out monitor: {Settings.Monitor.Value}" +
-                        (PopOutScreen.DisplayAvailable ? "" : " (not connected - pop-out buttons stay hidden)"));
+            ModLog.Info($"{Name} {Version} loaded.");
         }
         catch (Exception ex)
         {
             // Never take the game down with us.
             ModLog.Error($"Startup failed, mod inactive: {ex}");
         }
-    }
-
-    private static void LogDisplays()
-    {
-        Display[] displays = Display.displays;
-        for (int i = 0; i < displays.Length; i++)
-            ModLog.Info($"Monitor {i + 1}: {displays[i].systemWidth}x{displays[i].systemHeight}" +
-                        (i == 0 ? " (game)" : ""));
     }
 }

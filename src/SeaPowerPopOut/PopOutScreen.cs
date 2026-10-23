@@ -100,10 +100,23 @@ internal sealed class PopOutScreen : MonoBehaviour
     private readonly Queue<Action> deferred = new Queue<Action>();
     private float nextSave;
 
+    // Stage two of the patches (see Patches): applied once the game's first window host exists.
+    private enum WindowHooks { Waiting, Applied, Failed }
+    private WindowHooks windowHooks = WindowHooks.Waiting;
+    private float nextHookCheck;
+
     private void Awake() => Instance = this;
 
     private void Update()
     {
+        if (windowHooks == WindowHooks.Waiting && Time.unscaledTime >= nextHookCheck)
+        {
+            nextHookCheck = Time.unscaledTime + 0.5f;
+            // A WindowHost registers itself with WindowHostManager when it is built, which only happens while
+            // NoesisGUI runs (the main menu view has one) – from then on Noesis types are safe to touch.
+            if (Singleton<WindowHostManager>.InstanceExists())
+                ApplyWindowHooks();
+        }
         while (deferred.Count > 0)
         {
             try { deferred.Dequeue()(); }
@@ -122,6 +135,27 @@ internal sealed class PopOutScreen : MonoBehaviour
     }
 
     private void OnApplicationQuit() => Layout.Save();
+
+    private void ApplyWindowHooks()
+    {
+        try
+        {
+            windowHooks = Patches.ApplyWindowHooks() ? WindowHooks.Applied : WindowHooks.Failed;
+        }
+        catch (Exception ex)
+        {
+            windowHooks = WindowHooks.Failed;
+            ModLog.Error($"Window hooks failed, pop-out inactive: {ex}");
+        }
+
+        // Listed here rather than at plugin load, where Unity reported only the game's monitor.
+        Display[] displays = Display.displays;
+        for (int i = 0; i < displays.Length; i++)
+            ModLog.Info($"Monitor {i + 1}: {displays[i].systemWidth}x{displays[i].systemHeight}" + (i == 0 ? " (game)" : ""));
+        if (windowHooks == WindowHooks.Applied)
+            ModLog.Info($"Window hooks in place. Pop-out monitor: {Settings.Monitor.Value}" +
+                        (DisplayAvailable ? "" : " - not connected, the pop-out buttons stay hidden"));
+    }
 
     // ---- mission lifecycle -------------------------------------------------------------------------------------
 
@@ -430,8 +464,11 @@ internal sealed class PopOutScreen : MonoBehaviour
 
     private void UpdateScreen(bool force)
     {
+        // The game scales its UI by screen height / 1080. Same here, by the short side, so a portrait monitor gets
+        // the size a landscape one of that resolution would (by its long side the windows would come out huge).
         float ui = Singleton<OptionsManager>.InstanceExists() ? Singleton<OptionsManager>.Instance.UIScale : 1f;
-        float s = ui * Mathf.Max(1, screenCamera.pixelHeight) / DesignHeight * Settings.Scale.Value;
+        int shortSide = Mathf.Max(1, Mathf.Min(screenCamera.pixelWidth, screenCamera.pixelHeight));
+        float s = ui * shortSide / DesignHeight * Settings.Scale.Value;
         if (force || Mathf.Abs(s - appliedScale) > 0.001f)
         {
             scale.ScaleX = s;
