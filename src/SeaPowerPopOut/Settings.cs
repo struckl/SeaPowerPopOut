@@ -30,12 +30,14 @@ internal static class Settings
         VerboseLog = file.Bind("1. General", "Verbose log", false,
             "Write debug detail to BepInEx/LogOutput.log.");
 
-        Monitor = file.Bind("2. Pop-out screen", "Monitor", 2,
-            new ConfigDescription("Monitor the windows pop out to. 1 is the monitor the game runs on, 2 the next one " +
-                                  "Unity finds, and so on - BepInEx/LogOutput.log lists them with their resolutions " +
-                                  "at startup. The monitor is taken over by the game the first time a window pops " +
-                                  "out and stays so until the game closes.",
-                                  new AcceptableValueRange<int>(2, 8)));
+        Monitor = file.Bind("2. Pop-out screen", "Monitor", 0,
+            new ConfigDescription("Monitor the windows pop out to. 0 = automatic: the first monitor the game doesn't " +
+                                  "use itself. 2 = the next monitor after the game's, 3 the one after - " +
+                                  "BepInEx/LogOutput.log lists them with their resolutions once the main menu is up. " +
+                                  "A monitor that shows the game's world view or second-screen map is skipped for " +
+                                  "the next free one. The monitor is taken over by the game the first time a window " +
+                                  "pops out and stays so until the game closes.",
+                                  new AcceptableValueRange<int>(0, 8)));
         Scale = file.Bind("2. Pop-out screen", "UI scale", 1.0f,
             new ConfigDescription("Size of the windows on the pop-out monitor relative to the game's own UI scale " +
                                   "(which already adapts to that monitor's resolution).",

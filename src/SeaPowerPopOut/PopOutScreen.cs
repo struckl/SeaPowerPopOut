@@ -77,14 +77,38 @@ internal sealed class PopOutScreen : MonoBehaviour
     private const string OutIcon = "M1,4 L1,11 L8,11 L8,8 M5,7 L11,1 M7,1 L11,1 L11,5";
     private const string InIcon = "M1,4 L1,11 L8,11 L8,8 M11,1 L5,7 M5,3 L5,7 L9,7";
 
-    private static int DisplayIndex => Settings.Monitor.Value - 1;
-    internal static bool DisplayAvailable => DisplayIndex >= 1 && DisplayIndex < Display.displays.Length;
+    internal static bool DisplayAvailable => Display.displays.Length > 1;
+
+    /// <summary>
+    /// The monitor windows pop out to (Unity display index, -1 = none): the configured one, unless the game draws its
+    /// world view or second-screen map there – then, as with "automatic", the first monitor the game leaves alone.
+    /// Only when every other monitor is taken do the windows float over the game's own view.
+    /// </summary>
+    private static int ChooseDisplay()
+    {
+        int count = Display.displays.Length;
+        int wanted = Settings.Monitor.Value - 1;
+        if (wanted >= 1 && wanted < count && !GameDrawsOn(wanted))
+            return wanted;
+        for (int i = 1; i < count; i++)
+        {
+            if (!GameDrawsOn(i))
+                return i;
+        }
+        if (wanted >= 1 && wanted < count)
+            return wanted;
+        return count > 1 ? 1 : -1;
+    }
+
+    /// <summary>Monitor number (1-based, as in the config) the next pop-out goes to.</summary>
+    private int TargetMonitor => (screenDisplay >= 1 ? screenDisplay : ChooseDisplay()) + 1;
 
     // The mission's main game view and its window host.
     private MainGameView mainView;
     private WindowHost mainHost;
 
     // The pop-out screen, while open.
+    private int screenDisplay = -1;               // its Unity display index
     private MainGameView builtFor;
     private GameObject screen;
     private UnityEngine.Camera screenCamera;
@@ -153,8 +177,9 @@ internal sealed class PopOutScreen : MonoBehaviour
         for (int i = 0; i < displays.Length; i++)
             ModLog.Info($"Monitor {i + 1}: {displays[i].systemWidth}x{displays[i].systemHeight}" + (i == 0 ? " (game)" : ""));
         if (windowHooks == WindowHooks.Applied)
-            ModLog.Info($"Window hooks in place. Pop-out monitor: {Settings.Monitor.Value}" +
-                        (DisplayAvailable ? "" : " - not connected, the pop-out buttons stay hidden"));
+            ModLog.Info(DisplayAvailable
+                ? $"Window hooks in place. Pop-out monitor: {ChooseDisplay() + 1}"
+                : "Window hooks in place. Only one monitor - the pop-out buttons stay hidden.");
     }
 
     // ---- mission lifecycle -------------------------------------------------------------------------------------
@@ -320,7 +345,7 @@ internal sealed class PopOutScreen : MonoBehaviour
             "VerticalAlignment='Center' Data='" + (popped ? InIcon : OutIcon) + "' " +
             "Stroke='{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}' /></Button>");
         button.Name = ButtonName;
-        button.ToolTip = popped ? "Back to the main screen" : $"Pop out to monitor {Settings.Monitor.Value}";
+        button.ToolTip = popped ? "Back to the main screen" : $"Pop out to monitor {TargetMonitor}";
         button.Click += (sender, args) =>
         {
             args.Handled = true;
@@ -351,7 +376,7 @@ internal sealed class PopOutScreen : MonoBehaviour
         if (remember)
             Layout.SetPopped(kind, toPopOut);
         WindowHostCommands.CloseWindowCommand.UpdateCanExecute();
-        ModLog.Info(toPopOut ? $"{kind} popped out to monitor {Settings.Monitor.Value}" : $"{kind} back on the main screen");
+        ModLog.Info(toPopOut ? $"{kind} popped out to monitor {screenDisplay + 1}" : $"{kind} back on the main screen");
     }
 
     private static void AddTo(WindowHost target, object content)
@@ -402,14 +427,16 @@ internal sealed class PopOutScreen : MonoBehaviour
     {
         if (host != null)
             return true;
-        if (!DisplayAvailable || MainHost == null)
+        int index = ChooseDisplay();
+        if (index < 1 || MainHost == null)
             return false;
         try
         {
-            Display display = Display.displays[DisplayIndex];
+            screenDisplay = index;
+            Display display = Display.displays[index];
             if (!display.active)
                 display.Activate();
-            SecondaryDisplayBlanker.Register(DisplayIndex);
+            SecondaryDisplayBlanker.Register(index);
 
             root = (ScalableUserControl)Noesis.GUI.ParseXaml(RootXaml);
             host = FindHost(root);
@@ -434,7 +461,7 @@ internal sealed class PopOutScreen : MonoBehaviour
             screenCamera = screen.AddComponent<UnityEngine.Camera>();
             screenCamera.cullingMask = 0;
             screenCamera.depth = 90f;
-            screenCamera.targetDisplay = DisplayIndex;
+            screenCamera.targetDisplay = index;
             screenCamera.backgroundColor = UnityEngine.Color.black;
             screenCamera.useOcclusionCulling = false;
             screenCamera.allowHDR = false;
@@ -450,8 +477,10 @@ internal sealed class PopOutScreen : MonoBehaviour
             WindowHostCommands.CloseWindowCommand.Keyboard = mainView.Keyboard;
 
             UpdateScreen(force: true);
-            ModLog.Info($"Pop-out screen open on monitor {Settings.Monitor.Value} " +
-                        $"({display.renderingWidth}x{display.renderingHeight})");
+            ModLog.Info($"Pop-out screen open on monitor {index + 1} ({display.renderingWidth}x{display.renderingHeight})" +
+                        (index + 1 != Settings.Monitor.Value && GameDrawsOn(Settings.Monitor.Value - 1)
+                            ? $" - monitor {Settings.Monitor.Value} shows the game's world view or map" : "") +
+                        (shared ? ", over the game's own view (no free monitor)" : ""));
             return true;
         }
         catch (Exception ex)
@@ -476,7 +505,7 @@ internal sealed class PopOutScreen : MonoBehaviour
             appliedScale = s;
         }
 
-        bool gameThere = GameDrawsOn(DisplayIndex);
+        bool gameThere = GameDrawsOn(screenDisplay);
         if (force || gameThere != shared)
         {
             // Sharing the monitor with the game's own map / world view: draw the windows over it, see-through.
@@ -512,7 +541,7 @@ internal sealed class PopOutScreen : MonoBehaviour
         try
         {
             Vector3 p = Display.RelativeMouseAt(UnityEngine.Input.mousePosition);
-            if (p == Vector3.zero || (int)p.z != DisplayIndex)
+            if (p == Vector3.zero || (int)p.z != screenDisplay)
                 return;
             if (shared && !root.IsMouseOver)
                 return;
@@ -540,6 +569,7 @@ internal sealed class PopOutScreen : MonoBehaviour
         if (screen != null)
             Destroy(screen);
         builtFor = null;
+        screenDisplay = -1;
         screen = null;
         screenCamera = null;
         root = null;
