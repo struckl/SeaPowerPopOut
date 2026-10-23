@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using HarmonyLib;
 using Noesis;
 using Noesis.Interactivity;
 using SeaPower;
 using SeapowerUI;
 using UnityEngine;
+using ContextMenu = Noesis.ContextMenu;
 using GameWindow = SeapowerUI.Window;
 
 namespace SeaPowerPopOut;
@@ -22,7 +24,11 @@ namespace SeaPowerPopOut;
 /// host is patched to know about it (see <see cref="Patches"/>).</para>
 /// <para>The screen is created the first time a window pops out in a mission (activating a Unity display can't be
 /// undone, so it never happens unasked) and thrown away when the mission unloads.</para>
+/// <para>Unity shows a display in a window covering the whole monitor. <see cref="MonitorWindow"/> cuts that window
+/// down to the popped-out windows (with a thin frame that is their resize border) and whatever tooltip, context menu
+/// or drop-down they have open, so around them the desktop shows through and the windows float freely.</para>
 /// </summary>
+[DefaultExecutionOrder(10000)]   // LateUpdate after the NoesisViews: the cut-out follows this frame's layout
 internal sealed class PopOutScreen : MonoBehaviour
 {
     internal static PopOutScreen Instance { get; private set; }
@@ -34,6 +40,9 @@ internal sealed class PopOutScreen : MonoBehaviour
     private const string ButtonName = "PopOutButton";
     private const float SaveInterval = 3f;
     private const float DesignHeight = 1080f;
+    private const float FrameWidth = 5f;          // resize border around popped-out windows (window units)
+    private const float SnapDistance = 10f;       // window units
+    private const string FrameBrushKey = "Brush.Window.Header";
 
     private static readonly MethodInfo CreateView = AccessTools.Method(typeof(NoesisView), "CreateView", new[] { typeof(FrameworkElement) });
     private static readonly MethodInfo MarkUserPositioned = AccessTools.Method(typeof(GameWindow), "MarkUserPositioned");
@@ -57,7 +66,7 @@ internal sealed class PopOutScreen : MonoBehaviour
             <Grid.LayoutTransform>
                 <ScaleTransform x:Name='Scale' ScaleX='1' ScaleY='1' />
             </Grid.LayoutTransform>
-            <ItemsControl ItemsSource='{Binding ElementName=PopOutHost, Path=Windows}'>
+            <ItemsControl x:Name='Items' ItemsSource='{Binding ElementName=PopOutHost, Path=Windows}'>
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <Grid />
@@ -120,9 +129,27 @@ internal sealed class PopOutScreen : MonoBehaviour
     private float appliedScale;
     private bool shared;                          // the game draws its own map or world view on that monitor too
     private SolidColorBrush backdropBrush;
+    private NoesisView screenView;
+    private ItemsControl items;
+
+    // See-through: only the windows (and their open popups) of the screen show on the monitor.
+    private MonitorWindow monitor;
+    private bool seeThrough;
+    private readonly List<GameWindow> windows = new List<GameWindow>();
+    private readonly List<(UIElement element, float since)> overlays = new List<(UIElement, float)>();
+    private readonly List<UnityEngine.Rect> keep = new List<UnityEngine.Rect>();
+    private readonly List<UnityEngine.Rect> lastKeep = new List<UnityEngine.Rect>();
+    private static readonly ConditionalWeakTable<GameWindow, object> Snapping = new ConditionalWeakTable<GameWindow, object>();
+    private static bool overlayHooks;
+
+    // A press on the screen whose release went to another program (the pointer had left the see-through cut-out).
+    private bool pressed;
+    private int releasedFrames;
+    private Vector2 pointer;
+    private int shapeErrors;
 
     private readonly Queue<Action> deferred = new Queue<Action>();
-    private float nextSave;
+    private float nextSave, nextYieldCheck;
 
     // Stage two of the patches (see Patches): applied once the game's first window host exists.
     private enum WindowHooks { Waiting, Applied, Failed }
@@ -148,13 +175,38 @@ internal sealed class PopOutScreen : MonoBehaviour
         }
         if (host != null)
         {
-            try { UpdateScreen(force: false); }
+            try
+            {
+                UpdateScreen(force: false);
+                ReleaseLostClick();
+            }
             catch (Exception ex) { ModLog.Error($"screen update: {ex.Message}"); }
+        }
+        else if (Time.unscaledTime >= nextYieldCheck)
+        {
+            nextYieldCheck = Time.unscaledTime + 1f;
+            MonitorWindow.YieldTo(GameDrawsOn);
         }
         if (Time.unscaledTime >= nextSave)
         {
             nextSave = Time.unscaledTime + SaveInterval;
             Layout.Save();
+        }
+    }
+
+    private void LateUpdate()
+    {
+        if (host == null || !seeThrough)
+            return;
+        try
+        {
+            CollectShape();
+            monitor.Shape(keep, screenCamera.pixelWidth, screenCamera.pixelHeight);
+        }
+        catch (Exception ex)
+        {
+            if (shapeErrors++ < 3)
+                ModLog.Error($"see-through: {ex}");
         }
     }
 
@@ -301,6 +353,7 @@ internal sealed class PopOutScreen : MonoBehaviour
     {
         try
         {
+            CornerResize.Attach(window);
             object content = window.DataContext;
             if (content == null || !DisplayAvailable || StayHome.Contains(Kind(content)) || !TopLevel(window))
                 return;
@@ -314,6 +367,7 @@ internal sealed class PopOutScreen : MonoBehaviour
             if (popped)
             {
                 Place(window, Kind(content));
+                Track(window);
                 // A loading window hands the game's window commands its own keyboard; the main screen's is meant.
                 if (mainView != null)
                     GameWindow.CloseWindowCommand.Keyboard = mainView.Keyboard;
@@ -394,6 +448,9 @@ internal sealed class PopOutScreen : MonoBehaviour
             window.MaxWidth = float.PositiveInfinity;
             window.MaxHeight = float.PositiveInfinity;
         }
+        // The resize border lies outside the window; on a see-through monitor it shows, as a thin frame.
+        if (window.ResizeHandleWidth > FrameWidth)
+            window.ResizeHandleWidth = FrameWidth;
         if (Layout.TryGetPlacement(kind, out Layout.Placement p))
         {
             // Stops windows anchored to the bottom right (unit status) from snapping back to their corner.
@@ -434,8 +491,12 @@ internal sealed class PopOutScreen : MonoBehaviour
         {
             screenDisplay = index;
             Display display = Display.displays[index];
+            monitor = MonitorWindow.For(index);
             if (!display.active)
+            {
+                monitor.BeforeActivate();
                 display.Activate();
+            }
             SecondaryDisplayBlanker.Register(index);
 
             root = (ScalableUserControl)Noesis.GUI.ParseXaml(RootXaml);
@@ -447,6 +508,11 @@ internal sealed class PopOutScreen : MonoBehaviour
             backdrop = (Grid)root.FindName("Backdrop");
             hint = (TextBlock)root.FindName("Hint");
             scale = (ScaleTransform)root.FindName("Scale");
+            items = (ItemsControl)root.FindName("Items");
+            root.PreviewMouseLeftButtonDown += (sender, args) => pressed = true;
+            root.PreviewMouseLeftButtonUp += (sender, args) => pressed = false;
+            root.GotMouseCapture += OnCapture;
+            HookOverlays();
             backdropBrush = backdrop.Background as SolidColorBrush;
             hint.Text = "Pop-out screen\n\nThe pop-out button in a window's title bar moves it here, " +
                         "the same button on this screen sends it back.";
@@ -471,12 +537,16 @@ internal sealed class PopOutScreen : MonoBehaviour
             if (DM._noesisView != null)
                 view.DPIScale = DM._noesisView.DPIScale;
             CreateView.Invoke(view, new object[] { root });
+            screenView = view;
 
             // Our host and view grabbed the game's window commands for their own keyboard; give it back.
             WindowHostCommands.OpenWindowCommand.Keyboard = mainView.Keyboard;
             WindowHostCommands.CloseWindowCommand.Keyboard = mainView.Keyboard;
 
             UpdateScreen(force: true);
+            if (screenCamera.pixelHeight != Screen.height)
+                ModLog.Info($"Pointer on monitor {index + 1} shifted by {screenCamera.pixelHeight - Screen.height} px " +
+                            $"(monitor {screenCamera.pixelHeight} px high, game window {Screen.height} px)");
             ModLog.Info($"Pop-out screen open on monitor {index + 1} ({display.renderingWidth}x{display.renderingHeight})" +
                         (index + 1 != Settings.Monitor.Value && GameDrawsOn(Settings.Monitor.Value - 1)
                             ? $" - monitor {Settings.Monitor.Value} shows the game's world view or map" : "") +
@@ -506,14 +576,31 @@ internal sealed class PopOutScreen : MonoBehaviour
         }
 
         bool gameThere = GameDrawsOn(screenDisplay);
-        if (force || gameThere != shared)
+        if (!gameThere && Settings.SeeThrough.Value)
+            monitor.Search(Display.displays[screenDisplay]);
+        bool see = !gameThere && Settings.SeeThrough.Value && monitor.Found;
+        if (force || gameThere != shared || see != seeThrough)
         {
             // Sharing the monitor with the game's own map / world view: draw the windows over it, see-through.
+            // On a monitor of our own made see-through, the backdrop only shows in the frame around each window.
             shared = gameThere;
+            seeThrough = see;
             screenCamera.clearFlags = shared ? CameraClearFlags.Depth : CameraClearFlags.SolidColor;
-            backdrop.Background = shared ? null : backdropBrush;
+            if (shared)
+                backdrop.Background = null;
+            else if (seeThrough)
+                backdrop.SetResourceReference(Panel.BackgroundProperty, FrameBrushKey);
+            else
+                backdrop.Background = backdropBrush;
+            if (!seeThrough)
+                monitor.Unshape();
         }
-        hint.Visibility = !shared && host.Windows.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        hint.Visibility = !shared && !seeThrough && host.Windows.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        monitor.KeepOnTop(seeThrough && Settings.OnTop.Value);
+
+        Vector3 p = Display.RelativeMouseAt(UnityEngine.Input.mousePosition);
+        if (p != Vector3.zero && (int)p.z == screenDisplay)
+            pointer = new Vector2(p.x, screenCamera.pixelHeight - p.y);
 
         if (mainView != null && !ReferenceEquals(root.DataContext, mainView.DataContext))
             root.DataContext = mainView.DataContext;
@@ -561,6 +648,7 @@ internal sealed class PopOutScreen : MonoBehaviour
         try
         {
             host?.Windows.Clear();
+            monitor?.Release();
         }
         catch (Exception ex)
         {
@@ -568,6 +656,14 @@ internal sealed class PopOutScreen : MonoBehaviour
         }
         if (screen != null)
             Destroy(screen);
+        monitor = null;
+        seeThrough = false;
+        screenView = null;
+        items = null;
+        windows.Clear();
+        overlays.Clear();
+        lastKeep.Clear();
+        pressed = false;
         builtFor = null;
         screenDisplay = -1;
         screen = null;
@@ -579,6 +675,239 @@ internal sealed class PopOutScreen : MonoBehaviour
         scale = null;
         appliedScale = 0f;
         WindowHostCommands.CloseWindowCommand.UpdateCanExecute();
+    }
+
+    // ---- see-through -------------------------------------------------------------------------------------------
+
+    /// <summary>A window on the pop-out screen: part of the cut-out, and it snaps while dragged.</summary>
+    private void Track(GameWindow window)
+    {
+        if (!windows.Contains(window))
+            windows.Add(window);
+        if (window.HeaderThumb != null && !Snapping.TryGetValue(window, out _))
+        {
+            Snapping.Add(window, new object());
+            // Runs after the game's own handler, which has just moved the window with the mouse.
+            window.HeaderThumb.DragDelta += (sender, args) => SnapWindow(window);
+        }
+    }
+
+    /// <summary>
+    /// Snaps a dragged window to the monitor's edges and to the other windows there: side by side or stacked with
+    /// one frame between them, edges in line. The game's drag handler has just set the unsnapped position (the
+    /// header thumb measures the mouse from where it was grabbed), so a snap never accumulates.
+    /// </summary>
+    private void SnapWindow(GameWindow window)
+    {
+        if (!Settings.Snap.Value || items == null || window.Maximized)
+            return;
+        float w = window.ActualWidth, h = window.ActualHeight, x = window.X, y = window.Y;
+        if (w <= 0f || h <= 0f)
+            return;
+        float bestX = x, bestY = y, dx = SnapDistance, dy = SnapDistance;
+        void TryX(float c)
+        {
+            float d = Math.Abs(c - x);
+            if (d < dx) { dx = d; bestX = c; }
+        }
+        void TryY(float c)
+        {
+            float d = Math.Abs(c - y);
+            if (d < dy) { dy = d; bestY = c; }
+        }
+
+        TryX(0f);
+        TryX(items.ActualWidth - w);
+        TryY(0f);
+        TryY(items.ActualHeight - h);
+        foreach (GameWindow other in windows)
+        {
+            if (ReferenceEquals(other, window) || other.Visibility != Visibility.Visible)
+                continue;
+            float ox = other.X, oy = other.Y, ow = other.ActualWidth, oh = other.ActualHeight;
+            float gap = Math.Max(window.ResizeHandleWidth, other.ResizeHandleWidth);
+            bool beside = y < oy + oh + gap + SnapDistance && y + h > oy - gap - SnapDistance;
+            bool stacked = x < ox + ow + gap + SnapDistance && x + w > ox - gap - SnapDistance;
+            if (beside)
+            {
+                TryX(ox + ow + gap);
+                TryX(ox - gap - w);
+                TryY(oy);
+                TryY(oy + oh - h);
+            }
+            if (stacked)
+            {
+                TryY(oy + oh + gap);
+                TryY(oy - gap - h);
+                TryX(ox);
+                TryX(ox + ow - w);
+            }
+        }
+        if (bestX != x)
+            window.X = bestX;
+        if (bestY != y)
+            window.Y = bestY;
+    }
+
+    /// <summary>What of the monitor stays visible: every window with its frame, and its open popups.</summary>
+    private void CollectShape()
+    {
+        keep.Clear();
+        for (int i = windows.Count - 1; i >= 0; i--)
+        {
+            GameWindow window = windows[i];
+            if (VisualTreeHelper.GetParent(window) == null)
+            {
+                windows.RemoveAt(i);                  // closed or sent back (loading again adds it again)
+                continue;
+            }
+            // The template root: the window plus the resize border around it.
+            if (window.Visibility == Visibility.Visible && VisualTreeHelper.GetChildrenCount(window) > 0)
+                AddBounds(VisualTreeHelper.GetChild(window, 0) as FrameworkElement);
+        }
+        for (int i = overlays.Count - 1; i >= 0; i--)
+        {
+            (UIElement element, float since) = overlays[i];
+            if (IsOpen(element))
+                AddBounds(element is Popup popup ? popup.Child as FrameworkElement : element as FrameworkElement);
+            else if (Time.unscaledTime - since > 0.5f)
+                overlays.RemoveAt(i);
+        }
+        // While a window is dragged or resized the cut-out and the picture may be a frame apart; last frame's
+        // parts as well cover that.
+        int count = keep.Count;
+        if (pressed)
+            keep.AddRange(lastKeep);
+        lastKeep.Clear();
+        for (int i = 0; i < count; i++)
+            lastKeep.Add(keep[i]);
+    }
+
+    private void AddBounds(FrameworkElement element)
+    {
+        if (element == null || element.ActualWidth <= 0f || element.ActualHeight <= 0f)
+            return;
+        Point a = element.PointToScreen(new Point(0f, 0f));
+        Point b = element.PointToScreen(new Point(element.ActualWidth, element.ActualHeight));
+        keep.Add(UnityEngine.Rect.MinMaxRect(Math.Min(a.X, b.X), Math.Min(a.Y, b.Y), Math.Max(a.X, b.X), Math.Max(a.Y, b.Y)));
+    }
+
+    /// <summary>
+    /// Tooltips and context menus open in popups of their own, which may reach past the window: while open they are
+    /// part of the cut-out. Class handlers are for good, so registered once per game.
+    /// </summary>
+    private static void HookOverlays()
+    {
+        if (overlayHooks)
+            return;
+        overlayHooks = true;
+        try
+        {
+            var opened = new RoutedEventHandler((sender, args) => Instance?.OverlayOpened(sender as UIElement));
+            EventManager.RegisterClassHandler(typeof(ToolTip), ToolTip.OpenedEvent, opened, true);
+            EventManager.RegisterClassHandler(typeof(ContextMenu), ContextMenu.OpenedEvent, opened, true);
+        }
+        catch (Exception ex)
+        {
+            ModLog.Warn($"Tooltips and context menus may be cut off at the window edge on the pop-out monitor: {ex.Message}");
+        }
+    }
+
+    private void OverlayOpened(UIElement overlay)
+    {
+        try
+        {
+            if (overlay == null || root == null)
+                return;
+            UIElement target = overlay is ToolTip tip ? tip.PlacementTarget
+                : overlay is ContextMenu menu ? menu.PlacementTarget : null;
+            if (target != null ? root.IsAncestorOf(target) : ReferenceEquals(overlay.View, root.View))
+                TrackOverlay(overlay);
+        }
+        catch (Exception ex)
+        {
+            ModLog.Debug($"overlay: {ex.Message}");
+        }
+    }
+
+    // A drop-down list holds the mouse while open; its popup is part of its template.
+    private void OnCapture(object sender, MouseEventArgs e)
+    {
+        if (e.Source is ComboBox box && FindPopup(box) is Popup popup)
+            TrackOverlay(popup);
+    }
+
+    private void TrackOverlay(UIElement overlay)
+    {
+        for (int i = 0; i < overlays.Count; i++)
+        {
+            if (ReferenceEquals(overlays[i].element, overlay))
+            {
+                overlays[i] = (overlay, Time.unscaledTime);
+                return;
+            }
+        }
+        overlays.Add((overlay, Time.unscaledTime));
+    }
+
+    private static bool IsOpen(UIElement overlay) => overlay switch
+    {
+        Popup popup => popup.IsOpen,
+        ToolTip tip => tip.IsOpen,
+        ContextMenu menu => menu.IsOpen,
+        _ => false,
+    };
+
+    private static Popup FindPopup(Visual start)
+    {
+        var queue = new Queue<Visual>();
+        queue.Enqueue(start);
+        for (int seen = 0; queue.Count > 0 && seen < 200; seen++)
+        {
+            Visual v = queue.Dequeue();
+            if (v is Popup popup)
+                return popup;
+            int n = VisualTreeHelper.GetChildrenCount(v);
+            for (int i = 0; i < n; i++)
+            {
+                if (VisualTreeHelper.GetChild(v, i) is Visual child)
+                    queue.Enqueue(child);
+            }
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// A press on the screen released over another program (the pointer ran out of the cut-out faster than the
+    /// window followed, or onto another monitor) never reaches the screen, and the window would stick to the mouse.
+    /// </summary>
+    private void ReleaseLostClick()
+    {
+        if (!pressed || screenView == null || Native.LeftButtonHeld())
+        {
+            releasedFrames = 0;
+            return;
+        }
+        // A release the screen does get arrives a frame or two after the button is physically up.
+        if (++releasedFrames < 3)
+            return;
+        pressed = false;
+        releasedFrames = 0;
+        screenView.MouseButtonUp((int)pointer.x, (int)pointer.y, MouseButton.Left);
+        ModLog.Debug("Mouse button released outside the pop-out windows");
+    }
+
+    /// <summary>
+    /// <c>NoesisView.MousePosition</c> just returned the mouse position relative to the monitor it is on. NoesisView
+    /// flips it with the main window's height; for the pop-out view, shift it so the flip comes out right for the
+    /// pop-out monitor's height.
+    /// </summary>
+    internal void FixPointer(NoesisView view, ref Vector3 position)
+    {
+        if (screenView == null || !ReferenceEquals(view, screenView) || screenCamera == null)
+            return;
+        if (position != Vector3.zero && (int)position.z == screenDisplay)
+            position.y += Screen.height - screenCamera.pixelHeight;
     }
 
     // ---- helpers -----------------------------------------------------------------------------------------------

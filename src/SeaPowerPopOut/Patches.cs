@@ -4,6 +4,7 @@ using System.Reflection;
 using HarmonyLib;
 using SeaPower;
 using SeapowerUI;
+using UnityEngine;
 using GameWindow = SeapowerUI.Window;
 
 namespace SeaPowerPopOut;
@@ -19,6 +20,8 @@ namespace SeaPowerPopOut;
 /// bar and puts popped-out windows where they were last time.</item>
 /// <item><c>MouseControlState.OnUpdate</c> — while the mouse is on the pop-out monitor it counts as "over the UI",
 /// so a click there doesn't also select, deselect or order something in the world.</item>
+/// <item><c>NoesisView.MousePosition</c> — puts the pointer of the pop-out view where the mouse really is (see
+/// <see cref="PointerHooks"/>). Optional: if it's missing, everything else still runs.</item>
 /// <item><c>MainGameViewModel.OnStart</c> / <c>GameMain.OnDestroy</c> — mission ready / mission unloading.</item>
 /// </list>
 /// <para>Two stages. The window hooks must wait until NoesisGUI runs: patching a method JIT-compiles it, which runs
@@ -49,6 +52,15 @@ internal static class Patches
         new Hook { Type = "SeapowerUI.Window", Method = "OnInitialized", Args = Type.EmptyTypes, Postfix = nameof(WindowLoaded) },
     };
 
+    // NoesisView turns the mouse position on another monitor into view coordinates with the main window's height
+    // (Screen.height), so on a monitor of another height the pointer sits off by the difference – 400 px on a
+    // 2560 px portrait monitor next to a 2160 px game window: no resize cursor at the edges, drags jump. Clicks go
+    // another way and land right. Without this hook the pop-out still works, just with that offset.
+    private static readonly Hook[] PointerHooks =
+    {
+        new Hook { Type = "NoesisView", Method = "MousePosition", Args = Type.EmptyTypes, Postfix = nameof(MousePosition) },
+    };
+
     private static Harmony harmony;
 
     /// <summary>Stage one, at plugin load: hooks on plain game classes.</summary>
@@ -59,9 +71,16 @@ internal static class Patches
     }
 
     /// <summary>Stage two, once NoesisGUI is up: hooks on the game's Noesis window classes.</summary>
-    public static bool ApplyWindowHooks() => harmony != null && Apply(WindowHooks);
+    public static bool ApplyWindowHooks()
+    {
+        if (harmony == null || !Apply(WindowHooks))
+            return false;
+        if (!Apply(PointerHooks, optional: true))
+            ModLog.Warn("Pointer fix not applied - on a monitor of another height than the game's the mouse sits off.");
+        return true;
+    }
 
-    private static bool Apply(Hook[] hooks)
+    private static bool Apply(Hook[] hooks, bool optional = false)
     {
         var resolved = new List<(Hook hook, MethodBase target)>();
         foreach (Hook hook in hooks)
@@ -70,7 +89,10 @@ internal static class Patches
             MethodBase target = type == null ? null : AccessTools.Method(type, hook.Method, hook.Args);
             if (target == null)
             {
-                ModLog.Error($"{hook.Type}.{hook.Method} not found (game updated?) - mod inactive.");
+                if (optional)
+                    ModLog.Warn($"{hook.Type}.{hook.Method} not found (game updated?).");
+                else
+                    ModLog.Error($"{hook.Type}.{hook.Method} not found (game updated?) - mod inactive.");
                 return false;
             }
             resolved.Add((hook, target));
@@ -100,6 +122,9 @@ internal static class Patches
     private static void WindowLoaded(GameWindow __instance) => PopOutScreen.Instance?.Decorate(__instance);
 
     private static void MouseUpdated(MouseControlState __instance) => PopOutScreen.Instance?.ClaimMouse(__instance);
+
+    private static void MousePosition(NoesisView __instance, ref Vector3 __result) =>
+        PopOutScreen.Instance?.FixPointer(__instance, ref __result);
 
     private static void MissionReady() => PopOutScreen.Instance?.MissionReady();
 
