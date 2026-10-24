@@ -25,9 +25,9 @@ Start Sea Power → Mods → Create Mod:
 
 | Field | Value |
 | --- | --- |
-| Existing item | first upload: none (creates the item); later: pick *Sea Power Pop-Out Windows* |
+| Existing item | first upload: none (creates the item); later: pick *Sea Power: Rats Pop-Out Windows* |
 | Folder | `StreamingAssets\SeaPowerPopOut` (the folder `package.ps1 -Install` filled) |
-| Name | Sea Power Pop-Out Windows |
+| Name | Sea Power: Rats Pop-Out Windows (the naming of "Sea Power: Rats Topographic Map") |
 | Description | [workshop/description.bbcode](../workshop/description.bbcode) |
 | Preview image | `StreamingAssets\SeaPowerPopOut\preview.jpg` (put there by `package.ps1`: the picker only browses StreamingAssets and only takes .jpg; Steam wants it under 1 MB) |
 | Tags | Scripting |
@@ -35,7 +35,9 @@ Start Sea Power → Mods → Create Mod:
 | Visibility | first upload **Hidden** (or Friends only); Public once the subscribed copy is tested |
 | Change log | the CHANGELOG entry |
 
-After the first upload, add the Workshop link to the README and the description, and the screenshots from
+Posts for Reddit, the Steam forum and Discord are drafted in
+[workshop/promotion.md](../workshop/promotion.md). After the first upload, add the Workshop link to the README, the
+description and those drafts, and the screenshots from
 [workshop/screenshots/](../workshop/screenshots) on the Workshop page itself (Steam web → Edit → Add/edit images),
 in this order: 01 (both monitors), 04 and 05 (before / after), 02 (the arranged windows), 03 (the button).
 

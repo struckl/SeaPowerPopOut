@@ -122,7 +122,7 @@ src/SeaPowerPopOut/
   mod/_info.ini       Mod Manager entry
 tools/package.ps1     release build → dist/SeaPowerPopOut/
 tools/shot-director/  dev-only plugin and scripts that took the Workshop screenshots (docs/workshop.md)
-workshop/             Workshop description, preview.jpg, screenshots/
+workshop/             Workshop description, preview.jpg, screenshots/, release posts (promotion.md)
 ```
 
 ## License
