@@ -29,7 +29,7 @@ Start Sea Power → Mods → Create Mod:
 | Folder | `StreamingAssets\SeaPowerPopOut` (the folder `package.ps1 -Install` filled) |
 | Name | Sea Power Pop-Out Windows |
 | Description | [workshop/description.bbcode](../workshop/description.bbcode) |
-| Preview image | `workshop\preview.jpg` (the picker only takes .jpg; Steam wants it under 1 MB) |
+| Preview image | `StreamingAssets\SeaPowerPopOut\preview.jpg` (put there by `package.ps1`: the picker only browses StreamingAssets and only takes .jpg; Steam wants it under 1 MB) |
 | Tags | Scripting |
 | Dependencies | `3380210757` (Anchor Chain) – shows as a required item on the Workshop page |
 | Visibility | first upload **Hidden** (or Friends only); Public once the subscribed copy is tested |
@@ -47,9 +47,9 @@ the item to Public.
 
 ## Still to do for the first release
 
-- Screenshots: `workshop/preview.jpg` (Workshop preview) and `workshop/thumbnail.png` (Mod Manager picture), taken
-  in game – a second monitor with two or three popped-out windows arranged side by side, the desktop around them;
-  the pop-out button in a title bar close up.
+- Preview and screenshots: `workshop/preview.jpg` (Workshop preview; the game's Mod Manager shows no pictures) and
+  a few screenshots for the Workshop page, taken in game – a second monitor with two or three popped-out windows
+  arranged side by side, the desktop around them; the pop-out button in a title bar close up.
 - Test matrix: one and two extra monitors, landscape and portrait, a monitor of another resolution or height than
   the game's, Windows display scaling (125 %, 150 %), the game's own second-monitor map and detached world view,
   windowed / borderless / exclusive fullscreen, the game's UI scale.
