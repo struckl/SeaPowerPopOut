@@ -3,6 +3,9 @@
 A mod for [Sea Power: Naval Combat in the Missile Age](https://store.steampowered.com/app/1286220/) that puts the
 game's windows on another monitor, so the main screen stays free for the world view and the map.
 
+**[Get it on the Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3826396311)** – requires
+[Anchor Chain](https://steamcommunity.com/sharedfiles/filedetails/?id=3380210757).
+
 ![The map on the main screen, the game's windows on the second monitor](workshop/screenshots/01-two-monitors.jpg)
 
 - **Pop-out button** next to the X of every window – formation manager, message log, camera controls, unit status,
@@ -35,7 +38,7 @@ the game's view when there is none).
    community mod loader, following its
    [installation guide](https://seapower-modders.github.io/AnchorChain/install-anchor-chain.html) (one manual step:
    copy its preloader into the game folder).
-2. Subscribe to Sea Power Pop-Out Windows on the Steam Workshop *(link follows with the first release)*.
+2. Subscribe to **[Sea Power: Rats Pop-Out Windows](https://steamcommunity.com/sharedfiles/filedetails/?id=3826396311)** on the Steam Workshop.
 3. Connect the second monitor **before** starting the game. In a mission, click the new button left of the **X**
    in a window's title bar (a box with an arrow).
 

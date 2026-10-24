@@ -1,6 +1,6 @@
 # Rats Pop-Out Windows – release and promotion
 
-Workshop: WORKSHOP_LINK (after the upload: https://steamcommunity.com/sharedfiles/filedetails/?id=<item id>)
+Workshop: https://steamcommunity.com/sharedfiles/filedetails/?id=3826396311 (item 3826396311, uploaded 2026-10-24, tags Overhaul + Scripting)
 Source: https://github.com/struckl/SeaPowerPopOut
 Images: `workshop/screenshots/` – 01-two-monitors, 02-floating-windows, 03-pop-out-button, 04-before, 05-after
 
@@ -14,13 +14,13 @@ Images: `workshop/screenshots/` – 01-two-monitors, 02-floating-windows, 03-pop
 | Name | Sea Power: Rats Pop-Out Windows |
 | Description | [description.bbcode](description.bbcode) |
 | Preview image | `StreamingAssets\SeaPowerPopOut\preview.jpg` |
-| Tags | Scripting (plus a UI / quality-of-life tag if the picker offers one) |
+| Tags | Overhaul, Scripting |
 | Dependencies | `3380210757` (Anchor Chain) |
 | Visibility | Hidden first, Public once the subscribed copy works |
 | Change log | First release: pop-out button in every window's title bar, free-floating windows on a second monitor, snapping, remembered layout, wide resize corners. |
 
-After the upload: add the screenshots on the Workshop page (Steam web → Edit → Add/edit images) in the order 01, 04,
-05, 02, 03, and put the Workshop link into the README, the description and the posts below.
+Done 2026-10-24 (item 3826396311). Still to do on the Workshop page: Owner Controls → Add/edit images & videos →
+the screenshots in the order 01, 04, 05, 02, 03.
 
 ---
 
@@ -46,7 +46,7 @@ The map and the 3D view are what I want to look at, but the formation manager, m
 
 It's the game's own window over there – same look and controls – and clicks on the second monitor never reach the world. Monitors the game already uses for its own map or world view are skipped. Needs Anchor Chain and a second monitor connected before you start the game.
 
-Workshop: WORKSHOP_LINK
+Workshop: https://steamcommunity.com/sharedfiles/filedetails/?id=3826396311
 Source (MIT): https://github.com/struckl/SeaPowerPopOut
 
 Screenshots: 4K main screen with a 1440×2560 portrait monitor next to it, mission Trollfjorden. Feedback welcome – especially from other monitor setups (landscape, different resolutions, display scaling).
@@ -77,7 +77,7 @@ It's the game's own window over there – same look and controls – and clicks 
 
 Requires [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3380210757]Anchor Chain[/url] and a second monitor connected before you start the game.
 
-[url=WORKSHOP_LINK]Workshop page[/url] · [url=https://github.com/struckl/SeaPowerPopOut]Source code (MIT)[/url]
+[url=https://steamcommunity.com/sharedfiles/filedetails/?id=3826396311]Workshop page[/url] · [url=https://github.com/struckl/SeaPowerPopOut]Source code (MIT)[/url]
 
 Bug reports and suggestions welcome here or on the Workshop page – please attach BepInEx\LogOutput.log and mention your monitor setup.
 
@@ -99,7 +99,7 @@ Put the game's windows on your second monitor, so the main screen stays free for
 
 Formation manager, message log, unit status, camera controls, sensor and doctrine windows. Requires **Anchor Chain** and a second monitor.
 
-**Workshop:** WORKSHOP_LINK
+**Workshop:** https://steamcommunity.com/sharedfiles/filedetails/?id=3826396311
 **Source (MIT):** <https://github.com/struckl/SeaPowerPopOut>
 Feedback welcome!
 ```
@@ -111,5 +111,5 @@ https://discord.gg/CTDqUUJAVC – a mods / showcase channel if there is one, not
 
 ```
 Made a small Sea Power mod for multi-monitor setups: **Rats Pop-Out Windows** puts the formation manager, message log, unit status and the other windows on your second monitor with one click, floating freely next to your desktop – the main screen stays free for the map. Windows snap together and are remembered for the next mission. Needs Anchor Chain.
-Workshop: WORKSHOP_LINK
+Workshop: https://steamcommunity.com/sharedfiles/filedetails/?id=3826396311
 ```
