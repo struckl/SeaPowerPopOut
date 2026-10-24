@@ -1,11 +1,11 @@
 <#
 .SYNOPSIS
-    Screenshot for the Workshop set: one monitor without its taskbar, or the game's own window.
+    Screenshot for the Workshop set: one monitor without its taskbar, or the whole game monitor.
 
 .DESCRIPTION
     Per-monitor DPI aware, so it grabs real pixels on a scaled monitor too. -Screen picks a monitor by its place
     from left to right (0 = leftmost) and grabs its working area (the taskbar left out); -Game grabs the client area
-    of the Sea Power window. Saves a PNG.
+    of the primary monitor, which the game fills. Saves a PNG.
 
 .EXAMPLE
     powershell -ExecutionPolicy Bypass -File tools\shot-director\grab.ps1 -Screen 2 -Out shots\right.png
@@ -32,12 +32,8 @@ public static class GrabNative {
 Add-Type -AssemblyName System.Windows.Forms, System.Drawing
 
 if ($Game) {
-    $process = Get-Process -Name 'Sea Power' -ErrorAction Stop | Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object -First 1
-    $client = New-Object GrabNative+RECT
-    [GrabNative]::GetClientRect($process.MainWindowHandle, [ref]$client) | Out-Null
-    $origin = New-Object GrabNative+POINT
-    [GrabNative]::ClientToScreen($process.MainWindowHandle, [ref]$origin) | Out-Null
-    $rect = New-Object System.Drawing.Rectangle($origin.X, $origin.Y, $client.Right, $client.Bottom)
+    # The game window fills the primary monitor. (Its process's "main window" can be the pop-out display's window.)
+    $rect = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
 }
 else {
     $screens = [System.Windows.Forms.Screen]::AllScreens | Sort-Object { $_.Bounds.X }

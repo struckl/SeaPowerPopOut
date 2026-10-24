@@ -3,6 +3,8 @@
 A mod for [Sea Power: Naval Combat in the Missile Age](https://store.steampowered.com/app/1286220/) that puts the
 game's windows on another monitor, so the main screen stays free for the world view and the map.
 
+![The map on the main screen, the game's windows on the second monitor](workshop/screenshots/01-two-monitors.jpg)
+
 - **Pop-out button** next to the X of every window – formation manager, message log, camera controls, unit status,
   sensor and doctrine windows – moves it to the other monitor; the same button there sends it back.
 - **Free-floating windows**: only the popped-out windows show on that monitor, each with a thin frame that is its
@@ -17,6 +19,11 @@ game's windows on another monitor, so the main screen stays free for the world v
 - It is the game's own window over there – same look, dragging, resizing and clicks. Clicks on the other monitor
   never reach the world or the map behind them, and the bottom-bar buttons keep working (they close and reopen the
   window over there).
+
+| | |
+| --- | --- |
+| ![Before: the windows cover the map](workshop/screenshots/04-before.jpg) | ![After: the same map, free](workshop/screenshots/05-after.jpg) |
+| ![The pop-out button and its tooltip](workshop/screenshots/03-pop-out-button.jpg) | ![Four windows arranged on a portrait monitor](workshop/screenshots/02-floating-windows.jpg) |
 
 The map stays on the main screen – the game has its own options for putting the map or the world view on another
 monitor. A monitor the game uses for those is skipped; the windows go to the first free one (and only float over
@@ -114,6 +121,8 @@ src/SeaPowerPopOut/
   Settings.cs         config
   mod/_info.ini       Mod Manager entry
 tools/package.ps1     release build → dist/SeaPowerPopOut/
+tools/shot-director/  dev-only plugin and scripts that took the Workshop screenshots (docs/workshop.md)
+workshop/             Workshop description, preview.jpg, screenshots/
 ```
 
 ## License

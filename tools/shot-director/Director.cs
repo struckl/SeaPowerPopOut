@@ -490,6 +490,17 @@ internal static class Native
     [DllImport("user32.dll")] private static extern void mouse_event(uint flags, uint dx, uint dy, uint data, UIntPtr extra);
     [DllImport("user32.dll")] private static extern void keybd_event(byte vk, byte scan, uint flags, UIntPtr extra);
     [DllImport("user32.dll")] private static extern bool ClientToScreen(IntPtr hwnd, ref POINT point);
+    [DllImport("user32.dll")] private static extern bool GetClientRect(IntPtr hwnd, out RECT rect);
+    [DllImport("user32.dll")] private static extern bool EnumWindows(EnumProc callback, IntPtr lParam);
+    [DllImport("user32.dll")] private static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint pid);
+
+    private delegate bool EnumProc(IntPtr hwnd, IntPtr lParam);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct RECT
+    {
+        public int Left, Top, Right, Bottom;
+    }
 
     [StructLayout(LayoutKind.Sequential)]
     private struct POINT
@@ -506,11 +517,26 @@ internal static class Native
 
     public static void Move(int x, int y) => SetCursorPos(x, y);
 
-    /// <summary>Where the game window's client area (the main view's pixel 0,0) sits on the desktop.</summary>
+    /// <summary>
+    /// Where the game window's client area (the main view's pixel 0,0) sits on the desktop: the game's window whose
+    /// client area has the main screen's size. (The process's "main window" can be a pop-out display's window.)
+    /// </summary>
     public static void ClientOrigin(out int x, out int y)
     {
+        uint own = (uint)System.Diagnostics.Process.GetCurrentProcess().Id;
+        IntPtr main = IntPtr.Zero;
+        EnumWindows((hwnd, _) =>
+        {
+            GetWindowThreadProcessId(hwnd, out uint pid);
+            if (pid == own && GetClientRect(hwnd, out RECT r) && r.Right == Screen.width && r.Bottom == Screen.height)
+            {
+                main = hwnd;
+                return false;
+            }
+            return true;
+        }, IntPtr.Zero);
         var p = new POINT();
-        ClientToScreen(System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle, ref p);
+        ClientToScreen(main, ref p);
         x = p.X;
         y = p.Y;
     }

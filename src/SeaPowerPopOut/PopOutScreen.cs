@@ -457,8 +457,10 @@ internal sealed class PopOutScreen : MonoBehaviour
             MarkUserPositioned?.Invoke(window, null);
             if (!float.IsNaN(p.X)) window.X = p.X;
             if (!float.IsNaN(p.Y)) window.Y = p.Y;
-            if (!float.IsNaN(p.Width) && !float.IsNaN(window.Width)) window.Width = p.Width;
-            if (!float.IsNaN(p.Height) && !float.IsNaN(window.Height)) window.Height = p.Height;
+            // A size is only remembered once it was resized, also for windows that size themselves (formation
+            // manager): then it is the player's.
+            if (!float.IsNaN(p.Width)) window.Width = p.Width;
+            if (!float.IsNaN(p.Height)) window.Height = p.Height;
         }
         window.PositionChanged += (sender, args) => Remember(window);
         window.SizeChanged += (sender, args) => Remember(window);

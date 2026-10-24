@@ -50,3 +50,13 @@ tooltips or menus missing, the pointer off (hover highlights not under the mouse
 button, the game losing keyboard focus oddly or pausing/muting after a click on the other monitor, sizes or fonts
 that look different over there (config `UI scale`). Config `See-through`, `Always on top`, `Snap windows` and
 `Wide resize corners` switch the newer parts off.
+
+## 1.0.0 – release check (2026-10-24)
+
+Same build as 0.2.0 apart from the version and the remembered size of self-sizing windows (the formation manager
+came back at its automatic width). Run during the screenshot session on Sea Power 0.8.7: 1.0.0 loaded, four windows
+popped out, arranged, back in and out again twice, no errors.
+
+1. Log: `Sea Power Pop-Out Windows 1.0.0 loaded.`, the monitor list and `Window hooks in place. Pop-out monitor: …`.
+2. In any mission pop out the formation manager and the message log, arrange them, pop one back in: steps 3, 4 and 9
+   of the 0.2.0 check above – no `[Error :SeaPowerPopOut]` lines.

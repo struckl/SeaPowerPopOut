@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased (first Workshop release in preparation)
+## 1.0.0 – 2026-10-24 (first Workshop release)
+
+Tested on Sea Power 0.8.7.
 
 - Pop-out button in the title bar of every window (formation manager, message log, camera controls, unit status,
   sensor and doctrine windows): moves it to another monitor and back. Bottom-bar toggles keep working.
@@ -10,4 +12,6 @@
   remembered for the next mission.
 - Monitors the game uses for its own second-screen map or world view are skipped.
 - Mouse pointer lines up on a monitor of another height than the game's (resizing works there).
+- A window resized on the other monitor comes back at that size in the next mission, also the formation manager,
+  which otherwise sizes itself.
 - Wide resize corners on every window, on both screens.
