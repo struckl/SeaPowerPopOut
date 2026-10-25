@@ -55,6 +55,15 @@ internal static class Native
 
     private static readonly uint Pid = GetCurrentProcessId();
 
+    /// <summary>The game's own window, captured at startup while it is the only one. Never cut or re-stacked.</summary>
+    public static IntPtr MainWindow { get; private set; }
+
+    public static void CaptureMainWindow()
+    {
+        try { MainWindow = System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle; }
+        catch { MainWindow = IntPtr.Zero; }
+    }
+
     /// <summary>The visible top-level windows of this process (the game's window and one per activated display).</summary>
     public static HashSet<IntPtr> OwnWindows()
     {

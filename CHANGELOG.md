@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Safeguard: the game's own main window is never cut to the see-through shape, even if it is mistaken for the
+  pop-out monitor's window (a bug report: clicks on the main screen went to the desktop).
+
 ## 1.0.0 – 2026-10-24 (first Workshop release)
 
 Tested on Sea Power 0.8.7.

@@ -32,6 +32,7 @@ public class Plugin : IAnchorChainMod
 
         try
         {
+            Native.CaptureMainWindow();
             Settings.Init();
             if (!Settings.Enabled.Value)
             {

@@ -98,6 +98,13 @@ internal sealed class MonitorWindow
         }
         if (candidate == IntPtr.Zero)
             return;
+        if (candidate == Native.MainWindow)
+        {
+            // Cutting the game's own window to the popped-out windows would hand every click on the main screen to
+            // the desktop.
+            ModLog.Warn($"Window found for monitor {display + 1} is the game's main window - left alone.");
+            return;
+        }
 
         hwnd = candidate;
         before = null;
