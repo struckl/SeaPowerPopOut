@@ -70,9 +70,9 @@ second display) and keeps it until it closes – with nothing popped out, nothin
 - Needs a second monitor. Works next to the game's own second-monitor map and detached world view (those monitors
   are skipped).
 - No game files are changed. Uninstall by unsubscribing (or deleting the folder).
-- **Unticking the mod in the Mod Manager does not switch it off** – Anchor Chain loads it anyway. To switch it off set
-  `Enable mod = false` in the config (see Settings), or unsubscribe. Nothing the mod does survives a game restart
-  except that config file.
+- Unticking the mod in the Mod Manager switches it off (after a restart): the mod reads the Mod Manager's choice
+  itself, because Anchor Chain loads every mod folder regardless. Nothing the mod does survives a game restart
+  except its config file; `Enable mod = false` there is a second switch.
 
 Problems: `<Sea Power>\BepInEx\LogOutput.log` has a line for every step the mod takes (`[Info :SeaPowerPopOut]`);
 please attach it to a bug report.

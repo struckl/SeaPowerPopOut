@@ -32,6 +32,11 @@ public class Plugin : IAnchorChainMod
 
         try
         {
+            if (!ModState.TickedInModManager())
+            {
+                ModLog.Info("Unticked in the Mod Manager - inactive.");
+                return;
+            }
             Native.CaptureMainWindow();
             Settings.Init();
             if (!Settings.Enabled.Value)

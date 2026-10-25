@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Unticking the mod in the Mod Manager now really switches it off (it reads the Mod Manager's choice; Anchor Chain
+  loads every mod folder regardless).
 - Safeguard: the game's own main window is never cut to the see-through shape, even if it is mistaken for the
   pop-out monitor's window (a bug report: clicks on the main screen went to the desktop).
 

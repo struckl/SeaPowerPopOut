@@ -3,7 +3,7 @@
 Log: `<Sea Power>\BepInEx\LogOutput.log` (overwritten on every game start). Config:
 `<Sea Power>\BepInEx\config\dev.sewerlabs.seapowerpopout.cfg`. Installed mod (local build):
 `<Sea Power>\Sea Power_Data\StreamingAssets\SeaPowerPopOut\`. Needs a second monitor connected before the game
-starts. Anchor Chain loads the mod whether or not it is ticked in the Mod Manager.
+starts. Anchor Chain loads the mod whether or not it is ticked; the mod itself checks `usersettings.ini` (LocalLow\Triassic Games\Sea Power) and logs `Unticked in the Mod Manager - inactive.` – verify by unticking and restarting.
 
 ## Pop-Out Windows – free-floating windows on another monitor (0.2.0)
 
