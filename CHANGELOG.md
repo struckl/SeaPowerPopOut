@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 1.0.1 – 2026-10-25
+
+Fixes after a bug report (clicks on the main screen went to the desktop, also with the mod unticked).
 
 - Unticking the mod in the Mod Manager now really switches it off (it reads the Mod Manager's choice; Anchor Chain
   loads every mod folder regardless).

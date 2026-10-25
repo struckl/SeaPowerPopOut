@@ -15,7 +15,7 @@ public class Plugin : IAnchorChainMod
 {
     public const string Guid = "dev.sewerlabs.seapowerpopout";
     public const string Name = "Sea Power Pop-Out Windows";
-    public const string Version = "1.0.0";
+    public const string Version = "1.0.1";
 
     // Anchor Chain loads assemblies with Assembly.LoadFile, so the same DLL found in two folders would be two
     // separate assemblies with separate statics. The marker lives on the AppDomain so only the first one starts.
