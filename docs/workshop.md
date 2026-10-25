@@ -25,8 +25,7 @@ With Steam running and signed in as the item's owner (game closed), after `packa
 
 ```powershell
 dotnet build tools\workshop-upload -c Release
-tools\workshop-uploadin\Release
-et8.0\WorkshopUpload.exe 3826396311 dist\SeaPowerPopOut workshop\changelog-<version>.txt
+tools\workshop-upload\bin\Release\net8.0\WorkshopUpload.exe 3826396311 dist\SeaPowerPopOut workshop\changelog-<version>.txt
 ```
 
 It sends the content folder and the change note through the Steam client (Steamworks.NET from the game's own
