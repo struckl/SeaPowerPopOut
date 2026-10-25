@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <Nullable>disable</Nullable>
+    <GameDir Condition="'$(GameDir)' == ''">E:\Games\steamapps\common\Sea Power</GameDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Steamworks.NET"><HintPath>$(GameDir)\Sea Power_Data\Managed\com.rlabrecque.steamworks.net.dll</HintPath></Reference>
+    <None Include="$(GameDir)\Sea Power_Data\Plugins\x86_64\steam_api64.dll" CopyToOutputDirectory="PreserveNewest" Link="steam_api64.dll" />
+  </ItemGroup>
+</Project>
