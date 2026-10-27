@@ -1,0 +1,3 @@
+1.0.2
+- Right-clicking a unit in the formation manager on the other monitor now opens its menu there (it opened on the main screen). A click on one monitor closes a unit menu that is open on the other.
+- Formation manager tabs (a game bug, also on the main screen): with a category missing, e.g. no submarines, a tab stood for the category after it, so double-clicking a plane in the "Air" tab jumped the list to "All". It now stays on the tab.
