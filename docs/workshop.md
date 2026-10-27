@@ -30,7 +30,7 @@ tools\workshop-upload\bin\Release\net8.0\WorkshopUpload.exe 3826396311 dist\SeaP
 
 It sends the content folder and the change note through the Steam client (Steamworks.NET from the game's own
 folder); title, description, tags, visibility and preview stay as they are. `Result: k_EResultOK` = done; the
-change shows on the item's Change Notes page. (1.0.1 went out this way, 2026-10-25.)
+change shows on the item's Change Notes page. (1.0.1 went out this way, 2026-10-25; 1.0.2 on 2026-10-27.)
 
 ## Upload in the game
 
