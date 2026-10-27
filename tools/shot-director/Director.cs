@@ -28,6 +28,7 @@ namespace ShotDirector;
 /// <code>
 /// load missions/NATO/Trollfjorden.ini   start a mission (from the main menu)
 /// click X Y | move X Y | key tab        mouse / keyboard (screen pixels, key names or hex)
+/// rclick [X Y] | dclick [X Y]            right click / double click (without X Y: where the mouse is; click too)
 /// wait SECONDS
 /// mapfull | mapoff                       map full screen (Tab) / map closed
 /// center LAT LON [ZOOM] | where          map centre and zoom level through the map's view model
@@ -40,6 +41,11 @@ namespace ShotDirector;
 /// place KIND X Y [W H]                   put it there (window units of its screen)
 /// hover KIND                             mouse onto its pop-out button (main screen), so the tooltip shows
 /// windows                                log every open window: screen, kind, place, size
+/// point KIND TEXT | point KIND tab:N     mouse onto a text in that window (either screen; KIND * = anywhere) or
+///                                        onto its TabControl's tab N (counting collapsed tabs)
+/// expand KIND TEXT                       expand the tree row holding that text
+/// tabs                                   formation manager: shown tab, its view model's tab and category, selection
+/// menus                                  the unit menu on each screen: open, where, entries
 /// get PATH | set PATH VALUE | call PATH ARGS…   reflection, e.g. SeaPower.Globals._mainGameViewModel.MapVisible
 /// quit
 /// </code>
@@ -116,8 +122,32 @@ internal sealed class Director : MonoBehaviour
                 MissionManager.DoLoad();
                 break;
             case "click":
-                Native.Click(I(a[1]), I(a[2]));
+                MoveIfGiven(a);
+                Native.Click();
                 Log(line);
+                break;
+            case "rclick":
+                MoveIfGiven(a);
+                Native.RightClick();
+                Log(line);
+                break;
+            case "dclick":
+                MoveIfGiven(a);
+                Native.Click();
+                Native.Click();
+                Log(line);
+                break;
+            case "point":
+                PointAt(a[1], rest.Substring(a[1].Length).Trim());
+                break;
+            case "expand":
+                Expand(a[1], rest.Substring(a[1].Length).Trim());
+                break;
+            case "tabs":
+                Tabs();
+                break;
+            case "menus":
+                Menus();
                 break;
             case "move":
                 Native.Move(I(a[1]), I(a[2]));
@@ -261,12 +291,132 @@ internal sealed class Director : MonoBehaviour
     // The pop-out mod's own move, as its title-bar button does it (remembered for the next mission).
     private static void PopOut(object content, bool toPopOut)
     {
+        object instance = PopOutScreen();
+        MethodInfo move = instance.GetType().GetMethod("Move", BindingFlags.NonPublic | BindingFlags.Instance);
+        move.Invoke(instance, new[] { content, toPopOut, (object)true });
+    }
+
+    private const string PopOutScreenName = "SeaPowerPopOut screen";
+    private const BindingFlags Members = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance;
+
+    private static object PopOutScreen()
+    {
         Type screen = AppDomain.CurrentDomain.GetAssemblies()
             .Select(asm => asm.GetType("SeaPowerPopOut.PopOutScreen", throwOnError: false))
             .FirstOrDefault(t => t != null) ?? throw new InvalidOperationException("SeaPowerPopOut not loaded");
-        object instance = screen.GetProperty("Instance", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static).GetValue(null);
-        MethodInfo move = screen.GetMethod("Move", BindingFlags.NonPublic | BindingFlags.Instance);
-        move.Invoke(instance, new[] { content, toPopOut, (object)true });
+        return screen.GetProperty("Instance", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static).GetValue(null)
+               ?? throw new InvalidOperationException("SeaPowerPopOut not running");
+    }
+
+    private static object Field(object owner, string name) =>
+        owner.GetType().GetField(name, Members)?.GetValue(owner) ?? throw new InvalidOperationException($"no {name}");
+
+    /// <summary>Where a view's pixel 0,0 sits on the desktop: the game window, or the pop-out monitor's window.</summary>
+    private static void ViewOrigin(string screen, out int x, out int y)
+    {
+        if (screen != PopOutScreenName)
+        {
+            Native.ClientOrigin(out x, out y);
+            return;
+        }
+        object monitor = Field(PopOutScreen(), "monitor");
+        Native.ClientOrigin((IntPtr)Field(monitor, "hwnd"), out x, out y);
+    }
+
+    // A text in the window of that kind (KIND * = anywhere on either screen), or tab N of the window's TabControl.
+    private static (FrameworkElement element, string screen) FindElement(string kind, string what)
+    {
+        IEnumerable<(string screen, Visual root)> roots = kind == "*"
+            ? Object.FindObjectsByType<NoesisView>(FindObjectsSortMode.None).Where(v => v.Content != null)
+                .Select(v => (v.gameObject.name, (Visual)v.Content))
+            : OpenWindows().Where(w => ReferenceEquals(w.window.DataContext, Content(kind))).Select(w => (w.screen, (Visual)w.window));
+        foreach ((string screen, Visual root) in roots.ToList())
+        {
+            if (what.StartsWith("tab:", StringComparison.OrdinalIgnoreCase))
+            {
+                TabControl tabs = Descendants(root).OfType<TabControl>().FirstOrDefault();
+                if (tabs?.ItemContainerGenerator.ContainerFromIndex(I(what.Substring(4))) is TabItem tab)
+                    return (tab, screen);
+                continue;
+            }
+            TextBlock text = Descendants(root).OfType<TextBlock>().FirstOrDefault(t =>
+                t.IsVisible && t.ActualWidth > 0f && (t.Text ?? "").IndexOf(what, StringComparison.OrdinalIgnoreCase) >= 0);
+            if (text != null)
+                return (text, screen);
+        }
+        throw new InvalidOperationException($"'{what}' not found in {kind}");
+    }
+
+    private void PointAt(string kind, string what)
+    {
+        (FrameworkElement element, string screen) = FindElement(kind, what);
+        Point centre = element.PointToScreen(new Point(element.ActualWidth / 2f, element.ActualHeight / 2f));
+        ViewOrigin(screen, out int ox, out int oy);
+        int x = ox + (int)centre.X, y = oy + (int)centre.Y;
+        Native.Move(x + 6, y + 4);
+        Native.Move(x, y);
+        Log($"point {kind} '{what}' on {screen} at {x},{y}");
+    }
+
+    private void Expand(string kind, string what)
+    {
+        (FrameworkElement element, _) = FindElement(kind, what);
+        for (DependencyObject d = element; d != null; d = VisualTreeHelper.GetParent(d))
+        {
+            if (d is TreeViewItem item)
+            {
+                item.IsExpanded = true;
+                Log($"expanded '{what}'");
+                return;
+            }
+        }
+        throw new InvalidOperationException($"'{what}' is not in a tree row");
+    }
+
+    private void Tabs()
+    {
+        object model = Content("formation");
+        Type type = model.GetType();
+        object selected = type.GetProperty("SelectedItem").GetValue(model);
+        string shown = "window not open";
+        (string screen, GameWindow window) open = OpenWindows().FirstOrDefault(w => ReferenceEquals(w.window.DataContext, model));
+        if (open.window != null && Descendants(open.window).OfType<TabControl>().FirstOrDefault() is TabControl tabs)
+            shown = $"{open.screen} shows tab {tabs.SelectedIndex} '{(tabs.SelectedItem as TabItem)?.Header}'";
+        string name = selected switch
+        {
+            ObjectBase unit => unit.getName(),
+            UnitFormation formation => "formation " + formation.Name,
+            Station station => "station " + station.UnitObject?.getName(),
+            _ => selected?.ToString() ?? "nothing",
+        };
+        Log($"tabs: {shown}; model tab {type.GetProperty("SelectedTabIndex").GetValue(model)}, " +
+            $"category {Field(model, "_selectedCategory")}, selected {name}");
+    }
+
+    private void Menus()
+    {
+        object screen = PopOutScreen();
+        foreach (string field in new[] { "homeMenu", "menu" })
+        {
+            if (!(screen.GetType().GetField(field, Members)?.GetValue(screen) is Noesis.ContextMenu menu))
+            {
+                Log($"menu {field}: none");
+                continue;
+            }
+            string where = "";
+            if (menu.IsOpen && menu.ActualWidth > 0f)
+            {
+                Point p = menu.PointToScreen(new Point(0f, 0f));
+                where = $" at {p.X:0},{p.Y:0} size {menu.ActualWidth:0}x{menu.ActualHeight:0} (view pixels)";
+            }
+            Log($"menu {field}: open {menu.IsOpen}{where}, {menu.Items.Count} entries");
+        }
+    }
+
+    private static void MoveIfGiven(string[] a)
+    {
+        if (a.Length > 2)
+            Native.Move(I(a[1]), I(a[2]));
     }
 
     private void Place(object content, float x, float y, float width, float height)
@@ -508,7 +658,7 @@ internal static class Native
         public int X, Y;
     }
 
-    private const uint LeftDown = 0x02, LeftUp = 0x04, KeyUp = 0x02;
+    private const uint LeftDown = 0x02, LeftUp = 0x04, RightDown = 0x08, RightUp = 0x10, KeyUp = 0x02;
 
     private static readonly Dictionary<string, byte> Keys = new Dictionary<string, byte>(StringComparer.OrdinalIgnoreCase)
     {
@@ -535,17 +685,27 @@ internal static class Native
             }
             return true;
         }, IntPtr.Zero);
+        ClientOrigin(main, out x, out y);
+    }
+
+    public static void ClientOrigin(IntPtr hwnd, out int x, out int y)
+    {
         var p = new POINT();
-        ClientToScreen(main, ref p);
+        ClientToScreen(hwnd, ref p);
         x = p.X;
         y = p.Y;
     }
 
-    public static void Click(int x, int y)
+    public static void Click()
     {
-        SetCursorPos(x, y);
         mouse_event(LeftDown, 0, 0, 0, UIntPtr.Zero);
         mouse_event(LeftUp, 0, 0, 0, UIntPtr.Zero);
+    }
+
+    public static void RightClick()
+    {
+        mouse_event(RightDown, 0, 0, 0, UIntPtr.Zero);
+        mouse_event(RightUp, 0, 0, 0, UIntPtr.Zero);
     }
 
     public static void Key(string name)

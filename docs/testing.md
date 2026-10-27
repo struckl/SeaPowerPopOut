@@ -76,3 +76,8 @@ Needs a mission with surface ships and aircraft but **no submarines** (so the "S
    formation: the camera goes to it, the list **stays on Air** with the plane selected. Same on the Surface and Helos
    tabs with their units. Double-clicking a unit on **All** stays on All.
 5. Log: no `Formation manager tab fix not applied` warning, no `[Error :SeaPowerPopOut]` lines.
+
+Run 2026-10-27 on the Sea Power beta (Steam build 26223125), mission *Caron at Grenada 1983* (NATO: one ship, an
+air formation, two helicopters, no submarines), driven through the shot-director (`rclick`, `dclick`, `point`,
+`expand`, `tabs`, `menus`): steps 1–5 pass on both screens; "Damage Control" from the pop-out menu opened the unit
+status window.
