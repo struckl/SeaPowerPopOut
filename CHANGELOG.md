@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.0.2 – 2026-10-27
 
 - Right-clicking a unit in the formation manager on the other monitor opens its menu there (it opened on the main
   screen). A click on one monitor closes a unit menu open on the other.

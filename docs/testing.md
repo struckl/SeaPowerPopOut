@@ -61,7 +61,7 @@ popped out, arranged, back in and out again twice, no errors.
 2. In any mission pop out the formation manager and the message log, arrange them, pop one back in: steps 3, 4 and 9
    of the 0.2.0 check above – no `[Error :SeaPowerPopOut]` lines.
 
-## Unit menu and formation manager tabs (unreleased)
+## Unit menu and formation manager tabs (1.0.2)
 
 Needs a mission with surface ships and aircraft but **no submarines** (so the "Subs" tab is missing in front of
 "Air"), e.g. any carrier mission without a sub.
