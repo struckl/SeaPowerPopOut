@@ -84,6 +84,11 @@ please attach it to a bug report.
 Requires the .NET SDK 8, Sea Power installed, and Anchor Chain subscribed (the build references the game's and
 Anchor Chain's assemblies).
 
+**Two game versions, one build.** Sea Power exists in 0.8.7 (flat map) and the 3D-globe build (the public beta of
+26 October 2026). The windows and the Harmony targets this mod uses are the same in both: a DLL built against either
+game has no reference that the other lacks (checked 2026-10-28 with `tools/compat-check` of the workspace: 1078 references,
+0 missing on both games), so one DLL serves both, unlike the map mods, which ship one build per version.
+
 ```bash
 dotnet build src/SeaPowerPopOut/SeaPowerPopOut.csproj -c Release -p:GameDir="C:\Program Files (x86)\Steam\steamapps\common\Sea Power"
 ```

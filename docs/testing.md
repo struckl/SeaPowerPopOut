@@ -5,6 +5,19 @@ Log: `<Sea Power>\BepInEx\LogOutput.log` (overwritten on every game start). Conf
 `<Sea Power>\Sea Power_Data\StreamingAssets\SeaPowerPopOut\`. Needs a second monitor connected before the game
 starts. Anchor Chain loads the mod whether or not it is ticked; the mod itself checks `usersettings.ini` (LocalLow\Triassic Games\Sea Power) and logs `Unticked in the Mod Manager - inactive.` – verify by unticking and restarting.
 
+## Both game versions (0.8.7 and the 3D-globe build 26223125) - one DLL
+
+Offline, 2026-10-28: `python tools/modtool.py compat popout` (workspace) builds the DLL against each game's assemblies and
+checks it against both: 1078 references, 0 missing on either; every Harmony target and reflection lookup (window hooks,
+`NoesisView.MousePosition`, the formation-tab fields, `Window.MarkUserPositioned`, `MouseControlState._currentState`)
+resolves in the globe build's assemblies too. So one DLL serves both and there is no gate. In the game (his go; on the
+globe build Anchor Chain needs the dev shim - workspace `docs/both-versions.md`), on each game version:
+
+1. Log: `SeaPowerPopOut … loaded.`, the window and pointer hooks applied (no `not found (game updated?)` or `fix not applied` line).
+2. The checklist below on the first run (pop the formation manager and the message log out, move, resize, close, tabs).
+3. On the globe build the map is a different control: the map window stays home as before; check that the main window's
+   map still reacts to the mouse while a window is popped out.
+
 ## Pop-Out Windows – free-floating windows on another monitor (0.2.0)
 
 Monitor numbers below are an example: game on monitor 1, the game's detached world view on monitor 2, monitor 3
