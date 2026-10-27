@@ -78,6 +78,7 @@ internal sealed class PopOutScreen : MonoBehaviour
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
+            <Canvas x:Name='MenuCanvas' />
         </Grid>
     </Grid>
 </local:ScalableUserControl>";
@@ -142,6 +143,11 @@ internal sealed class PopOutScreen : MonoBehaviour
     private static readonly ConditionalWeakTable<GameWindow, object> Snapping = new ConditionalWeakTable<GameWindow, object>();
     private static bool overlayHooks;
 
+    // The game's unit menu (right-click in the formation manager) and our copy of it, see BuildMenu.
+    private Noesis.Canvas homeCanvas, menuCanvas;
+    private ContextMenu homeMenu, menu;
+    private MainGameView lentTo;
+
     // A press on the screen whose release went to another program (the pointer had left the see-through cut-out).
     private bool pressed;
     private int releasedFrames;
@@ -177,6 +183,8 @@ internal sealed class PopOutScreen : MonoBehaviour
         {
             try
             {
+                ReturnMenu();
+                CloseMenuElsewhere();
                 UpdateScreen(force: false);
                 ReleaseLostClick();
             }
@@ -513,6 +521,8 @@ internal sealed class PopOutScreen : MonoBehaviour
             items = (ItemsControl)root.FindName("Items");
             root.PreviewMouseLeftButtonDown += (sender, args) => pressed = true;
             root.PreviewMouseLeftButtonUp += (sender, args) => pressed = false;
+            root.PreviewMouseRightButtonDown += (sender, args) => LendMenu();
+            root.PreviewMouseRightButtonUp += (sender, args) => LendMenu();
             root.GotMouseCapture += OnCapture;
             HookOverlays();
             backdropBrush = backdrop.Background as SolidColorBrush;
@@ -523,6 +533,7 @@ internal sealed class PopOutScreen : MonoBehaviour
             root.Resources = Flatten(mainView.Resources);
             root.DataContext = mainView.DataContext;
             builtFor = mainView;
+            BuildMenu();
 
             screen = new GameObject("SeaPowerPopOut screen");
             UnityEngine.Object.DontDestroyOnLoad(screen);
@@ -644,11 +655,77 @@ internal sealed class PopOutScreen : MonoBehaviour
         }
     }
 
+    // ---- the unit menu -----------------------------------------------------------------------------------------
+
+    /// <summary>
+    /// The game opens its unit menu (right-click on a unit in the formation manager) from the context menu of a
+    /// canvas of the main game view, <c>MainGameView.ContextMenuCanvas</c> – so on the main screen, wherever the
+    /// click was. This screen gets a copy of that menu, on a canvas in the scaled layer of the windows so it comes
+    /// out at their size.
+    /// </summary>
+    private void BuildMenu()
+    {
+        homeCanvas = mainView.ContextMenuCanvas;
+        homeMenu = homeCanvas?.ContextMenu;
+        menuCanvas = (Noesis.Canvas)root.FindName("MenuCanvas");
+        if (homeMenu == null || menuCanvas == null)
+        {
+            ModLog.Warn("The game's unit menu wasn't found - right-clicking a unit on the pop-out monitor opens it on the main screen.");
+            return;
+        }
+        // Its place is the mouse; the target only makes it part of this screen (scale, see-through cut-out).
+        menu = new ContextMenu { ItemContainerStyle = homeMenu.ItemContainerStyle, PlacementTarget = menuCanvas };
+        foreach (object key in homeMenu.Resources.Keys)   // the templates of its entries
+            menu.Resources[key] = homeMenu.Resources[key];
+        // As on the game's menu: right-clicks on it do nothing.
+        menu.PreviewMouseRightButtonDown += (sender, args) => args.Handled = true;
+        menu.PreviewMouseRightButtonUp += (sender, args) => args.Handled = true;
+        menuCanvas.ContextMenu = menu;
+    }
+
+    /// <summary>
+    /// A right-click on this screen: until the next frame the main game view's menu canvas is ours, so a unit menu
+    /// the click opens opens over here (the game looks the canvas up each time it opens the menu).
+    /// </summary>
+    private void LendMenu()
+    {
+        MainGameView view = MainGameView.Instance;
+        if (menu == null || view == null || !ReferenceEquals(view.ContextMenuCanvas, homeCanvas))
+            return;
+        view.ContextMenuCanvas = menuCanvas;
+        lentTo = view;
+    }
+
+    private void ReturnMenu()
+    {
+        if (lentTo == null)
+            return;
+        if (ReferenceEquals(lentTo.ContextMenuCanvas, menuCanvas))
+            lentTo.ContextMenuCanvas = homeCanvas;
+        lentTo = null;
+    }
+
+    /// <summary>
+    /// A click reaches only the view of the monitor it was on, so the unit menu open on the other screen would stay
+    /// open. Closes it, as a click anywhere beside the menu does on one screen.
+    /// </summary>
+    private void CloseMenuElsewhere()
+    {
+        if (menu == null || !(UnityEngine.Input.GetMouseButtonDown(0) || UnityEngine.Input.GetMouseButtonDown(1)
+                              || UnityEngine.Input.GetMouseButtonDown(2)))
+            return;
+        Vector3 p = Display.RelativeMouseAt(UnityEngine.Input.mousePosition);
+        ContextMenu other = p != Vector3.zero && (int)p.z == screenDisplay ? homeMenu : menu;
+        if (other.IsOpen)
+            other.IsOpen = false;
+    }
+
     private void Teardown()
     {
         deferred.Clear();
         try
         {
+            ReturnMenu();
             host?.Windows.Clear();
             monitor?.Release();
         }
@@ -658,6 +735,10 @@ internal sealed class PopOutScreen : MonoBehaviour
         }
         if (screen != null)
             Destroy(screen);
+        homeCanvas = null;
+        menuCanvas = null;
+        homeMenu = null;
+        menu = null;
         monitor = null;
         seeThrough = false;
         screenView = null;

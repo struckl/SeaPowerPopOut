@@ -60,3 +60,19 @@ popped out, arranged, back in and out again twice, no errors.
 1. Log: `Sea Power Pop-Out Windows 1.0.0 loaded.`, the monitor list and `Window hooks in place. Pop-out monitor: …`.
 2. In any mission pop out the formation manager and the message log, arrange them, pop one back in: steps 3, 4 and 9
    of the 0.2.0 check above – no `[Error :SeaPowerPopOut]` lines.
+
+## Unit menu and formation manager tabs (unreleased)
+
+Needs a mission with surface ships and aircraft but **no submarines** (so the "Subs" tab is missing in front of
+"Air"), e.g. any carrier mission without a sub.
+
+1. Pop out the formation manager. Right-click a unit (a formation, a ship, a plane, a station inside a formation):
+   the unit menu opens **on the other monitor**, at the mouse, at the size of the windows there, in full (also where
+   it reaches past the window's edge). Pick an entry: it works as on the main screen.
+2. With that menu open, click on the main screen: the menu closes. Right-click a unit on the map: its menu opens on
+   the main screen; click on the other monitor: it closes.
+3. Pop the formation manager back in: right-clicking a unit opens the menu on the main screen, as before.
+4. Formation manager (either screen): click the **Air** tab, double-click a plane, then a station inside an air
+   formation: the camera goes to it, the list **stays on Air** with the plane selected. Same on the Surface and Helos
+   tabs with their units. Double-clicking a unit on **All** stays on All.
+5. Log: no `Formation manager tab fix not applied` warning, no `[Error :SeaPowerPopOut]` lines.

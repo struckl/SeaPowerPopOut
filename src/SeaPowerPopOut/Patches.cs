@@ -23,6 +23,8 @@ namespace SeaPowerPopOut;
 /// <item><c>NoesisView.MousePosition</c> — puts the pointer of the pop-out view where the mouse really is (see
 /// <see cref="PointerHooks"/>). Optional: if it's missing, everything else still runs.</item>
 /// <item><c>MainGameViewModel.OnStart</c> / <c>GameMain.OnDestroy</c> — mission ready / mission unloading.</item>
+/// <item><c>FormationManagerViewModel.SelectedTabIndex</c> — counts every tab, as the TabControl does (see
+/// <see cref="FormationTabs"/>). Optional.</item>
 /// </list>
 /// <para>Two stages. The window hooks must wait until NoesisGUI runs: patching a method JIT-compiles it, which runs
 /// its class's static constructor, and <c>WindowHost</c> / <c>Window</c> register Noesis dependency properties
@@ -61,13 +63,25 @@ internal static class Patches
         new Hook { Type = "NoesisView", Method = "MousePosition", Args = Type.EmptyTypes, Postfix = nameof(MousePosition) },
     };
 
+    // A fix of the game's own formation manager tabs (see FormationTabs), on both screens. Without it everything
+    // else still runs.
+    private static readonly Hook[] TabHooks =
+    {
+        new Hook { Type = "SeapowerUI.ViewModels.FormationManagerViewModel", Method = "get_SelectedTabIndex", Args = Type.EmptyTypes, Prefix = nameof(GetTabIndex) },
+        new Hook { Type = "SeapowerUI.ViewModels.FormationManagerViewModel", Method = "set_SelectedTabIndex", Args = new[] { typeof(int) }, Prefix = nameof(SetTabIndex) },
+    };
+
     private static Harmony harmony;
 
     /// <summary>Stage one, at plugin load: hooks on plain game classes.</summary>
     public static bool ApplyGameHooks(Harmony instance)
     {
         harmony = instance;
-        return Apply(GameHooks);
+        if (!Apply(GameHooks))
+            return false;
+        if (!FormationTabs.Resolve() || !Apply(TabHooks, optional: true))
+            ModLog.Warn("Formation manager tab fix not applied (game updated?) - its tabs work as the game has them.");
+        return true;
     }
 
     /// <summary>Stage two, once NoesisGUI is up: hooks on the game's Noesis window classes.</summary>
@@ -125,6 +139,10 @@ internal static class Patches
 
     private static void MousePosition(NoesisView __instance, ref Vector3 __result) =>
         PopOutScreen.Instance?.FixPointer(__instance, ref __result);
+
+    private static bool GetTabIndex(object __instance, ref int __result) => FormationTabs.Get(__instance, ref __result);
+
+    private static bool SetTabIndex(object __instance, int value) => FormationTabs.Set(__instance, value);
 
     private static void MissionReady() => PopOutScreen.Instance?.MissionReady();
 

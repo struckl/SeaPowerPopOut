@@ -21,7 +21,9 @@ game's windows on another monitor, so the main screen stays free for the world v
   game's own corner handle is a tiny square just outside the corner).
 - It is the game's own window over there – same look, dragging, resizing and clicks. Clicks on the other monitor
   never reach the world or the map behind them, and the bottom-bar buttons keep working (they close and reopen the
-  window over there).
+  window over there). Right-clicking a unit in the formation manager opens its menu right there, on that monitor.
+- **Formation manager tabs fixed** (a game bug, on both screens): with a category missing, e.g. no submarines, the
+  "Air" tab really is Air – double-clicking a plane there no longer jumps the list to "All".
 
 | | |
 | --- | --- |
@@ -108,6 +110,15 @@ of the monitor belongs to the desktop again. It is topmost (`SetWindowPos`) only
 is in the foreground. A drag released over another program never reaches Unity, so a press whose button is
 physically up (`GetAsyncKeyState`) gets its release sent to the view.
 
+Unit menu: the game opens it from the context menu of a canvas of the main game view
+(`MainGameView.ContextMenuCanvas`), looked up each time it opens. The pop-out screen has a copy of that menu on a
+canvas of its own; a right-click there points the field at it until the next frame. A click on one monitor closes a
+menu open on the other (each view only gets the clicks on its own monitor).
+
+Formation manager tabs: the TabControl holds all six tabs, empty ones collapsed, so its `SelectedIndex` counts them
+too, while the game's `FormationManagerViewModel.SelectedTabIndex` counts only the visible ones. A prefix on that
+property's getter and setter counts every tab.
+
 Pointer fix: `NoesisView` maps the mouse on another display with the main window's height (`Screen.height`), so on
 a monitor of a different height its pointer sits off by the difference (400 px on a 2560 px portrait monitor next
 to a 2160 px game window) – no resize cursor at the edges, drags jump. A Harmony postfix on
@@ -117,11 +128,12 @@ to a 2160 px game window) – no resize cursor at the edges, drags jump. A Harmo
 src/SeaPowerPopOut/
   Plugin.cs           entry point (Anchor Chain plugin)
   Patches.cs          every hook: WindowHost open/close, Window loaded, mouse over UI, NoesisView pointer,
-                      mission start/end
+                      mission start/end, formation manager tabs
   PopOutScreen.cs     the pop-out monitor (display, NoesisView, second WindowHost), title-bar buttons, moving
-                      windows between the screens, see-through cut-out, snapping, pointer fix
+                      windows between the screens, unit menu, see-through cut-out, snapping, pointer fix
   MonitorWindow.cs    the Unity window of the pop-out display: found, cut to the windows, kept on top
   CornerResize.cs     wide resize corners on every game window
+  FormationTabs.cs    the formation manager's tab index counted over every tab (game bug)
   Native.cs           the Win32 calls (window region, topmost, mouse button state)
   Layout.cs           remembered popped-out windows and their placement
   Settings.cs         config
