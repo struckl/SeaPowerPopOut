@@ -18,6 +18,12 @@ globe build Anchor Chain needs the dev shim - workspace `docs/both-versions.md`)
 3. On the globe build the map is a different control: the map window stays home as before; check that the main window's
    map still reacts to the mouse while a window is popped out.
 
+### Result 2026-10-28 (Claude, on his go; globe build, Anchor Chain dev shim, mouse-free)
+
+Log only: `Sea Power Pop-Out Windows 1.0.2 loaded.`, `Monitor 1: 3840x2160 (game)`, `Monitor 2/3: 1440x2560`, `Window hooks in place.
+Pop-out monitor: 2.`, no `not found (game updated?)` / `fix not applied` line, no error. **Not run:** popping a window out (needs
+clicks on the title-bar button; no mouse use without his OK), and 0.8.7.
+
 ## Pop-Out Windows – free-floating windows on another monitor (0.2.0)
 
 Monitor numbers below are an example: game on monitor 1, the game's detached world view on monitor 2, monitor 3
