@@ -153,6 +153,7 @@ internal sealed class PopOutScreen : MonoBehaviour
     private int releasedFrames;
     private Vector2 pointer;
     private int shapeErrors;
+    private readonly HashSet<int> pointerLogged = new HashSet<int>();
 
     private readonly Queue<Action> deferred = new Queue<Action>();
     private float nextSave, nextYieldCheck;
@@ -557,9 +558,9 @@ internal sealed class PopOutScreen : MonoBehaviour
             WindowHostCommands.CloseWindowCommand.Keyboard = mainView.Keyboard;
 
             UpdateScreen(force: true);
-            if (screenCamera.pixelHeight != Screen.height)
-                ModLog.Info($"Pointer on monitor {index + 1} shifted by {screenCamera.pixelHeight - Screen.height} px " +
-                            $"(monitor {screenCamera.pixelHeight} px high, game window {Screen.height} px)");
+            if (Screen.fullScreenMode == FullScreenMode.ExclusiveFullScreen)
+                ModLog.Warn("The game runs in exclusive fullscreen: with a second monitor in use the picture of the world view " +
+                            "can freeze there (Unity). Borderless windowed (Options > Graphics) avoids it.");
             ModLog.Info($"Pop-out screen open on monitor {index + 1} ({display.renderingWidth}x{display.renderingHeight})" +
                         (index + 1 != Settings.Monitor.Value && GameDrawsOn(Settings.Monitor.Value - 1)
                             ? $" - monitor {Settings.Monitor.Value} shows the game's world view or map" : "") +
@@ -981,16 +982,39 @@ internal sealed class PopOutScreen : MonoBehaviour
     }
 
     /// <summary>
-    /// <c>NoesisView.MousePosition</c> just returned the mouse position relative to the monitor it is on. NoesisView
-    /// flips it with the main window's height; for the pop-out view, shift it so the flip comes out right for the
-    /// pop-out monitor's height.
+    /// <c>NoesisView.MousePosition</c> just returned the mouse position relative to the monitor it is on, bottom up,
+    /// in the monitor's own pixels. NoesisView then flips it with its camera's <c>pixelHeight</c> – which for a camera
+    /// on another display is not that display's height, so on a monitor of another height (or a Windows scaling
+    /// other than the game's) the pointer sat off by the difference: no resize cursor at the edges, drags that jump,
+    /// tooltips far from the cursor, right-clicks landing on the wrong thing. Clicks take another way and land right.
+    /// <para>Corrected for every view on another monitor – the pop-out screen and the game's own second-monitor map /
+    /// world view – so that the flip comes out at the monitor's real height. What the flip uses is read from the
+    /// camera right here, so the correction is zero wherever the game already gets it right.</para>
     /// </summary>
     internal void FixPointer(NoesisView view, ref Vector3 position)
     {
-        if (screenView == null || !ReferenceEquals(view, screenView) || screenCamera == null)
+        if (position == Vector3.zero || view == null)
             return;
-        if (position != Vector3.zero && (int)position.z == screenDisplay)
-            position.y += Screen.height - screenCamera.pixelHeight;
+        int index = (int)position.z;
+        Display[] displays = Display.displays;
+        if (index < 1 || index >= displays.Length)
+            return;
+        UnityEngine.Camera camera = view.GetComponent<UnityEngine.Camera>();
+        if (camera == null || camera.targetDisplay != index)
+            return;
+
+        Display display = displays[index];
+        float real = display.renderingHeight, mouse = display.systemHeight;
+        if (real < 1f || mouse < 1f)
+            return;
+        float k = real / mouse;                       // mouse pixels -> pixels of the picture (1 unless scaled)
+        float seen = camera.pixelHeight;              // what NoesisView flips with
+        if (pointerLogged.Add(index))
+            ModLog.Info($"Pointer on monitor {index + 1}: camera {camera.pixelWidth}x{camera.pixelHeight}, monitor " +
+                        $"{display.systemWidth}x{display.systemHeight} (rendering {display.renderingWidth}x{display.renderingHeight}), " +
+                        $"game window {Screen.width}x{Screen.height}; first mouse position {position.x:0},{position.y:0}");
+        position.x *= k;
+        position.y = position.y * k + seen - real;
     }
 
     // ---- helpers -----------------------------------------------------------------------------------------------

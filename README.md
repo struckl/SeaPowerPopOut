@@ -71,6 +71,8 @@ second display) and keeps it until it closes – with nothing popped out, nothin
   stays out of the way and the log says why – the game itself keeps running.
 - Needs a second monitor. Works next to the game's own second-monitor map and detached world view (those monitors
   are skipped).
+- Exclusive fullscreen: with a second monitor in use the world view can freeze (Unity; music and menus keep
+  working). Use borderless windowed (Options > Graphics); the log warns when the game runs exclusive.
 - No game files are changed. Uninstall by unsubscribing (or deleting the folder).
 - Unticking the mod in the Mod Manager switches it off (after a restart): the mod reads the Mod Manager's choice
   itself, because Anchor Chain loads every mod folder regardless. Nothing the mod does survives a game restart
@@ -124,10 +126,13 @@ Formation manager tabs: the TabControl holds all six tabs, empty ones collapsed,
 too, while the game's `FormationManagerViewModel.SelectedTabIndex` counts only the visible ones. A prefix on that
 property's getter and setter counts every tab.
 
-Pointer fix: `NoesisView` maps the mouse on another display with the main window's height (`Screen.height`), so on
-a monitor of a different height its pointer sits off by the difference (400 px on a 2560 px portrait monitor next
-to a 2160 px game window) – no resize cursor at the edges, drags jump. A Harmony postfix on
-`NoesisView.MousePosition` shifts it for the pop-out view.
+Pointer fix: `NoesisView` flips the mouse of another display with its camera's `pixelHeight`, which is not that
+display's height when it differs from the game window's (or Windows scales it differently) – the pointer sits off by
+the difference (400 px on a 2560 px portrait monitor next to a 2160 px game window): no resize cursor at the edges,
+drags that jump, tooltips far from the cursor. A Harmony postfix on `NoesisView.MousePosition` corrects it for every
+view on another monitor (the pop-out screen and the game's own second-monitor map / world view), reading the flip
+height from the camera itself so the correction is zero where the game already gets it right. The log has one
+`Pointer on monitor N` line with the numbers.
 
 ```
 src/SeaPowerPopOut/

@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+Fixes after a report from a 3440x1440 main monitor with a 1080p second monitor (not yet tested in the game).
+
+- Pointer on a monitor of another height: also fixed on the game's own second-monitor map and world view (it only
+  covered the pop-out windows), and now measured from what the game really does instead of assumed. Should cure the
+  map dragging off, the height/depth tooltip far above the cursor, windows jumping when resized, and right-clicks
+  landing wrong there. Also corrects a Windows scaling that differs from the main monitor's.
+- Log: warns when the game runs in exclusive fullscreen (the world view can freeze with a second monitor; borderless
+  windowed avoids it) and prints one `Pointer on monitor N` line with the monitor numbers.
+
 ## 1.0.2 – 2026-10-27
 
 - Right-clicking a unit in the formation manager on the other monitor opens its menu there (it opened on the main

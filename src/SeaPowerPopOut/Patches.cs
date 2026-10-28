@@ -20,7 +20,7 @@ namespace SeaPowerPopOut;
 /// bar and puts popped-out windows where they were last time.</item>
 /// <item><c>MouseControlState.OnUpdate</c> — while the mouse is on the pop-out monitor it counts as "over the UI",
 /// so a click there doesn't also select, deselect or order something in the world.</item>
-/// <item><c>NoesisView.MousePosition</c> — puts the pointer of the pop-out view where the mouse really is (see
+/// <item><c>NoesisView.MousePosition</c> — puts the pointer of views on other monitors where the mouse really is (see
 /// <see cref="PointerHooks"/>). Optional: if it's missing, everything else still runs.</item>
 /// <item><c>MainGameViewModel.OnStart</c> / <c>GameMain.OnDestroy</c> — mission ready / mission unloading.</item>
 /// <item><c>FormationManagerViewModel.SelectedTabIndex</c> — counts every tab, as the TabControl does (see
@@ -54,10 +54,11 @@ internal static class Patches
         new Hook { Type = "SeapowerUI.Window", Method = "OnInitialized", Args = Type.EmptyTypes, Postfix = nameof(WindowLoaded) },
     };
 
-    // NoesisView turns the mouse position on another monitor into view coordinates with the main window's height
-    // (Screen.height), so on a monitor of another height the pointer sits off by the difference – 400 px on a
-    // 2560 px portrait monitor next to a 2160 px game window: no resize cursor at the edges, drags jump. Clicks go
-    // another way and land right. Without this hook the pop-out still works, just with that offset.
+    // NoesisView flips the mouse position of another monitor with its camera's pixelHeight, which is not that
+    // monitor's height when it differs from the game window's (or Windows scales it differently): the pointer sits
+    // off – no resize cursor at the edges, drags jump, tooltips far from the cursor. Clicks go another way and land
+    // right. Fixed for every view on another monitor (pop-out screen and the game's own second-monitor map). Without
+    // this hook everything else still runs.
     private static readonly Hook[] PointerHooks =
     {
         new Hook { Type = "NoesisView", Method = "MousePosition", Args = Type.EmptyTypes, Postfix = nameof(MousePosition) },
