@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using AnchorChain;
 using HarmonyLib;
 using UnityEngine;
@@ -7,7 +7,7 @@ namespace SeaPowerPopOut;
 
 /// <summary>
 /// Entry point. Loaded by Anchor Chain (the Sea Power community chainloader on top of BepInEx 5), which scans
-/// every mod folder — Steam Workshop items and <c>StreamingAssets/&lt;folder&gt;</c> — for classes implementing
+/// every mod folder â€” Steam Workshop items and <c>StreamingAssets/&lt;folder&gt;</c> â€” for classes implementing
 /// <see cref="IAnchorChainMod"/>.
 /// </summary>
 [ACPlugin(Guid, Name, Version)]
@@ -15,7 +15,7 @@ public class Plugin : IAnchorChainMod
 {
     public const string Guid = "dev.sewerlabs.seapowerpopout";
     public const string Name = "Sea Power Pop-Out Windows";
-    public const string Version = "1.0.2";
+    public const string Version = "1.1.1";
 
     // Anchor Chain loads assemblies with Assembly.LoadFile, so the same DLL found in two folders would be two
     // separate assemblies with separate statics. The marker lives on the AppDomain so only the first one starts.
@@ -45,6 +45,8 @@ public class Plugin : IAnchorChainMod
                 return;
             }
             Layout.Load();
+            SmartWindows.SmartSettings.Init();
+            SmartWindows.WindowMemory.Init();
 
             // Only the hooks on plain game classes now; the window hooks follow once NoesisGUI runs (see Patches).
             if (!Patches.ApplyGameHooks(new Harmony(Guid)))

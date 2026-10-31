@@ -65,6 +65,36 @@ second display) and keeps it until it closes – with nothing popped out, nothin
 | Popped-out windows, Window placement | The remembered layout (written by the mod; clear it to bring every window back) |
 | Wide resize corners | Diagonal resizing from the ends of every edge, on both screens |
 
+## Smart Windows features (1.1)
+
+Window handling based on rgreat's [Smart Windows](https://steamcommunity.com/sharedfiles/filedetails/?id=3813683442)
+mod, rewritten in the `SmartWindows/` folder. Thanks to rgreat for the original.
+
+- **Every window**: thin frame, double-click on the title bar maximizes / restores, snapping to the screen edges and
+  other windows, a gear button (settings panel in the game's nine languages, `lang/*.ini`).
+- **Remembered windows** (Tactical Display, Unit Reference, Unit Status, Event Log ... - the list is a setting): position,
+  size and maximized state come back in the next mission; a look button sets opacity, scale, text outline and level.
+- **Unit Reference (Encyclopedia)**: splitter with remembered tree width; hiding the tree narrows the window; classes by
+  service date; loadout variants labelled ("Long-Hull [Early]"); a click on a class picks its earliest variant; search
+  also finds ids and description text; the country list shows only countries with units; "Armed only"; the wheel
+  scrolls the tree only over it; the tree scrolls to the selected unit; your choices are kept between runs.
+- **Unit Status**: full unit name; a Reference tab with the unit's reference and loadouts; a Track State tab for a
+  selected contact; taller Damage Control sections.
+- **Mission**: right-click on the flag or name in the unit panel opens the unit's menu; the time panel can be dragged;
+  the corner messages no longer block clicks.
+- **Campaign Task Force Builder**: loadouts oldest first; "Strict loadouts" option on the start screen; damaged ships can
+  be dismissed; hull-swap price fix; optional "Upgrade ship" (off by default).
+- **Menus**: "_Custom Mission" left out of SCENARIOS; the mission editor's file picker starts in the last folder and
+  colours `.ini` files; optional mod-only backgrounds and old-log cleanup (off by default).
+- **Desktop mode** (off by default, config only): the game's minimap key (Tab) switches between desktops of window
+  layouts. With the game's World View on another monitor the map stays on the whole screen and the desktops arrange the
+  windows over it; without that, the 3D world becomes a window of its own (World View) next to the map window over a
+  plain backdrop. Both were run in the game.
+
+Settings are in `BepInEx/config/dev.sewerlabs.seapowerpopout.smartwindows.cfg`; each feature has its own switch and
+`Enable window memory = false` turns all of it off. Tested in the game on 0.8.7 (see `CHANGELOG.md` for what was and
+was not run); `modtool compat` passes for the globe build, which has not been run in the game.
+
 ## Compatibility
 
 - Sea Power 0.8.x on Windows. The game updates often; if an update moves something the mod hooks into, the mod

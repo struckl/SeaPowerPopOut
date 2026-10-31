@@ -1,11 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>SeaPowerPopOut</AssemblyName>
     <RootNamespace>SeaPowerPopOut</RootNamespace>
     <Product>Moves Sea Power's windows onto another monitor.</Product>
-    <Version>1.0.2</Version>
+    <Version>1.1.1</Version>
     <LangVersion>latest</LangVersion>
     <Nullable>disable</Nullable>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
@@ -34,6 +34,7 @@
     <Reference Include="Noesis.NoesisGUI"><HintPath>$(ManagedDir)\Noesis.NoesisGUI.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine"><HintPath>$(ManagedDir)\UnityEngine.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.CoreModule"><HintPath>$(ManagedDir)\UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.ImageConversionModule"><HintPath>$(ManagedDir)\UnityEngine.ImageConversionModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.InputLegacyModule"><HintPath>$(ManagedDir)\UnityEngine.InputLegacyModule.dll</HintPath><Private>false</Private></Reference>
     <!--Pulled in by game types we touch (Singleton, view models), compile-only.-->
     <Reference Include="Libraries"><HintPath>$(ManagedDir)\Libraries.dll</HintPath><Private>false</Private></Reference>

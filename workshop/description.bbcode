@@ -1,31 +1,64 @@
 [h1]Pop-Out Windows[/h1]
-Put the game's windows on your other monitor – the main screen stays free for the world view and the map.
+This started as a button to put the game's windows on a second monitor. It is now the window handling I always wanted in Sea Power: windows that stay where you put them, snap, maximize, go see-through, and an Encyclopedia you can actually search. All of it works on one monitor too.
 
+[h2]Second monitor[/h2]
 [list]
-[*][b]Pop-out button[/b] in the title bar of every window – formation manager, message log, camera controls, unit status, sensor and doctrine windows: one click moves it to the other monitor, the same button there sends it back.
-[*][b]Free-floating[/b] – only the windows show on that monitor, each with a thin frame; your desktop and other programs stay visible around them and take the clicks.
-[*][b]Arrange them as you like[/b] – pop out several and drag them around; windows snap to each other and to the monitor's edges, and can be made larger than the game normally allows.
-[*][b]Always in reach[/b] – while you're in the game they stay above other programs on that monitor.
-[*][b]Remembered[/b] – popped-out windows open on the other monitor in the next mission too, where you left them.
-[*][b]Wide resize corners[/b] on every window, on both screens: grab the end of an edge to resize diagonally.
+[*][b]Pop-out button[/b] on the formation manager, message log, unit status, camera, sensor and doctrine windows. One click moves the window to your second monitor, the same button brings it back.
+[*]Over there only the windows show, your desktop stays visible around them. They snap to each other and to the monitor edges and can be bigger than the game normally allows.
+[*]Popped-out windows come back on the second monitor in the next mission, where you left them.
 [/list]
 
-It is the game's own window over there – same look, dragging, resizing and clicks. Clicks on the other monitor never reach the world or the map, and the bottom-bar buttons keep working.
+[h2]All windows[/h2]
+[list]
+[*]Position and size are remembered, also after a restart.
+[*]Double-click the title bar to maximize, double-click again to restore.
+[*]Windows snap to the screen edges and to each other. Wide resize corners and proper resize cursors.
+[*]Look button: opacity, scale, text outline, and whether a window stays below or above the others.
+[*]Gear button with all settings, in the game's nine languages.
+[*]Optional desktops: Tab switches between window layouts (off by default, see the settings).
+[/list]
 
-The map stays on the main screen – the game has its own options for putting the map or the world view on another monitor. A monitor the game uses for those is skipped automatically.
+[h2]Encyclopedia[/h2]
+[list]
+[*]Search finds unit ids and words from the description too. "Type 072" finds the Yukan class.
+[*]Loadout variants get real names ("Long-Hull [Early]") instead of bare years, sorted by service date.
+[*]A click on a class opens its earliest variant.
+[*]"Armed only", and the country list only offers countries that have units for your search.
+[*]Drag the edge of the unit list to make it wider, or hide it. The wheel scrolls the list only when the mouse is over it.
+[*]Weapon and sensor links show their description as a tooltip.
+[*]Your country, category and search stay set for the next time.
+[/list]
+
+[h2]In a mission[/h2]
+[list]
+[*]Unit Status: full unit name, a Reference tab with the unit's data and loadouts, taller damage control sections.
+[*]Right-click the flag or name in the unit panel for the unit's menu (also for contacts).
+[*]The time panel can be dragged anywhere. The corner messages no longer block clicks on the map.
+[/list]
+
+[h2]Campaign[/h2]
+[list]
+[*]Task Force Builder: loadouts listed oldest first, a "Strict loadouts" option on the start screen.
+[*]Damaged ships can be dismissed, and the hull-swap price is fixed.
+[/list]
+
+Every part has its own switch, so turn off whatever you don't want.
+
+[h2]Credits[/h2]
+The window handling is based on rgreat's [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3813683442]Smart Windows[/url] mod.
 
 [h2]How to use[/h2]
-Connect the second monitor before starting the game. In a mission, click the new button left of the [b]X[/b] in a window's title bar (a box with an arrow).
+For the second monitor: connect it before starting the game, then click the new button left of the [b]X[/b] in a window's title bar (a box with an arrow). Everything else is on from the start. The gear button in a window's title bar opens the settings.
 
 [h2]Requirements[/h2]
 [b]Anchor Chain[/b] is required: [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3380210757]subscribe[/url] and follow its [url=https://seapower-modders.github.io/AnchorChain/install-anchor-chain.html]installation guide[/url] (one manual step: copy its preloader into the game folder).
-A second monitor. Windows.
+Windows. A second monitor only for the pop-out part.
 
 [h2]Settings[/h2]
-[i]<Sea Power>\BepInEx\config\dev.sewerlabs.seapowerpopout.cfg[/i] – which monitor, UI scale over there, unlimited window size, see-through, always on top, snapping, wide resize corners.
+In the gear panel, or in [i]<Sea Power>\BepInEx\config\[/i]: [i]dev.sewerlabs.seapowerpopout.cfg[/i] (second monitor) and [i]dev.sewerlabs.seapowerpopout.smartwindows.cfg[/i] (everything else).
 
 [h2]Compatibility[/h2]
-Sea Power 0.8.x. Works next to the game's own second-monitor map and detached world view. No game files are changed.
+Made for Sea Power 0.8.7. The 3D globe beta is not supported yet. Works next to the game's own second-monitor map and world view. No game files are changed.
 
 [h2]Problems?[/h2]
 Please post the file [i]<Sea Power>\BepInEx\LogOutput.log[/i] with your report.

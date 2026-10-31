@@ -4,7 +4,7 @@
 
 .DESCRIPTION
     Release build without the automatic deploy, then dist\SeaPowerPopOut\ with exactly what players get:
-    SeaPowerPopOut.dll, _info.ini, LICENSE.txt and preview.jpg – the Workshop preview (workshop\preview.jpg, if
+    SeaPowerPopOut.dll, _info.ini, lang\*.ini, LICENSE.txt and preview.jpg – the Workshop preview (workshop\preview.jpg, if
     present), which the game's upload screen only lets you pick from inside StreamingAssets.
     With -Install the staged folder also replaces <GameDir>\Sea Power_Data\StreamingAssets\SeaPowerPopOut\, the
     folder to pick in the game's Create Mod screen. Sea Power must be closed for that.
@@ -30,6 +30,8 @@ if (Test-Path $dist) { Remove-Item -Recurse -Force $dist }
 New-Item -ItemType Directory -Force $dist | Out-Null
 Copy-Item (Join-Path $out 'SeaPowerPopOut.dll') $dist
 Copy-Item (Join-Path $root 'src\SeaPowerPopOut\mod\_info.ini') $dist
+# The window-handling texts in the game's nine languages, read from next to the DLL.
+Copy-Item -Recurse (Join-Path $root 'src\SeaPowerPopOut\mod\lang') (Join-Path $dist 'lang')
 Copy-Item (Join-Path $root 'LICENSE') (Join-Path $dist 'LICENSE.txt')
 $preview = Join-Path $root 'workshop\preview.jpg'
 if (Test-Path $preview) { Copy-Item $preview $dist } else { Write-Warning 'workshop\preview.jpg missing - nothing to pick as the Workshop preview.' }

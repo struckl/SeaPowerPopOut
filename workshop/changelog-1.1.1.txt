@@ -1,0 +1,1 @@
+Fixed: the World View window was gone after switching the map between fullscreen and windowed. It now stays where you put it. Thanks for the report.

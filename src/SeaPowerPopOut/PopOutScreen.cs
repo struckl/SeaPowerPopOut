@@ -167,6 +167,7 @@ internal sealed class PopOutScreen : MonoBehaviour
 
     private void Update()
     {
+        SmartWindows.WindowMemory.Update();
         if (windowHooks == WindowHooks.Waiting && Time.unscaledTime >= nextHookCheck)
         {
             nextHookCheck = Time.unscaledTime + 0.5f;
@@ -219,7 +220,11 @@ internal sealed class PopOutScreen : MonoBehaviour
         }
     }
 
-    private void OnApplicationQuit() => Layout.Save();
+    private void OnApplicationQuit()
+    {
+        Layout.Save();
+        SmartWindows.WindowMemory.Save();
+    }
 
     private void ApplyWindowHooks()
     {
@@ -353,6 +358,9 @@ internal sealed class PopOutScreen : MonoBehaviour
     }
 
     // ---- windows -----------------------------------------------------------------------------------------------
+
+    /// <summary>True unless the window's content lives on the pop-out screen (where <see cref="Layout"/> places it).</summary>
+    internal bool OnMainScreen(GameWindow window) => host == null || !host.Windows.Contains(window.DataContext);
 
     /// <summary>
     /// A window finished loading on either screen. Windows of the main host get a pop-out button, windows on the
