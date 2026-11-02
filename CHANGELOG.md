@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.3 – 2026-11-02
+
+- Fixed: a popped-out window lost its gear and look buttons, so its opacity, scale, outline and level could not be set
+  there. They now come along to the pop-out monitor, and the look you chose is applied there too.
+- Snapping is gentler: an edge only lines up with windows next to it, not with any window anywhere on the screen. The
+  snap distance is now 6 px by default, on both screens. Hold Shift while dragging to move a window freely.
+  An existing config keeps its old snap distance (10); set it in the gear panel or in "3. Placement".
+
 ## 1.1.2 – 2026-11-02
 
 - Fixed: the thin window frame (setting "4. Window border") sat about 15–20 px outside the window, to the right and

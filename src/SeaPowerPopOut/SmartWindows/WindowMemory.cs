@@ -86,6 +86,19 @@ internal static class WindowMemory
         window.WindowUnmaximized += (s, e) => { if (primary && !FullscreenMap(window)) RememberMaximized(pattern, false); };
     }
 
+    /// <summary>
+    /// Called when a window has loaded on the pop-out monitor. Place, size and snapping there belong to <see cref="Layout"/>
+    /// and the pop-out screen; only the title bar buttons (settings, look) and the look itself come along.
+    /// </summary>
+    public static void PoppedWindowLoaded(GameWindow window)
+    {
+        if (!Active || window == null)
+            return;
+        if (window.CanResize)
+            SettingsPanel.AddGear(window);
+        WindowLook.WindowLoaded(window, PatternOf(window));
+    }
+
     /// <summary>Called every frame: writes the layouts to the config a moment after the last change.</summary>
     public static void Update()
     {

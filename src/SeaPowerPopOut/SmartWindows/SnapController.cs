@@ -26,6 +26,9 @@ internal sealed class SnapController
         window.SizeChanged += (s, e) => Changed();
     }
 
+    /// <summary>Shift held: the window moves freely, nothing snaps (both screens).</summary>
+    public static bool Suspended => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+
     public static void Attach(GameWindow window)
     {
         if (SmartSettings.SnapEnabled.Value)
@@ -39,7 +42,7 @@ internal sealed class SnapController
         WinRect now = Current();
         try
         {
-            if (SmartSettings.SnapEnabled.Value && Input.GetMouseButton(0) && !window.Maximized)
+            if (SmartSettings.SnapEnabled.Value && Input.GetMouseButton(0) && !window.Maximized && !Suspended)
                 Snap(now);
         }
         finally

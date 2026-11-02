@@ -56,7 +56,7 @@ internal static class Settings
             "While you're in the game, the popped-out windows stay above other programs on that monitor. " +
             "Switch to another program and they become normal windows again.");
         Snap = file.Bind("2. Pop-out screen", "Snap windows", true,
-            "Dragged windows on the pop-out monitor snap to each other's edges and to the monitor's edges.");
+            "Dragged windows on the pop-out monitor snap to each other's edges and to the monitor's edges. Hold Shift to move freely.");
 
         PoppedWindows = file.Bind("3. Remembered layout", "Popped-out windows", "",
             "Windows that open on the pop-out monitor (written by the mod when you use the pop-out button). " +

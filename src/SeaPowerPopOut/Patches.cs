@@ -140,6 +140,8 @@ internal static class Patches
         PopOutScreen.Instance?.Decorate(__instance);
         if (PopOutScreen.Instance == null || PopOutScreen.Instance.OnMainScreen(__instance))
             SmartWindows.WindowMemory.WindowLoaded(__instance);
+        else
+            SmartWindows.WindowMemory.PoppedWindowLoaded(__instance);
     }
 
     private static void MouseUpdated(MouseControlState __instance) => PopOutScreen.Instance?.ClaimMouse(__instance);

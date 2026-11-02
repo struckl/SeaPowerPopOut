@@ -90,6 +90,7 @@ internal static class SettingsPanel
         popup.Closed += (sender, args) => host.Children.Remove(popup);
         host.Children.Add(popup);
         popup.IsOpen = true;
+        PopOutScreen.Instance?.PopupOpened(popup, anchor);
     }
 
     // ---- rows ---------------------------------------------------------------------------------------------------

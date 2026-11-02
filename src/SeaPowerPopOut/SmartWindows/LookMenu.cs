@@ -72,6 +72,7 @@ internal static class LookMenu
         popup.Closed += (sender, args) => host.Children.Remove(popup);
         host.Children.Add(popup);
         popup.IsOpen = true;
+        PopOutScreen.Instance?.PopupOpened(popup, anchor);
     }
 
     /// <summary>Fills the menu from what is stored now; called again after every change.</summary>

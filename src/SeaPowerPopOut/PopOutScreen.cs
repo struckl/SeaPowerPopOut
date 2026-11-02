@@ -41,7 +41,7 @@ internal sealed class PopOutScreen : MonoBehaviour
     private const float SaveInterval = 3f;
     private const float DesignHeight = 1080f;
     private const float FrameWidth = 5f;          // resize border around popped-out windows (window units)
-    private const float SnapDistance = 10f;       // window units
+    private const float SnapDistance = 6f;        // window units
     private const string FrameBrushKey = "Brush.Window.Header";
 
     private static readonly MethodInfo CreateView = AccessTools.Method(typeof(NoesisView), "CreateView", new[] { typeof(FrameworkElement) });
@@ -791,7 +791,7 @@ internal sealed class PopOutScreen : MonoBehaviour
     /// </summary>
     private void SnapWindow(GameWindow window)
     {
-        if (!Settings.Snap.Value || items == null || window.Maximized)
+        if (!Settings.Snap.Value || items == null || window.Maximized || SmartWindows.SnapController.Suspended)
             return;
         float w = window.ActualWidth, h = window.ActualHeight, x = window.X, y = window.Y;
         if (w <= 0f || h <= 0f)
@@ -920,6 +920,13 @@ internal sealed class PopOutScreen : MonoBehaviour
         {
             ModLog.Debug($"overlay: {ex.Message}");
         }
+    }
+
+    /// <summary>A popup of the mod's own (settings, look menu) opened: on the pop-out monitor it is part of the cut-out.</summary>
+    internal void PopupOpened(Popup popup, UIElement anchor)
+    {
+        if (popup != null && anchor != null && root != null && root.IsAncestorOf(anchor))
+            TrackOverlay(popup);
     }
 
     // A drop-down list holds the mouse while open; its popup is part of its template.

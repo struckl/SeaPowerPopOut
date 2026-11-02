@@ -13,7 +13,7 @@ game's windows on another monitor, so the main screen stays free for the world v
 - **Free-floating windows**: only the popped-out windows show on that monitor, each with a thin frame that is its
   resize border. Around them your desktop and other programs show through and take the clicks.
 - **Arrange them as you like**: pop out several, drag them around – a dragged window snaps to the others and to the
-  monitor's edges. Over there a window can be made larger than the game normally allows.
+  monitor's edges (hold Shift to move it freely). Over there a window can be made larger than the game normally allows.
 - **Always in reach**: while you're in the game the popped-out windows stay above other programs on that monitor;
   switch to another program and they become normal windows again.
 - **Remembered**: windows you popped out open on the other monitor in the next mission too, where you left them.
@@ -71,9 +71,11 @@ Window handling based on rgreat's [Smart Windows](https://steamcommunity.com/sha
 mod, rewritten in the `SmartWindows/` folder. Thanks to rgreat for the original.
 
 - **Every window**: thin frame on the window's visible edge (left, right, bottom), double-click on the title bar maximizes / restores, snapping to the screen edges and
-  other windows, a gear button (settings panel in the game's nine languages, `lang/*.ini`).
+  the windows next to it (hold Shift to move freely), a gear button (settings panel in the game's nine languages,
+  `lang/*.ini`) - also on popped-out windows.
 - **Remembered windows** (Tactical Display, Unit Reference, Unit Status, Event Log ... - the list is a setting): position,
-  size and maximized state come back in the next mission; a look button sets opacity, scale, text outline and level.
+  size and maximized state come back in the next mission; a look button sets opacity, scale, text outline and level
+  (also on the pop-out monitor).
 - **Unit Reference (Encyclopedia)**: splitter with remembered tree width; hiding the tree narrows the window; classes by
   service date; loadout variants labelled ("Long-Hull [Early]"); a click on a class picks its earliest variant; search
   also finds ids and description text; the country list shows only countries with units; "Armed only"; the wheel

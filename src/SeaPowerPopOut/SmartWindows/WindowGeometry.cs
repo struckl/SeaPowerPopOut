@@ -34,8 +34,8 @@ internal static class WindowGeometry
     /// </summary>
     public static WinRect SnapMove(WinRect moving, IList<WinRect> others, WinRect screen, float distance)
     {
-        float dx = BestOffset(moving.X, moving.Right, others, screen, distance, horizontal: true);
-        float dy = BestOffset(moving.Y, moving.Bottom, others, screen, distance, horizontal: false);
+        float dx = BestOffset(moving.X, moving.Right, Near(moving, others, distance, horizontal: true), screen, distance, horizontal: true);
+        float dy = BestOffset(moving.Y, moving.Bottom, Near(moving, others, distance, horizontal: false), screen, distance, horizontal: false);
         return moving.Moved(dx, dy);
     }
 
@@ -45,26 +45,28 @@ internal static class WindowGeometry
     public static WinRect SnapResize(WinRect r, bool moveLeft, bool moveTop, bool moveRight, bool moveBottom,
         IList<WinRect> others, WinRect screen, float distance)
     {
+        IList<WinRect> nearX = Near(r, others, distance, horizontal: true);
+        IList<WinRect> nearY = Near(r, others, distance, horizontal: false);
         if (moveLeft)
         {
-            float d = NearestDelta(r.X, others, screen, distance, horizontal: true);
+            float d = NearestDelta(r.X, nearX, screen, distance, horizontal: true);
             r.X += d;
             r.W -= d;
         }
         else if (moveRight)
         {
-            r.W += NearestDelta(r.Right, others, screen, distance, horizontal: true);
+            r.W += NearestDelta(r.Right, nearX, screen, distance, horizontal: true);
         }
 
         if (moveTop)
         {
-            float d = NearestDelta(r.Y, others, screen, distance, horizontal: false);
+            float d = NearestDelta(r.Y, nearY, screen, distance, horizontal: false);
             r.Y += d;
             r.H -= d;
         }
         else if (moveBottom)
         {
-            r.H += NearestDelta(r.Bottom, others, screen, distance, horizontal: false);
+            r.H += NearestDelta(r.Bottom, nearY, screen, distance, horizontal: false);
         }
 
         return r;
@@ -134,6 +136,24 @@ internal static class WindowGeometry
             }
         }
         return best;
+    }
+
+    /// <summary>
+    /// The windows whose left/right (or top/bottom) edges may catch this one: those beside it (or above/below it), within
+    /// the snap distance on the other axis. A window far across the screen does not pull an edge into line with its own.
+    /// </summary>
+    private static IList<WinRect> Near(WinRect r, IList<WinRect> others, float distance, bool horizontal)
+    {
+        var near = new List<WinRect>();
+        foreach (WinRect o in others)
+        {
+            bool beside = horizontal
+                ? o.Y <= r.Bottom + distance && o.Bottom >= r.Y - distance
+                : o.X <= r.Right + distance && o.Right >= r.X - distance;
+            if (beside)
+                near.Add(o);
+        }
+        return near;
     }
 
     private static IEnumerable<float> Targets(IList<WinRect> others, WinRect screen, bool horizontal)

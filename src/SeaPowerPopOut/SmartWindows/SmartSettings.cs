@@ -108,8 +108,8 @@ internal static class SmartSettings
             "and right edge. The title bar always stays on screen at the bottom.");
         SnapEnabled = file.Bind("3. Placement", "Snap windows", true,
             "While a window is dragged or resized with the mouse, its edges snap to the edges of the screen and of " +
-            "the other windows when they come closer than the snap distance.");
-        SnapDistance = file.Bind("3. Placement", "Snap distance", 10f,
+            "the other windows next to it when they come closer than the snap distance. Hold Shift to move freely.");
+        SnapDistance = file.Bind("3. Placement", "Snap distance", 6f,
             new ConfigDescription("How close an edge must come to snap, in pixels.", new AcceptableValueRange<float>(1f, 50f)));
         Language = file.Bind("1. General", "Language", "",
             "Language of the mod's texts: a game language code (en, ru, cn, de, es, fr, ko, ja, vn). Empty = the " +
