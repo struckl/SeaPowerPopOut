@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.2 – 2026-11-02
+
+- Fixed: the thin window frame (setting "4. Window border") sat about 15–20 px outside the window, to the right and
+  below, instead of on its edge. Cause: the frame spanned the game's whole window template, which includes the
+  invisible resize-handle bands around the window. It now sits on the visible header and body only.
+
 ## 1.1.1 – 2026-10-31
 
 - Fixed: a player reported that the World View window disappeared after the map was switched between fullscreen and

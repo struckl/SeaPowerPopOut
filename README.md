@@ -70,7 +70,7 @@ second display) and keeps it until it closes – with nothing popped out, nothin
 Window handling based on rgreat's [Smart Windows](https://steamcommunity.com/sharedfiles/filedetails/?id=3813683442)
 mod, rewritten in the `SmartWindows/` folder. Thanks to rgreat for the original.
 
-- **Every window**: thin frame, double-click on the title bar maximizes / restores, snapping to the screen edges and
+- **Every window**: thin frame on the window's visible edge (left, right, bottom), double-click on the title bar maximizes / restores, snapping to the screen edges and
   other windows, a gear button (settings panel in the game's nine languages, `lang/*.ini`).
 - **Remembered windows** (Tactical Display, Unit Reference, Unit Status, Event Log ... - the list is a setting): position,
   size and maximized state come back in the next mission; a look button sets opacity, scale, text outline and level.
