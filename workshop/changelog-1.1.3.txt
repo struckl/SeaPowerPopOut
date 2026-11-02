@@ -1,0 +1,4 @@
+1.1.3:
+- Popped-out windows keep their settings (gear) and look buttons, so opacity, scale, text outline and level can be set on the pop-out monitor too.
+- Gentler snapping: an edge only lines up with windows next to it, the default snap distance is 6 px, and holding Shift moves a window freely. An existing config keeps its snap distance; change it in the settings panel.
+- Fixed: the thin window frame sat a little outside the window (right and below). It is on the window's edge again.
