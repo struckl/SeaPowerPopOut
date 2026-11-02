@@ -108,8 +108,11 @@ was not run); `modtool compat` passes for the globe build, which has not been ru
   itself, because Anchor Chain loads every mod folder regardless. Nothing the mod does survives a game restart
   except its config file; `Enable mod = false` there is a second switch.
 
-Problems: `<Sea Power>\BepInEx\LogOutput.log` has a line for every step the mod takes (`[Info :SeaPowerPopOut]`);
-please attach it to a bug report.
+## Feedback and bug reports
+
+Bugs, feedback and ideas go on the R.A.T.S. feedback board: <https://hub.sewerlabs.dev/s/popout>.
+For a bug, add `<Sea Power>\BepInEx\LogOutput.log` as a link; it has a line for every step the mod takes
+(`[Info :SeaPowerPopOut]`).
 
 ## Building from source
 
