@@ -50,7 +50,7 @@ internal static class TitleMenu
         {
             kebab = (Button)GUI.ParseXaml(
                 $"<Button {Ns} Width='20' Focusable='False' Padding='0' Margin='0'>" +
-                "<Path Width='12' Height='12' StrokeThickness='1.5' StrokeStartLineCap='Round' StrokeEndLineCap='Round' " +
+                "<Path Width='14' Height='14' Stretch='Uniform' StrokeThickness='1.7' StrokeLineJoin='Round' StrokeStartLineCap='Round' StrokeEndLineCap='Round' " +
                 "HorizontalAlignment='Center' VerticalAlignment='Center' " +
                 $"Data='{Mark}' Stroke='{{Binding Foreground, RelativeSource={{RelativeSource AncestorType=Button}}}}' /></Button>");
             kebab.Name = ButtonName;
