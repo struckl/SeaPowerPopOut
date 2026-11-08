@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- **Clickable messages fixed:** clicking a message in the corner log to jump to its unit did nothing, because the 'Messages do not block clicks' feature made the whole list ignore the mouse. The setting is off by default now (links work as in the game); switch it on to let clicks pass through the messages to the map at the cost of the links.
 - **Hide version label** (setting, on by default): on the Steam beta branch the game's version label ("Sea Power v...") was drawn over the title bars of windows, popped-out ones included; it is switched off now.
 
 ## 1.1.3 – 2026-11-02

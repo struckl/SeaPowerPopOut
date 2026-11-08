@@ -154,9 +154,10 @@ internal static class SmartSettings
             "menu as a right click on the unit on the map. Needs a restart.");
         TooltipFrame = file.Bind("4. Window border", "Tooltip frame", true,
             "A frame around the game's tooltips (pop-up hints) too, on all four sides, with the width and colour above. Needs a restart.");
-        MessagesClickThrough = file.Bind("8. Housekeeping", "Messages do not block clicks", true,
-            "The game's messages in the bottom right corner no longer catch the mouse, so the map and buttons under them can be " +
-            "clicked. Their unit and track links can then not be clicked. Needs a restart.");
+        MessagesClickThrough = file.Bind("8. Housekeeping", "Messages do not block clicks", false,
+            "On: the game's messages in the bottom right corner no longer catch the mouse, so the map and buttons under them can be " +
+            "clicked - but then their unit and track links (click a message to jump to the unit) cannot be clicked either. " +
+            "Off (default): the messages work as in the game, links included. Needs a restart.");
         StrictLoadouts = file.Bind("A. Campaign", "Strict loadouts", true,
             "Campaign start screen: adds a 'Strict loadouts' check box. When ticked for a new campaign, the Task Force Builder offers " +
             "only ships the mission lists as available (or that you own) and only loadouts already open. Saved with the campaign " +

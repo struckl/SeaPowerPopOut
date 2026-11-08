@@ -84,7 +84,8 @@ mod, rewritten in the `SmartWindows/` folder. Thanks to rgreat for the original.
 - **Unit Status**: full unit name; a Reference tab with the unit's reference and loadouts; a Track State tab for a
   selected contact; taller Damage Control sections.
 - **Mission**: right-click on the flag or name in the unit panel opens the unit's menu; the time panel can be dragged;
-  the corner messages no longer block clicks.
+  optionally (setting "Messages do not block clicks", off by default) the corner messages no longer block clicks - then
+  their unit links cannot be clicked either.
 - **Campaign Task Force Builder**: loadouts oldest first; "Strict loadouts" option on the start screen; damaged ships can
   be dismissed; hull-swap price fix; optional "Upgrade ship" (off by default).
 - **Menus**: "_Custom Mission" left out of SCENARIOS; the mission editor's file picker starts in the last folder and
