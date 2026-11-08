@@ -16,7 +16,8 @@ internal static class TitleMenu
 {
     private const string ButtonName = "SmartWindowsMenuButton";
     private const string MenuName = "SmartWindowsMenu";
-    private const string Burger = "M1,2.5 H11 M1,6 H11 M1,9.5 H11";
+    // The mod's own mark: a box with an arrow (pop out).
+    private const string Mark = "M1,4 L1,11 L8,11 L8,8 M5,7 L11,1 M7,1 L11,1 L11,5";
     private const string BackIcon = "M7,1 L2,6 L7,11 M2,6 H11";
     private const string Ns = "xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'";
 
@@ -51,7 +52,7 @@ internal static class TitleMenu
                 $"<Button {Ns} Width='20' Focusable='False' Padding='0' Margin='0'>" +
                 "<Path Width='12' Height='12' StrokeThickness='1.5' StrokeStartLineCap='Round' StrokeEndLineCap='Round' " +
                 "HorizontalAlignment='Center' VerticalAlignment='Center' " +
-                $"Data='{Burger}' Stroke='{{Binding Foreground, RelativeSource={{RelativeSource AncestorType=Button}}}}' /></Button>");
+                $"Data='{Mark}' Stroke='{{Binding Foreground, RelativeSource={{RelativeSource AncestorType=Button}}}}' /></Button>");
             kebab.Name = ButtonName;
             Button self = kebab;
             kebab.Click += (sender, args) =>
