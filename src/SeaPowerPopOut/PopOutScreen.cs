@@ -201,7 +201,28 @@ internal sealed class PopOutScreen : MonoBehaviour
         {
             nextSave = Time.unscaledTime + SaveInterval;
             Layout.Save();
+            HideVersionLabel();
         }
+    }
+
+    /// <summary>
+    /// The game's version label (Steam beta branch: "Sea Power v0.8.7-261107") is drawn above every window, popped-out ones
+    /// included, and sat on their title bars. Switched off unless the setting says to keep it.
+    /// </summary>
+    private static void HideVersionLabel()
+    {
+        if (!Settings.HideVersionLabel.Value)
+            return;
+        try
+        {
+            if (Singleton<SeaPower.VersionWatermark>.InstanceExists())
+            {
+                GameObject label = Singleton<SeaPower.VersionWatermark>.Instance.gameObject;
+                if (label.activeSelf)
+                    label.SetActive(false);
+            }
+        }
+        catch (Exception ex) { ModLog.Debug($"version label: {ex.Message}"); }
     }
 
     private void LateUpdate()

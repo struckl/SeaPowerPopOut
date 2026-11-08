@@ -25,6 +25,7 @@ internal static class Settings
     public static ConfigEntry<string> WindowPlacement;
 
     public static ConfigEntry<bool> WideCorners;
+    public static ConfigEntry<bool> HideVersionLabel;
 
     public static void Init()
     {
@@ -67,5 +68,8 @@ internal static class Settings
         WideCorners = file.Bind("4. All windows", "Wide resize corners", true,
             "The last bit of every window edge resizes diagonally (both sides at once), not just the tiny square " +
             "outside the corner. On both screens.");
+        HideVersionLabel = file.Bind("4. All windows", "Hide version label", true,
+            "On the Steam beta branch the game draws its version (\"Sea Power v...\") above everything, over the title bars of " +
+            "windows. On = it is switched off. Off = the game's own label stays.");
     }
 }

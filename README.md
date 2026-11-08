@@ -58,6 +58,7 @@ second display) and keeps it until it closes – with nothing popped out, nothin
 | --- | --- |
 | Monitor | 0 = automatic (the first monitor the game doesn't use itself); 2 = the next monitor after the game's, 3 the one after – the log lists them with their resolutions |
 | UI scale | Size of the windows on the other monitor, relative to the game's UI scale |
+| Hide version label | On (default): switches off the game's beta version label ("Sea Power v..."), which was drawn over the title bars of windows |
 | Unlimited window size | Over there a window can be resized beyond the game's maximum, up to the whole monitor |
 | See-through | Only the windows show on that monitor; off = the whole monitor turns dark while windows are popped out |
 | Always on top | While you're in the game, the windows stay above other programs on that monitor |

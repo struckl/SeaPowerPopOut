@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- **Hide version label** (setting, on by default): on the Steam beta branch the game's version label ("Sea Power v...") was drawn over the title bars of windows, popped-out ones included; it is switched off now.
+
 ## 1.1.3 – 2026-11-02
 
 - Fixed: a popped-out window lost its gear and look buttons, so its opacity, scale, outline and level could not be set
