@@ -37,7 +37,6 @@ internal sealed class PopOutScreen : MonoBehaviour
     // to put the map or the world view on another monitor.
     private static readonly HashSet<string> StayHome = new HashSet<string> { "MapViewModel", "WorldViewWindowViewModel" };
 
-    private const string ButtonName = "PopOutButton";
     private const float SaveInterval = 3f;
     private const float DesignHeight = 1080f;
     private const float FrameWidth = 5f;          // resize border around popped-out windows (window units)
@@ -84,8 +83,6 @@ internal sealed class PopOutScreen : MonoBehaviour
 </local:ScalableUserControl>";
 
     // Box with an arrow leaving it (pop out) or coming back into it (pop in), 12×12.
-    private const string OutIcon = "M1,4 L1,11 L8,11 L8,8 M5,7 L11,1 M7,1 L11,1 L11,5";
-    private const string InIcon = "M1,4 L1,11 L8,11 L8,8 M11,1 L5,7 M5,3 L5,7 L9,7";
 
     internal static bool DisplayAvailable => Display.displays.Length > 1;
 
@@ -398,33 +395,13 @@ internal sealed class PopOutScreen : MonoBehaviour
 
     private void AddButton(GameWindow window, bool popped)
     {
-        Panel panel = FindButtonsPanel(window);
-        if (panel == null)
+        string label = popped ? "Back to the main screen" : $"Pop out to monitor {TargetMonitor}";
+        SmartWindows.TitleMenu.Set(window, "popout", 0, label, anchor =>
         {
-            ModLog.Debug($"{Kind(window.DataContext)}: no title bar buttons found");
-            return;
-        }
-        for (int i = 0; i < panel.Children.Count; i++)
-        {
-            if (panel.Children[i] is FrameworkElement existing && existing.Name == ButtonName)
-                return;
-        }
-
-        var button = (Button)Noesis.GUI.ParseXaml(
-            "<Button xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation' Width='20' Focusable='False' " +
-            "Padding='0' Margin='0'><Path Width='12' Height='12' StrokeThickness='1.5' HorizontalAlignment='Center' " +
-            "VerticalAlignment='Center' Data='" + (popped ? InIcon : OutIcon) + "' " +
-            "Stroke='{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}' /></Button>");
-        button.Name = ButtonName;
-        button.ToolTip = popped ? "Back to the main screen" : $"Pop out to monitor {TargetMonitor}";
-        button.Click += (sender, args) =>
-        {
-            args.Handled = true;
             object content = window.DataContext;
             // Not while the click is still being routed through the window that's about to be unloaded.
             deferred.Enqueue(() => Move(content, toPopOut: !popped, remember: true));
-        };
-        panel.Children.Insert(0, button);
+        });
     }
 
     /// <summary>Moves a window's content between the main host and ours; the window is rebuilt on the other screen.</summary>

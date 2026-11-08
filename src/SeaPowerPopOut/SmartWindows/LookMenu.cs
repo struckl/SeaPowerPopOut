@@ -6,43 +6,17 @@ using GameWindow = SeapowerUI.Window;
 namespace SeaPowerPopOut.SmartWindows;
 
 /// <summary>
-/// The button in the title bar (next to the gear) that opens the look menu of a window: opacity, scale, outline and level.
+/// The entry in the title bar's menu (the three dots) that opens the look menu of a window: opacity, scale, outline and level.
 /// The choices are kept per window pattern (see <see cref="LookStore"/>) and applied by <see cref="WindowLook"/>.
 /// </summary>
 internal static class LookMenu
 {
-    private const string ButtonName = "SmartWindowsLookButton";
     private const string MenuName = "SmartWindowsLookMenu";
-    // Two overlapping discs: a window that is see-through.
-    private const string Icon = "M0,6 A4,4 0 1 1 8,6 A4,4 0 1 1 0,6 Z M4,6 A4,4 0 1 1 12,6 A4,4 0 1 1 4,6 Z";
-    private const string Ns = "xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'";
 
     public static void AddButton(GameWindow window, string pattern)
     {
-        Panel buttons = TitleBar.FindButtonsPanel(window);
-        if (buttons == null)
-        {
-            ModLog.Debug("look menu: no title bar buttons, button skipped");
-            return;
-        }
-        foreach (UIElement child in buttons.Children)
-        {
-            if (child is FrameworkElement existing && existing.Name == ButtonName)
-                return;
-        }
-
-        var button = (Button)GUI.ParseXaml(
-            $"<Button {Ns} Width='20' Focusable='False' Padding='0' Margin='0'>" +
-            "<Path Width='12' Height='12' StrokeThickness='1.2' HorizontalAlignment='Center' VerticalAlignment='Center' " +
-            $"Data='{Icon}' Stroke='{{Binding Foreground, RelativeSource={{RelativeSource AncestorType=Button}}}}' /></Button>");
-        button.Name = ButtonName;
-        button.ToolTip = Loc.Get("look_tip");
-        button.Click += (sender, args) =>
-        {
-            args.Handled = true;
-            Open(button, pattern);
-        };
-        buttons.Children.Insert(0, button);
+        Loc.Reload();
+        TitleMenu.Set(window, "look", 1, Loc.Get("look_tip"), anchor => Open(anchor, pattern));
     }
 
     private static void Open(UIElement anchor, string pattern)

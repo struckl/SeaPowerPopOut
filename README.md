@@ -41,8 +41,8 @@ the game's view when there is none).
    [installation guide](https://seapower-modders.github.io/AnchorChain/install-anchor-chain.html) (one manual step:
    copy its preloader into the game folder).
 2. Subscribe to **[Sea Power: R.A.T.S. Pop-Out Windows](https://steamcommunity.com/sharedfiles/filedetails/?id=3826396311)** on the Steam Workshop.
-3. Connect the second monitor **before** starting the game. In a mission, click the new button left of the **X**
-   in a window's title bar (a box with an arrow).
+3. Connect the second monitor **before** starting the game. In a mission, click the new menu button (three dots) left of the **X**
+   in a window's title bar and choose **Pop out to monitor**.
 
 Manual install instead of the Workshop: put `SeaPowerPopOut.dll` and `_info.ini` into
 `<Sea Power>\Sea Power_Data\StreamingAssets\SeaPowerPopOut\`.
@@ -71,10 +71,10 @@ Window handling based on rgreat's [Smart Windows](https://steamcommunity.com/sha
 mod, rewritten in the `SmartWindows/` folder. Thanks to rgreat for the original.
 
 - **Every window**: thin frame on the window's visible edge (left, right, bottom), double-click on the title bar maximizes / restores, snapping to the screen edges and
-  the windows next to it (hold Shift to move freely), a gear button (settings panel in the game's nine languages,
+  the windows next to it (hold Shift to move freely), a **Settings** entry in the title bar menu (settings panel in the game's nine languages,
   `lang/*.ini`) - also on popped-out windows.
 - **Remembered windows** (Tactical Display, Unit Reference, Unit Status, Event Log ... - the list is a setting): position,
-  size and maximized state come back in the next mission; a look button sets opacity, scale, text outline and level
+  size and maximized state come back in the next mission; the **Look** entry of the title bar menu sets opacity, scale, text outline and level
   (also on the pop-out monitor).
 - **Unit Reference (Encyclopedia)**: splitter with remembered tree width; hiding the tree narrows the window; classes by
   service date; loadout variants labelled ("Long-Hull [Early]"); a click on a class picks its earliest variant; search

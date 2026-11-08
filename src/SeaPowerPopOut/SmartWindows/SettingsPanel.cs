@@ -8,41 +8,18 @@ using GameWindow = SeapowerUI.Window;
 namespace SeaPowerPopOut.SmartWindows;
 
 /// <summary>
-/// The gear button in the title bar of a remembered window and the settings panel it opens. Every change is written
+/// The settings entry in the title bar's menu of a remembered window and the settings panel it opens. Every change is written
 /// to the config at once; options that shape a window (the frame) apply to windows opened afterwards.
 /// </summary>
 internal static class SettingsPanel
 {
-    private const string GearName = "SmartWindowsGear";
-    private const string GearIcon = "M6,0 L7,2 L9,1 L10,3 L12,4 L11,6 L12,8 L10,9 L9,11 L7,10 L6,12 L5,10 L3,11 L2,9 L0,8 L1,6 L0,4 L2,3 L3,1 L5,2 Z";
-    private const string Ns = "xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'";
 
     public static void AddGear(GameWindow window)
     {
         if (!SmartSettings.SettingsButton.Value)
             return;
-        Panel buttons = TitleBar.FindButtonsPanel(window);
-        if (buttons == null)
-            return;
         Loc.Reload();                                   // the game's language is known by now
-        foreach (UIElement child in buttons.Children)
-        {
-            if (child is FrameworkElement existing && existing.Name == GearName)
-                return;
-        }
-
-        var gear = (Button)GUI.ParseXaml(
-            $"<Button {Ns} Width='20' Focusable='False' Padding='0' Margin='0'>" +
-            "<Path Width='12' Height='12' StrokeThickness='1.2' HorizontalAlignment='Center' VerticalAlignment='Center' " +
-            $"Data='{GearIcon}' Stroke='{{Binding Foreground, RelativeSource={{RelativeSource AncestorType=Button}}}}' /></Button>");
-        gear.Name = GearName;
-        gear.ToolTip = Loc.Get("gear_tip");
-        gear.Click += (sender, args) =>
-        {
-            args.Handled = true;
-            Open(gear);
-        };
-        buttons.Children.Insert(0, gear);
+        TitleMenu.Set(window, "settings", 2, Loc.Get("gear_tip"), Open);
     }
 
     private static void Open(UIElement anchor)
