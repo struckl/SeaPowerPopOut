@@ -19,13 +19,16 @@ internal static class SettingsPanel
         if (!SmartSettings.SettingsButton.Value)
             return;
         Loc.Reload();                                   // the game's language is known by now
-        TitleMenu.Set(window, "settings", 2, Loc.Get("gear_tip"), Open);
+        TitleMenu.Set(window, "settings", 2, Loc.Get("gear_tip"),
+            "M6,0 L7,2 L9,1 L10,3 L12,4 L11,6 L12,8 L10,9 L9,11 L7,10 L6,12 L5,10 L3,11 L2,9 L0,8 L1,6 L0,4 L2,3 L3,1 L5,2 Z", Open);
     }
 
     private static void Open(UIElement anchor)
     {
         Loc.Reload();
         var body = new StackPanel();
+        var backHolder = new Border();                    // its Tag gets the popup below; the Back row closes that
+        body.Children.Add(TitleMenu.BackRow(backHolder));
         body.Children.Add(Label("title", bold: true));
         body.Children.Add(Check("frame", SmartSettings.BorderEnabled));
         body.Children.Add(Field("frame_width", SmartSettings.BorderThickness));
@@ -64,6 +67,7 @@ internal static class SettingsPanel
             Placement = PlacementMode.Bottom,
             StaysOpen = false,
         };
+        backHolder.Tag = popup;
         popup.Closed += (sender, args) => host.Children.Remove(popup);
         host.Children.Add(popup);
         popup.IsOpen = true;

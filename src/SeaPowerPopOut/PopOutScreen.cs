@@ -393,10 +393,13 @@ internal sealed class PopOutScreen : MonoBehaviour
         }
     }
 
+    private const string OutIcon = "M1,4 L1,11 L8,11 L8,8 M5,7 L11,1 M7,1 L11,1 L11,5";
+    private const string InIcon = "M1,4 L1,11 L8,11 L8,8 M11,1 L5,7 M5,3 L5,7 L9,7";
+
     private void AddButton(GameWindow window, bool popped)
     {
         string label = popped ? "Back to the main screen" : $"Pop out to monitor {TargetMonitor}";
-        SmartWindows.TitleMenu.Set(window, "popout", 0, label, anchor =>
+        SmartWindows.TitleMenu.Set(window, "popout", 0, label, popped ? InIcon : OutIcon, anchor =>
         {
             object content = window.DataContext;
             // Not while the click is still being routed through the window that's about to be unloaded.

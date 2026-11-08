@@ -41,7 +41,7 @@ the game's view when there is none).
    [installation guide](https://seapower-modders.github.io/AnchorChain/install-anchor-chain.html) (one manual step:
    copy its preloader into the game folder).
 2. Subscribe to **[Sea Power: R.A.T.S. Pop-Out Windows](https://steamcommunity.com/sharedfiles/filedetails/?id=3826396311)** on the Steam Workshop.
-3. Connect the second monitor **before** starting the game. In a mission, click the new menu button (three dots) left of the **X**
+3. Connect the second monitor **before** starting the game. In a mission, click the new menu button (three lines) left of the **X**
    in a window's title bar and choose **Pop out to monitor**.
 
 Manual install instead of the Workshop: put `SeaPowerPopOut.dll` and `_info.ini` into

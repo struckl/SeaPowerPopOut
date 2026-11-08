@@ -16,12 +16,13 @@ internal static class TitleMenu
 {
     private const string ButtonName = "SmartWindowsMenuButton";
     private const string MenuName = "SmartWindowsMenu";
-    private const string Dots = "M6,1.5 L6,1.6 M6,6 L6,6.1 M6,10.4 L6,10.5";
+    private const string Burger = "M1,2.5 H11 M1,6 H11 M1,9.5 H11";
+    private const string BackIcon = "M7,1 L2,6 L7,11 M2,6 H11";
     private const string Ns = "xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'";
 
     private sealed class Entry
     {
-        public string Id, Label;
+        public string Id, Label, Icon;
         public int Order;
         public Action<UIElement> Run;
     }
@@ -29,7 +30,7 @@ internal static class TitleMenu
     private static readonly ConditionalWeakTable<Button, List<Entry>> Entries = new ConditionalWeakTable<Button, List<Entry>>();
 
     /// <summary>Adds or updates one entry of the window's menu; the button is made on the first call. Lower order is higher up.</summary>
-    public static void Set(GameWindow window, string id, int order, string label, Action<UIElement> run)
+    public static void Set(GameWindow window, string id, int order, string label, string icon, Action<UIElement> run)
     {
         Panel panel = TitleBar.FindButtonsPanel(window);
         if (panel == null)
@@ -48,9 +49,9 @@ internal static class TitleMenu
         {
             kebab = (Button)GUI.ParseXaml(
                 $"<Button {Ns} Width='20' Focusable='False' Padding='0' Margin='0'>" +
-                "<Path Width='12' Height='12' StrokeThickness='2' StrokeStartLineCap='Round' StrokeEndLineCap='Round' " +
+                "<Path Width='12' Height='12' StrokeThickness='1.5' StrokeStartLineCap='Round' StrokeEndLineCap='Round' " +
                 "HorizontalAlignment='Center' VerticalAlignment='Center' " +
-                $"Data='{Dots}' Stroke='{{Binding Foreground, RelativeSource={{RelativeSource AncestorType=Button}}}}' /></Button>");
+                $"Data='{Burger}' Stroke='{{Binding Foreground, RelativeSource={{RelativeSource AncestorType=Button}}}}' /></Button>");
             kebab.Name = ButtonName;
             Button self = kebab;
             kebab.Click += (sender, args) =>
@@ -71,8 +72,52 @@ internal static class TitleMenu
         }
         entry.Order = order;
         entry.Label = label;
+        entry.Icon = icon;
         entry.Run = run;
         list.Sort((a, b) => a.Order.CompareTo(b.Order));
+    }
+
+    /// <summary>Opens the menu again under the button (the Back row of a sub menu).</summary>
+    public static void Show(UIElement anchor)
+    {
+        if (anchor is Button kebab && kebab.Name == ButtonName)
+            Open(kebab);
+    }
+
+    /// <summary>A "Back" row for the top of a sub menu: closes it and shows the main menu again. The frame's Tag holds its popup.</summary>
+    public static Button BackRow(Border frame)
+    {
+        var back = new Button
+        {
+            Focusable = false,
+            Padding = new Thickness(6f, 2f, 10f, 2f),
+            Margin = new Thickness(0f, 0f, 0f, 6f),
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Content = Row(BackIcon, Loc.Get("back")),
+        };
+        back.Click += (sender, args) =>
+        {
+            args.Handled = true;
+            if (frame.Tag is Popup popup)
+            {
+                UIElement anchor = popup.PlacementTarget;
+                popup.IsOpen = false;
+                Show(anchor);
+            }
+        };
+        return back;
+    }
+
+    /// <summary>An icon (stroke path markup, drawn in the button's colour) and a text, side by side.</summary>
+    private static UIElement Row(string icon, string text)
+    {
+        var row = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
+        if (!string.IsNullOrEmpty(icon) && GUI.ParseXaml(
+                $"<Path {Ns} Width='12' Height='12' StrokeThickness='1.2' StrokeLineJoin='Round' StrokeStartLineCap='Round' StrokeEndLineCap='Round' " +
+                $"VerticalAlignment='Center' Data='{icon}' Stroke='{{Binding Foreground, RelativeSource={{RelativeSource AncestorType=Button}}}}'/>") is UIElement path)
+            row.Children.Add(path);
+        row.Children.Add(new TextBlock { Text = text, FontSize = 13f, Margin = new Thickness(icon == null ? 0f : 8f, 0f, 0f, 0f), VerticalAlignment = VerticalAlignment.Center });
+        return row;
     }
 
     private static void Open(Button kebab)
@@ -106,7 +151,7 @@ internal static class TitleMenu
                 Margin = new Thickness(0f, 1f, 0f, 1f),
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 HorizontalContentAlignment = HorizontalAlignment.Left,
-                Content = new TextBlock { Text = entry.Label, FontSize = 13f },
+                Content = Row(entry.Icon, entry.Label),
             };
             row.Click += (sender, args) =>
             {

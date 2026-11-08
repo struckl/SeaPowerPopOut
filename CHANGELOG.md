@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- **One menu button in the title bar:** the pop-out, look and settings buttons are now one three-dots button; its list has Pop out / Back to the main screen, Look and Settings. Built, not run in the game yet.
+- **One menu button in the title bar:** the pop-out, look and settings buttons are now one menu button (three lines); its list has Pop out / Back to the main screen, Look and Settings, each with an icon, and the look menu and the settings panel have a Back row that returns to the list. Built, not run in the game yet.
 - **Clickable messages fixed:** clicking a message in the corner log to jump to its unit did nothing, because the 'Messages do not block clicks' feature made the whole list ignore the mouse. The setting is off by default now (links work as in the game); switch it on to let clicks pass through the messages to the map at the cost of the links.
 - The game's version label (Steam beta branch) is no longer hidden by this mod: that moved to its own mod, R.A.T.S. Clean Screen.
 

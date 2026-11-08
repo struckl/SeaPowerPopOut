@@ -16,7 +16,9 @@ internal static class LookMenu
     public static void AddButton(GameWindow window, string pattern)
     {
         Loc.Reload();
-        TitleMenu.Set(window, "look", 1, Loc.Get("look_tip"), anchor => Open(anchor, pattern));
+        // Two overlapping discs: a window that is see-through.
+        TitleMenu.Set(window, "look", 1, Loc.Get("look_tip"),
+            "M0,6 A4,4 0 1 1 8,6 A4,4 0 1 1 0,6 Z M4,6 A4,4 0 1 1 12,6 A4,4 0 1 1 4,6 Z", anchor => Open(anchor, pattern));
     }
 
     private static void Open(UIElement anchor, string pattern)
@@ -43,6 +45,7 @@ internal static class LookMenu
             Placement = PlacementMode.Bottom,
             StaysOpen = false,
         };
+        frame.Tag = popup;                                  // the Back row finds the popup to close here
         popup.Closed += (sender, args) => host.Children.Remove(popup);
         host.Children.Add(popup);
         popup.IsOpen = true;
@@ -56,6 +59,7 @@ internal static class LookMenu
         int level = WindowLook.Store.LevelOf(pattern);
 
         var body = new StackPanel();
+        body.Children.Add(TitleMenu.BackRow(frame));
         body.Children.Add(Text(Loc.Get("look_title"), bold: true));
         body.Children.Add(Stepper("look_opacity", Percent(look.Opacity),
             dir => Change(frame, pattern, look.WithOpacity(LookMath.StepOpacity(look.Opacity, dir)))));
