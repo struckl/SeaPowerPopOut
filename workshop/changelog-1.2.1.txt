@@ -1,0 +1,1 @@
+1.2.1: Fixed windows of other mods staying invisible on the pop-out monitor. For example, the R.A.T.S. Sensor Views Board, Radar scope and Sonar counted as open but drew nothing once they were remembered as popped out. Run in the game on the 3D globe beta (build 261107); not run on 0.8.7.
