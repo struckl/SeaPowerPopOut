@@ -3,8 +3,7 @@
 A mod for [Sea Power: Naval Combat in the Missile Age](https://store.steampowered.com/app/1286220/) that puts the
 game's windows on another monitor, so the main screen stays free for the world view and the map.
 
-**[Get it on the Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3826396311)** – requires
-[Anchor Chain](https://steamcommunity.com/sharedfiles/filedetails/?id=3380210757).
+**[Get it on the Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3826396311)** – needs a mod loader, either one: [R.A.T.S. Keel](https://steamcommunity.com/sharedfiles/filedetails/?id=3835527459) or [Anchor Chain](https://steamcommunity.com/sharedfiles/filedetails/?id=3380210757).
 
 ![The map on the main screen, the game's windows on the second monitor](workshop/screenshots/01-two-monitors.jpg)
 
@@ -36,10 +35,10 @@ the game's view when there is none).
 
 ## Installation
 
-1. Install **[Anchor Chain](https://steamcommunity.com/sharedfiles/filedetails/?id=3380210757)**, the Sea Power
-   community mod loader, following its
-   [installation guide](https://seapower-modders.github.io/AnchorChain/install-anchor-chain.html) (one manual step:
-   copy its preloader into the game folder).
+1. Install a mod loader, either one: **[R.A.T.S. Keel](https://steamcommunity.com/sharedfiles/filedetails/?id=3835527459)** (subscribe, switch it on in the Mods menu, copy its one stub
+   file once; it is the one that runs on the 3D-globe public beta) or **[Anchor Chain](https://steamcommunity.com/sharedfiles/filedetails/?id=3380210757)** following its
+   [installation guide](https://seapower-modders.github.io/AnchorChain/install-anchor-chain.html) (one manual step: copy its
+   preloader into the game folder).
 2. Subscribe to **[Sea Power: R.A.T.S. Pop-Out Windows](https://steamcommunity.com/sharedfiles/filedetails/?id=3826396311)** on the Steam Workshop.
 3. Connect the second monitor **before** starting the game. In a mission, click the new menu button (the pop-out mark, a box with an arrow) left of the **X**
    in a window's title bar and choose **Pop out to monitor**.
