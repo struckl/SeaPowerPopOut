@@ -1,0 +1,5 @@
+1.2.0: one menu button in the title bar instead of three, and clickable messages.
+The pop-out, look and settings buttons are one menu button (the pop-out mark). Its list has Pop out to the other monitor (or Back to the main screen), Window look and Settings, each with an icon; the look menu and the settings panel have a Back row.
+Clicking a message in the corner log to jump to its unit works again: the "Messages do not block clicks" setting is off by default now (turn it on to let clicks pass through the messages to the map; the message links then stop working).
+The game's version label is no longer hidden by this mod; that moved to its own mod, R.A.T.S. Clean Screen.
+Run in the game on the 3D globe public beta (build 261107): the menu and its list. Popping a window out from the new menu is not run in the game yet. 0.8.7 checked offline only.

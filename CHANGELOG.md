@@ -1,8 +1,10 @@
 # Changelog
 
-## Unreleased
+## 1.2.0 – 2026-11-09 – one menu button
 
-- **One menu button in the title bar:** the pop-out, look and settings buttons are now one menu button (the pop-out mark); its list has Pop out / Back to the main screen, Look and Settings, each with an icon, and the look menu and the settings panel have a Back row that returns to the list. Built, not run in the game yet.
+Run in the game on the globe beta (build 261107) on 2026-11-09: the menu button in a map title bar opens its list (Pop out to monitor, Window look, Pop-Out Windows settings). Not run in the game: popping a window out from the new menu, the Back rows of the look and settings panels, the clickable-messages fix; 0.8.7.
+
+- **One menu button in the title bar:** the pop-out, look and settings buttons are now one menu button (the pop-out mark); its list has Pop out / Back to the main screen, Look and Settings, each with an icon, and the look menu and the settings panel have a Back row that returns to the list.
 - **Clickable messages fixed:** clicking a message in the corner log to jump to its unit did nothing, because the 'Messages do not block clicks' feature made the whole list ignore the mouse. The setting is off by default now (links work as in the game); switch it on to let clicks pass through the messages to the map at the cost of the links.
 - The game's version label (Steam beta branch) is no longer hidden by this mod: that moved to its own mod, R.A.T.S. Clean Screen.
 
