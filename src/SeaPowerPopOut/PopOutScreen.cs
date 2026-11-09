@@ -319,6 +319,7 @@ internal sealed class PopOutScreen : MonoBehaviour
             string kind = Kind(content);
             if (!Layout.IsPopped(kind) || StayHome.Contains(kind) || !Open())
                 return true;
+            CopyNewResources();
             AddTo(host, content);
             WindowHostCommands.CloseWindowCommand.UpdateCanExecute();
             ModLog.Debug($"{kind} opened on the pop-out screen");
@@ -422,6 +423,8 @@ internal sealed class PopOutScreen : MonoBehaviour
         if (index < 0)
             return;
         from.Windows.RemoveAt(index);
+        if (toPopOut)
+            CopyNewResources();
         AddTo(to, content);
         string kind = Kind(content);
         if (remember)
@@ -890,8 +893,7 @@ internal sealed class PopOutScreen : MonoBehaviour
         try
         {
             if (overlay == null || root == null)
-                return;
-            UIElement target = overlay is ToolTip tip ? tip.PlacementTarget
+                return;            UIElement target = overlay is ToolTip tip ? tip.PlacementTarget
                 : overlay is ContextMenu menu ? menu.PlacementTarget : null;
             if (target != null ? root.IsAncestorOf(target) : ReferenceEquals(overlay.View, root.View))
                 TrackOverlay(overlay);
@@ -1048,6 +1050,32 @@ internal sealed class PopOutScreen : MonoBehaviour
             CopyInto(merged[i], to, depth + 1);   // later merged dictionaries win over earlier ones,
         foreach (object key in from.Keys)         // the dictionary's own entries over all of them
             to[key] = from[key];
+    }
+
+    /// <summary>
+    /// Brings over what was added to the main game view's resources since the screen opened. A window remembered as
+    /// popped out opens the screen while the mission UI is still loading, and other mods add the templates of their
+    /// windows after that; without its template a window's content draws nothing.
+    /// </summary>
+    private void CopyNewResources()
+    {
+        if (root?.Resources != null && mainView != null)
+            CopyMissing(mainView.Resources, root.Resources, 0);
+    }
+
+    // Lookup precedence again, but the first hit counts: own entries, then the merged dictionaries from the last.
+    private static void CopyMissing(ResourceDictionary from, ResourceDictionary to, int depth)
+    {
+        if (from == null || depth > 16)
+            return;
+        foreach (object key in from.Keys)
+        {
+            if (!to.Contains(key))
+                to[key] = from[key];
+        }
+        ResourceDictionaryCollection merged = from.MergedDictionaries;
+        for (int i = (merged?.Count ?? 0) - 1; i >= 0; i--)
+            CopyMissing(merged[i], to, depth + 1);
     }
 
     /// <summary>Not a window inside another window's content.</summary>

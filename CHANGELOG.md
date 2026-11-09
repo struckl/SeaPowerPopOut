@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.1 – 2026-11-09
+
+Run in the game on the globe beta (build 261107) on 2026-11-09: the R.A.T.S. Sensor Views Radar scope showed on the pop-out monitor, and a right-click on a unit in the popped-out formation manager opened its menu. Board and Sonar use the same path and were not opened in that run. Not run on 0.8.7.
+
+- **Fixed: windows of other mods stayed invisible on the pop-out monitor.** A window remembered as popped out opens the pop-out screen while the mission is still loading, before other mods add their window templates, so for example the Sensor Views Board, Radar scope and Sonar counted as open but drew nothing. New templates now come along whenever a window opens there or pops out.
+- A right-click menu reported missing on the pop-out monitor opened normally in this version; what caused the report was not pinned down.
+
 ## 1.2.0 – 2026-11-09 – one menu button
 
 Run in the game on the globe beta (build 261107) on 2026-11-09: the menu button in a map title bar opens its list (Pop out to monitor, Window look, Pop-Out Windows settings). Not run in the game: popping a window out from the new menu, the Back rows of the look and settings panels, the clickable-messages fix; 0.8.7.

@@ -157,6 +157,10 @@ Unit menu: the game opens it from the context menu of a canvas of the main game 
 canvas of its own; a right-click there points the field at it until the next frame. A click on one monitor closes a
 menu open on the other (each view only gets the clicks on its own monitor).
 
+Templates: the pop-out screen has a flat copy of the main game view's resources. A window remembered as popped out
+opens that screen while the mission UI is still loading, before other mods add their window templates, so whatever
+is new in the main view's resources is copied over each time a window opens there or pops out.
+
 Formation manager tabs: the TabControl holds all six tabs, empty ones collapsed, so its `SelectedIndex` counts them
 too, while the game's `FormationManagerViewModel.SelectedTabIndex` counts only the visible ones. A prefix on that
 property's getter and setter counts every tab.
