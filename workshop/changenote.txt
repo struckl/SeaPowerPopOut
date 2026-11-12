@@ -1,0 +1,1 @@
+1.2.3: shows as "R.A.T.S. Pop-Out Windows" in the game's mod list and in the mod loader's list (Keel or Anchor Chain), the same name on every game version. Runs on Sea Power 0.9.1.
