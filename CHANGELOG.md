@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 1.2.3 – 2026-11-12 – in-game name R.A.T.S. Pop-Out Windows
+
+Run in the game on 0.9.1 (build 261112) on 2026-11-12: the new name shows in Keel's list, the mod works in Red Sea Breakout.
 
 - **Shows as just "R.A.T.S. Pop-Out Windows" in the game.** The game's mod list and the mod loader's list (Keel or Anchor Chain) now both say R.A.T.S. Pop-Out Windows, without "Sea Power".
 
