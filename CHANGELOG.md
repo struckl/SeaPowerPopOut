@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- **Shows as just "R.A.T.S. Pop-Out Windows" in the game.** The game's mod list and the mod loader's list (Keel or Anchor Chain) now both say R.A.T.S. Pop-Out Windows, without "Sea Power".
+
 ## 1.2.2 – 2026-11-11 – declared for game 0.9.0
 
 - **Declared for game 0.9.0.** The mod's `_info.ini` now says it fits 0.8.7 up to every 0.9.x, so the game no longer lists it as "not declared to be compatible", and Steam hands this and later updates to 0.9.0 players (the game skips Workshop updates whose declaration does not fit its version). Checked offline against 0.9.0 (build 261111): every game type, member, Harmony target and by-name lookup the mod uses is there; not run in the game on 0.9.0 yet.

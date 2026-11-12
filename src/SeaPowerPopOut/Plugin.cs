@@ -14,7 +14,7 @@ namespace SeaPowerPopOut;
 public class Plugin : IAnchorChainMod
 {
     public const string Guid = "dev.sewerlabs.seapowerpopout";
-    public const string Name = "Sea Power Pop-Out Windows";
+    public const string Name = "R.A.T.S. Pop-Out Windows";
     public const string Version = "1.2.2";
 
     // Anchor Chain loads assemblies with Assembly.LoadFile, so the same DLL found in two folders would be two
