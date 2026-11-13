@@ -49,8 +49,7 @@ Start Sea Power → Mods → Create Mod:
 | Visibility | first upload **Hidden** (or Friends only); Public once the subscribed copy is tested |
 | Change log | the CHANGELOG entry |
 
-Posts for Reddit, the Steam forum and Discord are in [workshop/promotion.md](../workshop/promotion.md), with the
-Workshop link. Add the screenshots from [workshop/screenshots/](../workshop/screenshots) on the Workshop page itself:
+Posts for Reddit, the Steam forum and Discord are in the private workspace (post texts and pictures are not kept in this repo). Add the screenshots from [workshop/screenshots/](../workshop/screenshots) on the Workshop page itself:
 open the item while signed in as its owner (Steam client or browser) → right column **Owner Controls** →
 **Add/edit images & videos** → choose the files, then drag them into this order: 01 (both monitors), 04 and 05
 (before / after), 02 (the arranged windows), 03 (the button).
