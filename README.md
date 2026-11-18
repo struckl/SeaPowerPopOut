@@ -198,5 +198,5 @@ workshop/             Workshop description, preview.jpg, screenshots/
 
 ## License
 
-[MIT](LICENSE). Not affiliated with Triassic Games or MicroProse. Nothing of the game is included in this repository
+[R.A.T.S. Source License](LICENSE): read it, fork it, send fixes; no re-uploads, no reuse in other projects. Not affiliated with Triassic Games or MicroProse. Nothing of the game is included in this repository
 or in the mod.
