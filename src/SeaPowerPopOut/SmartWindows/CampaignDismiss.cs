@@ -111,7 +111,7 @@ internal static class CampaignDismiss
 
     private static T Read<T>(object target, string property)
     {
-        object value = AccessTools.Property(target.GetType(), property)?.GetValue(target);
+        object value = GameMembers.Read(target, property);
         return value is T typed ? typed : default;
     }
 }

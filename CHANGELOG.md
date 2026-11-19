@@ -7,6 +7,7 @@
   - "Enable window memory" is the master switch as before: off turns every Smart Windows feature off
   - Desktop mode needs `Remember window places` (a desktop is a set of those places)
   - The three new panel rows are English and German; other languages show the English text until translated
+- Changed (internal): properties of game types found at run time (country list, damaged-ship rule, strict loadouts) are looked up once per type, not on every call
 - **Changed: "Upgrade ship" no longer depends on "Dismiss damaged ships"**: its list is the same whether that setting is on or off
   - Before: with it off, a damaged ship could only be replaced through decommission
   - Now damaged ships that can be repaired are offered at the reduced dismiss refund either way (the default behaviour)

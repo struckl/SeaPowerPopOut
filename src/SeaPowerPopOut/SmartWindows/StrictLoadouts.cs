@@ -150,7 +150,7 @@ internal static class StrictLoadouts
         if (restriction == null)
             return _ => true;
         Type type = restriction.GetType();
-        if ((bool)type.GetProperty("IsAllowAll").GetValue(restriction))
+        if ((bool)GameMembers.Read(restriction, "IsAllowAll"))
             return _ => true;
         MethodInfo allows = type.GetMethod("Allows", new[] { typeof(string), typeof(string) });
         if (allows == null)
@@ -189,10 +189,10 @@ internal static class StrictLoadouts
             if (restriction == null)
                 return;
             Type type = restriction.GetType();
-            if ((bool)type.GetProperty("IsAllowAll").GetValue(restriction))
+            if ((bool)GameMembers.Read(restriction, "IsAllowAll"))
                 return;
             var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            foreach (object name in (IEnumerable)type.GetProperty("UnitTypes").GetValue(restriction))
+            foreach (object name in (IEnumerable)GameMembers.Read(restriction, "UnitTypes"))
                 allowed.Add((string)name);
             if (ownedKeys?.Invoke(null, null) is IEnumerable owned)
             {

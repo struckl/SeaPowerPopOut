@@ -114,7 +114,7 @@ internal static class CountryList
         {
             return true;                                   // when in doubt keep the country
         }
-        return Contains(entry.DisplayName, text) || Contains(AccessTools.Property(entry.GetType(), "LongName")?.GetValue(entry) as string, text);
+        return Contains(entry.DisplayName, text) || Contains(GameMembers.Read(entry, "LongName") as string, text);
     }
 
     private static bool Contains(string value, string lower) => value != null && value.ToLowerInvariant().Contains(lower);
@@ -123,7 +123,7 @@ internal static class CountryList
     {
         if (entry is MuseumObjectEntry unit && !string.IsNullOrEmpty(unit.Nation))
             into.Add(unit.Nation);
-        if (AccessTools.Property(entry.GetType(), "Nations")?.GetValue(entry) is IEnumerable nations && !(nations is string))
+        if (GameMembers.Read(entry, "Nations") is IEnumerable nations && !(nations is string))
         {
             foreach (object nation in nations)
             {
