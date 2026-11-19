@@ -61,7 +61,7 @@ internal static class Native
     public static void CaptureMainWindow()
     {
         try { MainWindow = System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle; }
-        catch { MainWindow = IntPtr.Zero; }
+        catch { MainWindow = IntPtr.Zero; }       // the process could not be asked: no window counts as the game's own
     }
 
     /// <summary>The visible top-level windows of this process (the game's window and one per activated display).</summary>

@@ -85,7 +85,7 @@ internal sealed class TreeScroller
         if (tree == null || tree.ActualHeight <= 0f)
             return;
         var path = new List<MuseumEntry>();
-        if (!PathTo(model.Browser.TreeItems, selected, path))
+        if (!Encyclopedia.PathTo(model.Browser.TreeItems, selected, path, e => e.FilteredMuseumEntries))
         {
             Finish(selected);
             return;
@@ -193,22 +193,6 @@ internal sealed class TreeScroller
             level = container;
         }
         return row;
-    }
-
-    private static bool PathTo(IEnumerable<MuseumEntry> entries, MuseumEntry wanted, List<MuseumEntry> path)
-    {
-        if (entries == null)
-            return false;
-        foreach (MuseumEntry entry in entries)
-        {
-            if (entry == null)
-                continue;
-            path.Add(entry);
-            if (entry == wanted || PathTo(entry.FilteredMuseumEntries, wanted, path))
-                return true;
-            path.RemoveAt(path.Count - 1);
-        }
-        return false;
     }
 
     private static TreeView FindTree(DependencyObject root) => VisualSearch.First<TreeView>(root);

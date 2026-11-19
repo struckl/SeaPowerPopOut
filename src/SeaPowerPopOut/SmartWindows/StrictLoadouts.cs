@@ -87,6 +87,7 @@ internal static class StrictLoadouts
         }
         catch
         {
+            // Asked several times a second while the builder lists ships: a campaign the members cannot read is not strict.
             return false;
         }
     }

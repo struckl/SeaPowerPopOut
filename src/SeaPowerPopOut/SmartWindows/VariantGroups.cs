@@ -14,6 +14,10 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class VariantGroups
 {
+    // Loadout names in the units' .ini files: the plain unit's own, and the one that comes first in a year.
+    private const string DefaultLoadout = "Default";
+    private const string EarlyLoadout = "Early";
+
     /// <summary>One unit (one .ini) in a class: its plain entry, if shown, and its loadout entries.</summary>
     private sealed class UnitRows
     {
@@ -127,7 +131,7 @@ internal static class VariantGroups
     /// <summary>Label stem, date and the order of the loadouts of one unit.</summary>
     private static void Prepare(UnitRows unit, string className)
     {
-        if (unit.Plain != null && unit.Loadouts.Count > 0 && unit.Defs != null && !unit.Defs.ContainsKey("Default"))
+        if (unit.Plain != null && unit.Loadouts.Count > 0 && unit.Defs != null && !unit.Defs.ContainsKey(DefaultLoadout))
             unit.Plain = null;
         string name = unit.Plain != null ? unit.Plain.DisplayName : PlainName(unit);
         unit.Qualifier = UnitTreeGrouping.GetClassQualifier(name ?? "", className);
@@ -179,12 +183,12 @@ internal static class VariantGroups
     private static int DateKey(MuseumEntry entry) => ServiceYear.SortKey(entry.ServiceEntryDate);
 
     private static bool IsEarly(MuseumEntry entry) =>
-        string.Equals(VariantOf(entry), "Early", StringComparison.OrdinalIgnoreCase);
+        string.Equals(VariantOf(entry), EarlyLoadout, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>Position of the loadout in the .ini; "Early" comes before all, unknown ones last.</summary>
     private static int Rank(UnitRows unit, string loadout)
     {
-        if (string.Equals(loadout, "Early", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(loadout, EarlyLoadout, StringComparison.OrdinalIgnoreCase))
             return -1;
         int position = 0;
         if (unit.Defs != null)

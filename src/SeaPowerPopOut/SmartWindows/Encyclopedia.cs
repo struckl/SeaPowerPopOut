@@ -95,5 +95,26 @@ internal static class Encyclopedia
         }
     }
 
+    /// <summary>
+    /// The entries from <paramref name="level"/> down to <paramref name="target"/> (both ends included) into
+    /// <paramref name="path"/>, following <paramref name="children"/> (the whole tree or what the filters left).
+    /// </summary>
+    public static bool PathTo(IEnumerable<MuseumEntry> level, MuseumEntry target, List<MuseumEntry> path,
+        Func<MuseumEntry, IEnumerable<MuseumEntry>> children)
+    {
+        if (level == null)
+            return false;
+        foreach (MuseumEntry entry in level)
+        {
+            if (entry == null)
+                continue;
+            path.Add(entry);
+            if (entry == target || PathTo(children(entry), target, path, children))
+                return true;
+            path.RemoveAt(path.Count - 1);
+        }
+        return false;
+    }
+
     private static readonly string[] UnitCategories = { "Vessels", "Submarines", "Aircrafts", "Helicopters", "LandUnits", "Biologic" };
 }

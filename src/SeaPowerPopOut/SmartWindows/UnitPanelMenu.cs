@@ -61,16 +61,17 @@ internal static class UnitPanelMenu
     private static bool OverFlagOrName(FrameworkElement view, MouseButtonEventArgs e)
     {
         DependencyObject hit = VisualTreeHelper.HitTest(view, e.GetPosition(view)).VisualHit ?? e.Source as DependencyObject;
-        var seen = new System.Text.StringBuilder();
+        System.Text.StringBuilder seen = Settings.VerboseLog.Value ? new System.Text.StringBuilder() : null;
         for (int i = 0; hit != null && i < ParentsToCheck; i++, hit = VisualTreeHelper.GetParent(hit))
         {
             string path = hit is Image ? Bindings.PathOf(hit, Image.SourceProperty)
                 : hit is TextBlock ? Bindings.PathOf(hit, TextBlock.TextProperty) : null;
-            seen.Append(hit.GetType().Name).Append(path == null ? "" : $"[{path}]").Append(" < ");
+            seen?.Append(hit.GetType().Name).Append(path == null ? "" : $"[{path}]").Append(" < ");
             if ((hit is Image && path == FlagBinding) || (hit is TextBlock && path == NameBinding))
                 return true;
         }
-        ModLog.Debug($"unit panel menu: right click on {seen}");
+        if (seen != null)
+            ModLog.Debug($"unit panel menu: right click on {seen}");
         return false;
     }
 

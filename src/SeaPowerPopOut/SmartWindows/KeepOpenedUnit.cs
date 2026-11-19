@@ -89,7 +89,7 @@ internal static class KeepOpenedUnit
         if (!Pinned.TryGetValue(browser, out MuseumEntry pinned) || browser.MuseumEntries == null || browser.FilteredMuseumEntries == null)
             return;
         var path = new List<MuseumEntry>();
-        if (!PathTo(browser.MuseumEntries, pinned, path))
+        if (!Encyclopedia.PathTo(browser.MuseumEntries, pinned, path, e => e.MuseumEntries))
             return;
 
         ObservableCollection<MuseumEntry> visible = browser.FilteredMuseumEntries;
@@ -118,22 +118,6 @@ internal static class KeepOpenedUnit
             }
             all = children;
         }
-    }
-
-    private static bool PathTo(IEnumerable<MuseumEntry> level, MuseumEntry target, List<MuseumEntry> path)
-    {
-        if (level == null)
-            return false;
-        foreach (MuseumEntry entry in level)
-        {
-            if (entry == null)
-                continue;
-            path.Add(entry);
-            if (entry == target || PathTo(entry.MuseumEntries, target, path))
-                return true;
-            path.RemoveAt(path.Count - 1);
-        }
-        return false;
     }
 
     /// <summary>Adds the entry to the list at the place its position in the complete list gives it. False if it was there.</summary>
