@@ -13,7 +13,7 @@ internal static class DesktopSets
     /// <summary>The game shows the World View on another monitor (its own option): the desktops only arrange the windows here.</summary>
     private static bool WorldElsewhere => DesktopGame.Vm?.WorldViewDetached ?? false;
 
-    public static int Count => Math.Max(2, Math.Min(5, SmartSettings.DesktopCount.Value));
+    public static int Count => Math.Max(2, Math.Min(DesktopSet.Max, SmartSettings.DesktopCount.Value));
 
     public static int Active => Math.Max(1, Math.Min(Count, SmartSettings.DesktopActive.Value));
 
@@ -21,11 +21,11 @@ internal static class DesktopSets
     public static void Start()
     {
         bool any = false;
-        for (int i = 1; i <= 5; i++)
+        for (int i = 1; i <= DesktopSet.Max; i++)
             any |= !string.IsNullOrEmpty(SmartSettings.DesktopSlots[i].Value);
         if (!any)
         {
-            for (int i = 1; i <= 5; i++)
+            for (int i = 1; i <= DesktopSet.Max; i++)
                 SmartSettings.DesktopSlots[i].Value = Preset(i).ToText();
             SmartSettings.DesktopActive.Value = 1;
             Apply(DesktopSet.Parse(SmartSettings.DesktopSlots[1].Value));
@@ -34,8 +34,8 @@ internal static class DesktopSets
         else
         {
             string open = SmartSettings.WorldViewOpen.Value;
-            if (!WorldElsewhere && (open == "open" || open == "closed"))
-                DesktopGame.SetWorldViewOpen(open == "open");
+            if (!WorldElsewhere && (open == DesktopSet.Open || open == DesktopSet.Closed))
+                DesktopGame.SetWorldViewOpen(open == DesktopSet.Open);
         }
     }
 
@@ -59,7 +59,7 @@ internal static class DesktopSets
     }
 
     /// <summary>The World View was opened or closed (by the key or the game): remember it for the next start.</summary>
-    public static void WorldViewChanged(bool open) => SmartSettings.WorldViewOpen.Value = open ? "open" : "closed";
+    public static void WorldViewChanged(bool open) => SmartSettings.WorldViewOpen.Value = open ? DesktopSet.Open : DesktopSet.Closed;
 
     private static DesktopSet Snapshot() => new DesktopSet
     {

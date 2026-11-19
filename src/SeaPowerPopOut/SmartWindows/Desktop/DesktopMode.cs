@@ -105,23 +105,8 @@ internal static class DesktopMode
             }
             if (vm != missionVm)
                 Reset(vm);
-            // The map window often loads before the mission's view model has its map: catch up once it has.
-            if (!mapKnown && mapWindow != null && mapWindow.TryGetTarget(out GameWindow map) && map.IsLoaded)
-                MapWindowLoaded();
-            if (!Started && mapKnown)
-            {
-                Started = true;
-                startedAt = Time.unscaledTime;
-                DesktopSets.Start();
-            }
-            // While the mission settles, the game may put the map back on the whole screen: keep it a window. Not with the
-            // World View on another monitor: then the game holds the map on the whole screen every frame (its design).
-            if (Started && !vm.WorldViewDetached && Time.unscaledTime - startedAt < SettleSeconds && vm.Map.IsFullscreen)
-            {
-                vm.Map.IsFullscreen = false;
-                NotifyPip?.Invoke(vm, null);
-                ModLog.Debug("desktop mode: map put back into its window");
-            }
+            StartWhenMapKnown();
+            KeepMapWindowed(vm);
             KeepWorldViewOnScreen(vm);
             Pip3DView view = FindView();
             if (view != null)
@@ -132,6 +117,31 @@ internal static class DesktopMode
         {
             ModLog.Debug($"desktop mode, update: {ex.Message}");
         }
+    }
+
+    /// <summary>The map window often loads before the mission's view model has its map: catch up once it has, then start the desktops.</summary>
+    private static void StartWhenMapKnown()
+    {
+        if (!mapKnown && mapWindow != null && mapWindow.TryGetTarget(out GameWindow map) && map.IsLoaded)
+            MapWindowLoaded();
+        if (Started || !mapKnown)
+            return;
+        Started = true;
+        startedAt = Time.unscaledTime;
+        DesktopSets.Start();
+    }
+
+    /// <summary>
+    /// While the mission settles, the game may put the map back on the whole screen: keep it a window. Not with the World
+    /// View on another monitor: then the game holds the map on the whole screen every frame (its design).
+    /// </summary>
+    private static void KeepMapWindowed(MainGameViewModel vm)
+    {
+        if (!Started || vm.WorldViewDetached || Time.unscaledTime - startedAt >= SettleSeconds || !vm.Map.IsFullscreen)
+            return;
+        vm.Map.IsFullscreen = false;
+        NotifyPip?.Invoke(vm, null);
+        ModLog.Debug("desktop mode: map put back into its window");
     }
 
     private static void Reset(MainGameViewModel vm)
@@ -184,21 +194,28 @@ internal static class DesktopMode
         float w = float.IsNaN(window.Width) ? window.ActualWidth : window.Width;
         float h = float.IsNaN(window.Height) ? window.ActualHeight : window.Height;
         var now = new WinRect(window.X, window.Y, w, h);
-        // Only a window that is mostly off the screen is moved; then all of it comes back (as far as it fits).
-        bool mostlyOff = now.Y > screen.Bottom - h / 2f || now.X > screen.Right - w / 2f || now.Y < -h / 2f || now.X < -w / 2f;
-        if (!mostlyOff)
+        if (!MostlyOff(now, screen))
             return;
-        // Where the active desktop wants it, if that is on the screen; else as far up as it fits.
-        WinRect want = now;
-        if (WindowMemory.SnapshotLayouts().TryGet(PatternList.Squash(GameWindows.WorldView), out SavedLayout saved)
-            && !float.IsNaN(saved.X) && !float.IsNaN(saved.Y) && saved.Y < screen.Bottom - HostArea.TitleBarReach)
-            want = new WinRect(saved.X, saved.Y, w, h);
+        WinRect want = WantedOnScreen(now, screen);
         var fixedRect = new WinRect(
             Math.Max(screen.X, Math.Min(want.X, screen.Right - w)),
             Math.Max(screen.Y, Math.Min(want.Y, screen.Bottom - h)), w, h);
         window.X = fixedRect.X;
         window.Y = fixedRect.Y;
         ModLog.Debug($"desktop mode: World View window moved onto the screen ({now.X:0},{now.Y:0} -> {fixedRect.X:0},{fixedRect.Y:0})");
+    }
+
+    /// <summary>Only a window that is mostly off the screen is moved; then all of it comes back (as far as it fits).</summary>
+    private static bool MostlyOff(WinRect r, WinRect screen) =>
+        r.Y > screen.Bottom - r.H / 2f || r.X > screen.Right - r.W / 2f || r.Y < -r.H / 2f || r.X < -r.W / 2f;
+
+    /// <summary>Where the active desktop wants the window, if that is on the screen; else where it is (pulled up as far as it fits).</summary>
+    private static WinRect WantedOnScreen(WinRect now, WinRect screen)
+    {
+        if (WindowMemory.SnapshotLayouts().TryGet(PatternList.Squash(GameWindows.WorldView), out SavedLayout saved)
+            && !float.IsNaN(saved.X) && !float.IsNaN(saved.Y) && saved.Y < screen.Bottom - HostArea.TitleBarReach)
+            return new WinRect(saved.X, saved.Y, now.W, now.H);
+        return now;
     }
 
     private static Pip3DView FindView()

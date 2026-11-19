@@ -10,6 +10,11 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal sealed class DesktopSet
 {
+    /// <summary>How many desktops there can be (the built-in arrangements, <see cref="DesktopPresets"/>).</summary>
+    public const int Max = 5;
+
+    public const string Open = "open", Closed = "closed";
+
     public SavedLayouts Layouts = new SavedLayouts();
     public bool? WorldViewOpen;
 
@@ -37,7 +42,7 @@ internal sealed class DesktopSet
                     set.Layouts = SavedLayouts.Parse(body);
                     break;
                 case 'W':
-                    set.WorldViewOpen = body == "open" ? true : body == "closed" ? false : (bool?)null;
+                    set.WorldViewOpen = body == Open ? true : body == Closed ? false : (bool?)null;
                     break;
             }
         }
@@ -50,7 +55,7 @@ internal sealed class DesktopSet
         if (HasLayouts)
             sections.Add("L:" + Layouts.Serialize());
         if (WorldViewOpen.HasValue)
-            sections.Add("W:" + (WorldViewOpen.Value ? "open" : "closed"));
+            sections.Add("W:" + (WorldViewOpen.Value ? Open : Closed));
         return string.Join("~", sections);
     }
 }

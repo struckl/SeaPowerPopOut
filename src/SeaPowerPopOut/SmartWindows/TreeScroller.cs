@@ -72,28 +72,9 @@ internal sealed class TreeScroller
 
     private void Scroll(UnitTreeBrowserView v, ObjectInformationViewModel model)
     {
-        if (!model.ToggleTreeCommandVisible || !model.MuseumEntriesVisible)
-        {
-            shown = false;
+        MuseumEntry selected = Pending(model);
+        if (selected == null)
             return;
-        }
-
-        UnitTreeBrowserViewModel browser = model.Browser;
-        MuseumEntry selected = browser?.SelectedEntry;
-        object currentItems = browser?.TreeItems;
-        if (!shown || !ReferenceEquals(currentItems, items))
-        {
-            centre = true;                    // freshly shown tree or a new list: put the selection in the middle
-            done = null;
-            tries = 0;
-        }
-        shown = true;
-        items = currentItems;
-        if (selected == null || selected == done)
-            return;
-
-        if (tries == 0 && done != null)
-            centre = false;                   // a later selection: scroll only as far as needed
         if (++tries > MaxTries)
         {
             Finish(selected);
@@ -104,27 +85,61 @@ internal sealed class TreeScroller
         if (tree == null || tree.ActualHeight <= 0f)
             return;
         var path = new List<MuseumEntry>();
-        if (!PathTo(browser.TreeItems, selected, path))
+        if (!PathTo(model.Browser.TreeItems, selected, path))
         {
             Finish(selected);
             return;
         }
-
         TreeViewItem row = RowFor(tree, path, selected);
         if (row == null || row.ActualHeight <= 0f)
         {
             tree.UpdateLayout();
             return;
         }
+        if (Bring(tree, row))
+            Finish(selected);
+    }
+
+    /// <summary>
+    /// The selection still to scroll to, or null. A freshly shown tree or a new list puts the selection in the middle; a
+    /// later selection in the same tree scrolls only as far as needed.
+    /// </summary>
+    private MuseumEntry Pending(ObjectInformationViewModel model)
+    {
+        if (!model.ToggleTreeCommandVisible || !model.MuseumEntriesVisible)
+        {
+            shown = false;
+            return null;
+        }
+        UnitTreeBrowserViewModel browser = model.Browser;
+        MuseumEntry selected = browser?.SelectedEntry;
+        object currentItems = browser?.TreeItems;
+        if (!shown || !ReferenceEquals(currentItems, items))
+        {
+            centre = true;
+            done = null;
+            tries = 0;
+        }
+        shown = true;
+        items = currentItems;
+        if (selected == null || selected == done)
+            return null;
+        if (tries == 0 && done != null)
+            centre = false;
+        return selected;
+    }
+
+    /// <summary>Scrolls the row into view; false while the tree has no scroller with a size yet.</summary>
+    private bool Bring(TreeView tree, TreeViewItem row)
+    {
         ScrollViewer scroller = Ancestor<ScrollViewer>(row, tree) ?? VisualSearch.First<ScrollViewer>(tree);
         if (scroller == null || scroller.ViewportHeight <= 0f)
-            return;
-
+            return false;
         if (scroller.CanContentScroll)
             row.BringIntoView();
         else
             ScrollTo(scroller, row);
-        Finish(selected);
+        return true;
     }
 
     private void ScrollTo(ScrollViewer scroller, TreeViewItem row)
