@@ -15,11 +15,19 @@ internal static class WindowBorder
         WindowLoaded = Apply,
     };
 
-    private const string FrameName = "SmartWindowsFrame";
+    private const string FrameName = WindowLook.SkipPrefix + "Frame";
+
+    /// <summary>The frame colour of the windows and tooltips (setting "Color"); false when it is not a colour.</summary>
+    public static bool TryColor(out Color color)
+    {
+        bool ok = ColorText.TryParse(SmartSettings.BorderColor.Value, out byte a, out byte r, out byte g, out byte b);
+        color = Color.FromArgb(a, r, g, b);
+        return ok;
+    }
 
     private static void Apply(GameWindow window)
     {
-        if (!ColorText.TryParse(SmartSettings.BorderColor.Value, out byte a, out byte r, out byte g, out byte b))
+        if (!TryColor(out Color color))
         {
             ModLog.Warn($"Window border colour '{SmartSettings.BorderColor.Value}' is not #RRGGBB or #AARRGGBB.");
             return;
@@ -43,7 +51,7 @@ internal static class WindowBorder
         {
             Name = FrameName,
             IsHitTestVisible = false,
-            BorderBrush = new SolidColorBrush(Color.FromArgb(a, r, g, b)),
+            BorderBrush = new SolidColorBrush(color),
             BorderThickness = new Thickness(t, 0f, t, t),
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,

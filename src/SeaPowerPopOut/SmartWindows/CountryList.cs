@@ -95,6 +95,7 @@ internal static class CountryList
     private static bool ServiceCovers(MuseumEntry entry, int year) =>
         entry.ServiceEntryDate <= 0 || (entry.ServiceEntryDate <= year && (entry.ServiceExitDate <= 0 || entry.ServiceExitDate >= year));
 
+    // The game's own matchers: for units that is the one ExtendedSearch extends, so the list follows the same search.
     private static bool MatchesText(UnitTreeBrowserViewModel browser, MuseumEntry entry, string text)
     {
         try

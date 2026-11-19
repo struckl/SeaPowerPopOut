@@ -28,8 +28,6 @@ internal static class UnitReferenceLayout
     private const float MinTree = 100f;
     private const float MinInfo = 150f;           // the unit information next to the tree never gets narrower than this
     private const float ExtraWidth = 35f;         // the tree starts this much wider than the game makes it
-    private const float RetryEvery = 0.1f;
-    private const int MaxTries = 30;
 
     private const string ThumbXaml =
         "<Thumb xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation' " +
@@ -40,14 +38,7 @@ internal static class UnitReferenceLayout
         "<Trigger Property='IsDragging' Value='True'><Setter TargetName='Bar' Property='Background' Value='#50FFFFFF'/></Trigger>" +
         "</ControlTemplate.Triggers></ControlTemplate></Thumb.Template></Thumb>";
 
-    private sealed class Attempt
-    {
-        public WeakReference<GameWindow> Window;
-        public float Next;
-        public int Tries;
-    }
-
-    private static readonly List<Attempt> Pending = new List<Attempt>();
+    private static readonly Retries<GameWindow> Pending = new Retries<GameWindow>(0.1f, 30);
     private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<GameWindow, TreeCollapse> Collapses =
         new System.Runtime.CompilerServices.ConditionalWeakTable<GameWindow, TreeCollapse>();
 
@@ -59,26 +50,10 @@ internal static class UnitReferenceLayout
     {
         if (InfoViewModel(window) == null)
             return;
-        Pending.Add(new Attempt { Window = new WeakReference<GameWindow>(window), Next = 0f });
+        Pending.Add(window);
     }
 
-    private static void Update()
-    {
-        for (int i = Pending.Count - 1; i >= 0; i--)
-        {
-            Attempt attempt = Pending[i];
-            if (Time.unscaledTime < attempt.Next)
-                continue;
-            attempt.Next = Time.unscaledTime + RetryEvery;
-            if (!attempt.Window.TryGetTarget(out GameWindow window) || ++attempt.Tries > MaxTries)
-            {
-                Pending.RemoveAt(i);
-                continue;
-            }
-            if (TrySetup(window))
-                Pending.RemoveAt(i);
-        }
-    }
+    private static void Update() => Pending.Run(TrySetup);
 
     /// <summary>The window's Unit Reference view model, or null if this is another kind of window.</summary>
     private static ObjectInformationViewModel InfoViewModel(GameWindow window)

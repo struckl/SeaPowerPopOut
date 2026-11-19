@@ -23,7 +23,7 @@ internal static class DesktopPatches
     {
         MethodBase showPip = AccessTools.PropertyGetter(typeof(MainGameViewModel), nameof(MainGameViewModel.ShowPip3D));
         MethodBase paused = AccessTools.Method(typeof(CameraManager), nameof(CameraManager.SetRenderingPaused));
-        MethodBase rects = AccessTools.Method(typeof(CameraManager), "SetCameraRects");
+        MethodBase rects = WorldViewTexture.SetRects;
         MethodBase render = AccessTools.Method(typeof(Pip3DView), "OnRender");
         if (showPip == null || paused == null || rects == null || render == null || !GameMouse.Resolved
             || AccessTools.Method(typeof(CameraManager), nameof(CameraManager.RequestPipFrame)) == null

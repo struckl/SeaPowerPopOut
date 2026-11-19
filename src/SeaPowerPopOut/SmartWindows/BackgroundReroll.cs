@@ -27,7 +27,7 @@ internal static class BackgroundReroll
 
     private static bool Resolve()
     {
-        changeBackground = AccessTools.Method(typeof(LoadScreen), "ChangeBackground");
+        changeBackground = BackgroundFilter.ChangeBackground;
         if (changeBackground == null)
             ModLog.Warn("LoadScreen.ChangeBackground not found (game updated?) - the first background is not rerolled.");
         return changeBackground != null;

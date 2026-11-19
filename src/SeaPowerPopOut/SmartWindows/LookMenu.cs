@@ -13,7 +13,7 @@ using static PopupFrame;
 /// </summary>
 internal static class LookMenu
 {
-    private const string MenuName = "SmartWindowsLookMenu";
+    private const string MenuName = WindowLook.SkipPrefix + "LookMenu";
 
     public static void AddButton(GameWindow window, string pattern)
     {

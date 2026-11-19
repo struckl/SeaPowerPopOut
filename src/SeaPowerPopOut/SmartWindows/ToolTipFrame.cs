@@ -36,9 +36,8 @@ internal static class ToolTipFrame
     {
         try
         {
-            if (sender is ToolTip tip && VisualTreeHelper.GetChildrenCount(tip) > 0
-                && ColorText.TryParse(SmartSettings.BorderColor.Value, out byte a, out byte r, out byte g, out byte b))
-                Frame(VisualTreeHelper.GetChild(tip, 0), new SolidColorBrush(Color.FromArgb(a, r, g, b)), SmartSettings.BorderThickness.Value);
+            if (sender is ToolTip tip && VisualTreeHelper.GetChildrenCount(tip) > 0 && WindowBorder.TryColor(out Color color))
+                Frame(VisualTreeHelper.GetChild(tip, 0), new SolidColorBrush(color), SmartSettings.BorderThickness.Value);
         }
         catch (Exception ex)
         {

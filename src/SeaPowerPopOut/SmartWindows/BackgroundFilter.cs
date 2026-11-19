@@ -22,10 +22,13 @@ internal static class BackgroundFilter
 
     private static FieldInfo loadScreenImages;
 
+    /// <summary>The load screen's picker of a background picture.</summary>
+    public static readonly MethodInfo ChangeBackground = AccessTools.Method(typeof(LoadScreen), "ChangeBackground");
+
     private static bool Apply(Harmony harmony)
     {
         MethodInfo getAllFiles = AccessTools.Method(typeof(FileManager), nameof(FileManager.GetAllFiles));
-        MethodInfo change = AccessTools.Method(typeof(LoadScreen), "ChangeBackground");
+        MethodInfo change = ChangeBackground;
         loadScreenImages = AccessTools.Field(typeof(LoadScreen), "imagePaths");
         if (getAllFiles == null)
         {

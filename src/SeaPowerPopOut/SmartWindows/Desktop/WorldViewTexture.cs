@@ -27,7 +27,7 @@ internal static class WorldViewTexture
         AccessTools.FieldRefAccess<CameraManager, Camera>("_camera");
     private static readonly AccessTools.FieldRef<CameraManager, Camera> ParticleCamera =
         AccessTools.FieldRefAccess<CameraManager, Camera>("_particleCamera");
-    private static readonly MethodInfo SetRects = AccessTools.Method(typeof(CameraManager), "SetCameraRects");
+    public static readonly MethodInfo SetRects = AccessTools.Method(typeof(CameraManager), "SetCameraRects");
     private static readonly MethodInfo Supersample = AccessTools.PropertyGetter(typeof(CameraManager), "PipSupersampleFactor");
 
     private static RenderTexture camTexture, shownTexture;

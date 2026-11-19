@@ -14,8 +14,8 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class TitleMenu
 {
-    private const string ButtonName = "SmartWindowsMenuButton";
-    private const string MenuName = "SmartWindowsMenu";
+    private const string ButtonName = WindowLook.SkipPrefix + "MenuButton";
+    private const string MenuName = WindowLook.SkipPrefix + "Menu";
     // The mod's own mark: a box with an arrow leaving it, as on the pop-out entry.
     public const string Mark = "M1,4 L1,11 L8,11 L8,8 M5,7 L11,1 M7,1 L11,1 L11,5";
     private const string BackIcon = "M7,1 L2,6 L7,11 M2,6 H11";

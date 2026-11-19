@@ -28,8 +28,6 @@ internal static class DamageControlLayout
     };
 
     private const int SectionRow = 2;
-    private const float RetryEvery = 0.1f;
-    private const int MaxTries = 30;
 
     private sealed class Setup
     {
@@ -40,14 +38,7 @@ internal static class DamageControlLayout
         public float RowMargin;               // top + bottom margin of the element in the section row
     }
 
-    private sealed class Attempt
-    {
-        public WeakReference<DamageControlView> View;
-        public float Next;
-        public int Tries;
-    }
-
-    private static readonly List<Attempt> Pending = new List<Attempt>();
+    private static readonly Retries<DamageControlView> Pending = new Retries<DamageControlView>(0.1f, 30);
     private static readonly List<WeakReference<DamageControlView>> Views = new List<WeakReference<DamageControlView>>();
     private static readonly ConditionalWeakTable<DamageControlView, Setup> Done = new ConditionalWeakTable<DamageControlView, Setup>();
 
@@ -68,29 +59,11 @@ internal static class DamageControlLayout
     private static void Created(DamageControlView __instance)
     {
         Views.Add(new WeakReference<DamageControlView>(__instance));
-        Pending.Add(new Attempt { View = new WeakReference<DamageControlView>(__instance) });
+        Pending.Add(__instance);
     }
 
-    /// <summary>Called every frame: tries the views that were created but whose template is not built yet.</summary>
-    private static void Update()
-    {
-        for (int i = Pending.Count - 1; i >= 0; i--)
-        {
-            Attempt attempt = Pending[i];
-            if (Time.unscaledTime < attempt.Next)
-                continue;
-            attempt.Next = Time.unscaledTime + RetryEvery;
-            if (!attempt.View.TryGetTarget(out DamageControlView view) || ++attempt.Tries > MaxTries)
-            {
-                Pending.RemoveAt(i);
-                continue;
-            }
-            if (!view.IsVisible)
-                continue;                              // set up when the tab is shown
-            if (Prepare(view))
-                Pending.RemoveAt(i);
-        }
-    }
+    // A view is set up when its tab is shown.
+    private static void Update() => Pending.Run(view => view.IsVisible && Prepare(view));
 
     /// <summary>True when finished (set up, or nothing to do); false to try again later.</summary>
     private static bool Prepare(DamageControlView view)
@@ -135,7 +108,7 @@ internal static class DamageControlLayout
             if (Done.TryGetValue(view, out Setup setup))
                 Set(view, setup);
             else if (view.IsVisible)
-                Pending.Add(new Attempt { View = new WeakReference<DamageControlView>(view) });
+                Pending.Add(view);
         }
     }
 

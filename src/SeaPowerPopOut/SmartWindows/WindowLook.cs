@@ -21,7 +21,10 @@ internal static class WindowLook
         Update = Update,
     };
 
-    /// <summary>Elements whose name starts like this (the menu, the settings popup) are never dimmed or scaled.</summary>
+    /// <summary>
+    /// Elements whose name starts like this are never dimmed or scaled: the mod's own title bar button and menus and the
+    /// window frame, which all take their names from it.
+    /// </summary>
     public const string SkipPrefix = "SmartWindows";
     private const float RecheckSeconds = 1f;
     private const int WalkBudget = 6000;
