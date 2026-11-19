@@ -469,7 +469,7 @@ internal sealed class PopOutScreen : MonoBehaviour
         // The resize border lies outside the window; on a see-through monitor it shows, as a thin frame.
         if (window.ResizeHandleWidth > FrameWidth)
             window.ResizeHandleWidth = FrameWidth;
-        if (Layout.TryGetPlacement(kind, out Layout.Placement p))
+        if (Layout.TryGetPlacement(kind, out SmartWindows.SavedLayout p))
         {
             // Stops windows anchored to the bottom right (unit status) from snapping back to their corner.
             MarkUserPositioned?.Invoke(window, null);
@@ -477,8 +477,8 @@ internal sealed class PopOutScreen : MonoBehaviour
             if (!float.IsNaN(p.Y)) window.Y = p.Y;
             // A size is only remembered once it was resized, also for windows that size themselves (formation
             // manager): then it is the player's.
-            if (!float.IsNaN(p.Width)) window.Width = p.Width;
-            if (!float.IsNaN(p.Height)) window.Height = p.Height;
+            if (!float.IsNaN(p.W)) window.Width = p.W;
+            if (!float.IsNaN(p.H)) window.Height = p.H;
         }
         window.PositionChanged += (sender, args) => Remember(window);
         window.SizeChanged += (sender, args) => Remember(window);
@@ -489,12 +489,12 @@ internal sealed class PopOutScreen : MonoBehaviour
         object content = window.DataContext;
         if (content == null || window.Maximized)
             return;
-        Layout.SetPlacement(Kind(content), new Layout.Placement
+        Layout.SetPlacement(Kind(content), new SmartWindows.SavedLayout
         {
             X = window.X,
             Y = window.Y,
-            Width = float.IsNaN(window.Width) ? float.NaN : window.Width,
-            Height = float.IsNaN(window.Height) ? float.NaN : window.Height,
+            W = float.IsNaN(window.Width) ? float.NaN : window.Width,
+            H = float.IsNaN(window.Height) ? float.NaN : window.Height,
         });
     }
 

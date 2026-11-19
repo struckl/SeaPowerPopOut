@@ -1,45 +1,30 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
+using SeaPowerPopOut.SmartWindows;
 
 namespace SeaPowerPopOut;
 
 /// <summary>
 /// Which kinds of window open on the pop-out monitor, and where each sits there. Keyed by the window content's view
-/// model type ("FormationManagerViewModel"), so every sensor window or every unit status window shares one entry.
-/// Kept in memory and written to the config at most every few seconds - a window drag changes it every frame.
+/// model type ("FormationManagerViewModel"), so every sensor window or every unit status window shares one entry. The
+/// places use the same store and text as the main screen's remembered layouts (<see cref="SavedLayouts"/>).
+/// Kept in memory and written to the config at most every few seconds - a window drag changes it every frame; a hand
+/// edit of the config while the game runs is overwritten by the next change.
 /// </summary>
 internal static class Layout
 {
-    internal struct Placement
-    {
-        public float X, Y, Width, Height;   // Width/Height NaN = the window sizes itself
-    }
-
     private static readonly HashSet<string> Popped = new HashSet<string>();
-    private static readonly Dictionary<string, Placement> Placements = new Dictionary<string, Placement>();
-    private static bool dirty;
+    private static SavedLayouts placements = new SavedLayouts();
+    private static bool poppedChanged;
 
     public static void Load()
     {
         Popped.Clear();
         foreach (string name in Settings.PoppedWindows.Value.Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries))
             Popped.Add(name.Trim());
-
-        Placements.Clear();
-        foreach (string entry in Settings.WindowPlacement.Value.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
-        {
-            string[] kv = entry.Split('=');
-            string[] n = kv.Length == 2 ? kv[1].Split(',') : Array.Empty<string>();
-            if (n.Length != 4)
-                continue;
-            Placements[kv[0].Trim()] = new Placement
-            {
-                X = Parse(n[0]), Y = Parse(n[1]), Width = Parse(n[2]), Height = Parse(n[3]),
-            };
-        }
-        dirty = false;
+        placements = SavedLayouts.Parse(Settings.WindowPlacement.Value);
+        poppedChanged = false;
     }
 
     public static bool IsPopped(string kind) => Popped.Contains(kind);
@@ -47,38 +32,23 @@ internal static class Layout
     public static void SetPopped(string kind, bool popped)
     {
         if (popped ? Popped.Add(kind) : Popped.Remove(kind))
-            dirty = true;
+            poppedChanged = true;
     }
 
-    public static bool TryGetPlacement(string kind, out Placement placement) => Placements.TryGetValue(kind, out placement);
+    /// <summary>NaN width / height = the window sizes itself.</summary>
+    public static bool TryGetPlacement(string kind, out SavedLayout placement) => placements.TryGet(kind, out placement);
 
-    public static void SetPlacement(string kind, Placement placement)
-    {
-        if (Placements.TryGetValue(kind, out Placement old) && Same(old, placement))
-            return;
-        Placements[kind] = placement;
-        dirty = true;
-    }
+    public static void SetPlacement(string kind, SavedLayout placement) => placements.Set(kind, placement);
 
     /// <summary>Writes the config file if anything changed since the last save.</summary>
     public static void Save()
     {
-        if (!dirty)
+        if (!poppedChanged && !placements.Dirty)
             return;
-        dirty = false;
+        poppedChanged = false;
+        placements.MarkSaved();
         Settings.PoppedWindows.Value = string.Join(",", Popped.OrderBy(k => k));
-        Settings.WindowPlacement.Value = string.Join(";", Placements.OrderBy(p => p.Key).Select(p =>
-            $"{p.Key}={Format(p.Value.X)},{Format(p.Value.Y)},{Format(p.Value.Width)},{Format(p.Value.Height)}"));
+        Settings.WindowPlacement.Value = placements.Serialize();
         ModLog.Debug($"layout saved: popped [{Settings.PoppedWindows.Value}]");
     }
-
-    private static bool Same(Placement a, Placement b) =>
-        Near(a.X, b.X) && Near(a.Y, b.Y) && Near(a.Width, b.Width) && Near(a.Height, b.Height);
-
-    private static bool Near(float a, float b) => (float.IsNaN(a) && float.IsNaN(b)) || Math.Abs(a - b) < 0.5f;
-
-    private static float Parse(string s) =>
-        float.TryParse(s.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out float v) ? v : float.NaN;
-
-    private static string Format(float v) => float.IsNaN(v) ? "auto" : v.ToString("0", CultureInfo.InvariantCulture);
 }

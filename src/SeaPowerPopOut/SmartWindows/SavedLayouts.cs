@@ -18,8 +18,9 @@ internal struct SavedLayout
 }
 
 /// <summary>
-/// The remembered layouts, one per window pattern. Kept in memory; <see cref="Serialize"/> / <see cref="Parse"/>
-/// turn them into the text stored in the config (<c>pattern=x,y,w,h[,max];...</c>).
+/// Remembered window layouts by key (a window pattern on the main screen, a view model type on the pop-out monitor).
+/// Kept in memory; <see cref="Serialize"/> / <see cref="Parse"/> turn them into the text stored in the config
+/// (<c>key=x,y,w,h[,max];...</c>).
 /// </summary>
 internal sealed class SavedLayouts
 {
