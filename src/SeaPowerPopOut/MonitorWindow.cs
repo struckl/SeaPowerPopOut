@@ -17,6 +17,8 @@ internal sealed class MonitorWindow
     private static readonly Dictionary<int, MonitorWindow> All = new Dictionary<int, MonitorWindow>();
 
     private const float SearchSeconds = 5f;
+    private const float ForegroundCheckInterval = 0.5f;
+    private const int SizeTolerance = 2;        // pixels: a window this close to the display's size is taken as the display's
 
     private readonly int display;
     private IntPtr hwnd;
@@ -170,7 +172,7 @@ internal sealed class MonitorWindow
     {
         if (!Alive() || Time.unscaledTime < nextForegroundCheck)
             return;
-        nextForegroundCheck = Time.unscaledTime + 0.5f;
+        nextForegroundCheck = Time.unscaledTime + ForegroundCheckInterval;
         bool top = wanted && Native.GameInForeground();
         if (top == topmost)
             return;
@@ -202,7 +204,7 @@ internal sealed class MonitorWindow
     }
 
     private static bool Near(Native.RECT r, int width, int height) =>
-        Math.Abs(r.Width - width) <= 2 && Math.Abs(r.Height - height) <= 2;
+        Math.Abs(r.Width - width) <= SizeTolerance && Math.Abs(r.Height - height) <= SizeTolerance;
 
     private static bool Same(Native.RECT[] a, List<Native.RECT> b)
     {
