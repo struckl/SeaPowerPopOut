@@ -104,8 +104,6 @@ internal static class TrackState
         return new State { Tab = tab };
     }
 
-    // ---- which contact the tab follows ------------------------------------------------------------------------------
-
     /// <summary>The selected contact when it is not the player's side; null for own units and anything else.</summary>
     private static Vehicle SelectedContact()
     {
@@ -168,8 +166,6 @@ internal static class TrackState
             StatusTabHost.SelectFirstTab.Invoke(status, null);
         }
     }
-
-    // ---- the content -----------------------------------------------------------------------------------------------
 
     private static void Show(UnitStatusView view, UnitStatusViewModel status, State state)
     {

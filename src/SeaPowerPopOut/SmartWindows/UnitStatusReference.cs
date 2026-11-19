@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -79,8 +79,6 @@ internal static class UnitStatusReference
         return true;
     }
 
-    // ---- game hooks -------------------------------------------------------------------------------------------
-
     private static void Created(UnitStatusViewModel __instance)
     {
         try
@@ -133,8 +131,6 @@ internal static class UnitStatusReference
             ModLog.Debug($"reference tab: {ex.Message}");
         }
     }
-
-    // ---- tab model --------------------------------------------------------------------------------------------
 
     /// <summary>The page exists for every unit with its own parameters (ships, subs, aircraft ...), but not for weapons.</summary>
     private static bool HasReference(ObjectBase unit) => unit != null && !(unit is WeaponBase) && unit._obp != null;
@@ -205,8 +201,6 @@ internal static class UnitStatusReference
             ModLog.Debug($"reference tab dispose: {ex.Message}");
         }
     }
-
-    // ---- window side ------------------------------------------------------------------------------------------
 
     /// <summary>Remembers the Unit Status windows.</summary>
     private static void WindowLoaded(GameWindow window)

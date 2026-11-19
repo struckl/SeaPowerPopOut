@@ -160,8 +160,6 @@ internal static class UnitReferenceLayout
         return false;
     }
 
-    // ---- the splitter -------------------------------------------------------------------------------------------
-
     /// <summary>One window's splitter: takes over the tree block's width, adds the thumb, keeps the width and shown state.</summary>
     private sealed class TreeSplitter
     {

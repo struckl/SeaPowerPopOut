@@ -38,6 +38,10 @@ internal sealed class PopOutScreen : MonoBehaviour
     private static readonly HashSet<string> StayHome = new HashSet<string> { SmartWindows.GameWindows.MapViewModel, SmartWindows.GameWindows.WorldViewModel };
 
     private const float SaveInterval = 3f;
+    private const float HookCheckInterval = 0.5f;      // until the game's first window host exists
+    private const float YieldCheckInterval = 1f;       // while no screen is open: does the game want a monitor back?
+    private const int ReleaseAfterFrames = 3;          // a release the screen does get arrives a frame or two late
+    private const int ShapeErrorsLogged = 3;           // the cut-out runs every frame: an error is not logged each time
     private const float FrameWidth = 5f;          // resize border around popped-out windows (window units)
     private const string FrameBrushKey = "Brush.Window.Header";
 
@@ -126,23 +130,16 @@ internal sealed class PopOutScreen : MonoBehaviour
     // See-through: only the windows (and their open popups) of the screen show on the monitor.
     private MonitorWindow monitor;
     private bool seeThrough;
-    private readonly List<GameWindow> windows = new List<GameWindow>();
-    private readonly List<(UIElement element, float since)> overlays = new List<(UIElement, float)>();
-    private readonly List<UnityEngine.Rect> keep = new List<UnityEngine.Rect>();
-    private readonly List<UnityEngine.Rect> lastKeep = new List<UnityEngine.Rect>();
+    private readonly ScreenCutOut cutOut = new ScreenCutOut();
     private static bool overlayHooks;
 
-    // The game's unit menu (right-click in the formation manager) and our copy of it, see BuildMenu.
-    private Noesis.Canvas homeCanvas, menuCanvas;
-    private ContextMenu homeMenu, menu;
-    private MainGameView lentTo;
+    private UnitMenuCopy unitMenu;
 
     // A press on the screen whose release went to another program (the pointer had left the see-through cut-out).
     private bool pressed;
     private int releasedFrames;
     private Vector2 pointer;
     private int shapeErrors;
-    private readonly HashSet<int> pointerLogged = new HashSet<int>();
 
     private readonly Queue<Action> deferred = new Queue<Action>();
     private float nextSave, nextYieldCheck;
@@ -159,7 +156,7 @@ internal sealed class PopOutScreen : MonoBehaviour
         SmartWindows.SmartFeatures.Update();
         if (windowHooks == WindowHooks.Waiting && Time.unscaledTime >= nextHookCheck)
         {
-            nextHookCheck = Time.unscaledTime + 0.5f;
+            nextHookCheck = Time.unscaledTime + HookCheckInterval;
             // A WindowHost registers itself with WindowHostManager when it is built, which only happens while
             // NoesisGUI runs (the main menu view has one) - from then on Noesis types are safe to touch.
             if (Singleton<WindowHostManager>.InstanceExists())
@@ -174,8 +171,8 @@ internal sealed class PopOutScreen : MonoBehaviour
         {
             try
             {
-                ReturnMenu();
-                CloseMenuElsewhere();
+                unitMenu?.Return();
+                unitMenu?.CloseElsewhere(screenDisplay);
                 UpdateScreen(force: false);
                 ReleaseLostClick();
             }
@@ -183,7 +180,7 @@ internal sealed class PopOutScreen : MonoBehaviour
         }
         else if (Time.unscaledTime >= nextYieldCheck)
         {
-            nextYieldCheck = Time.unscaledTime + 1f;
+            nextYieldCheck = Time.unscaledTime + YieldCheckInterval;
             MonitorWindow.YieldTo(GameDrawsOn);
         }
         if (Time.unscaledTime >= nextSave)
@@ -199,12 +196,11 @@ internal sealed class PopOutScreen : MonoBehaviour
             return;
         try
         {
-            CollectShape();
-            monitor.Shape(keep, screenCamera.pixelWidth, screenCamera.pixelHeight);
+            monitor.Shape(cutOut.Collect(pressed), screenCamera.pixelWidth, screenCamera.pixelHeight);
         }
         catch (Exception ex)
         {
-            if (shapeErrors++ < 3)
+            if (shapeErrors++ < ShapeErrorsLogged)
                 ModLog.Error($"see-through: {ex}");
         }
     }
@@ -257,8 +253,6 @@ internal sealed class PopOutScreen : MonoBehaviour
                 : "Window hooks in place. Only one monitor - the pop-out buttons stay hidden.");
     }
 
-    // ---- mission lifecycle -------------------------------------------------------------------------------------
-
     internal void MissionReady()
     {
         try
@@ -303,8 +297,6 @@ internal sealed class PopOutScreen : MonoBehaviour
             ModLog.Error($"mission end: {ex}");
         }
     }
-
-    // ---- the main screen's window host (patched) ---------------------------------------------------------------
 
     /// <summary>The main game view's own window host; re-resolved whenever the game builds a new main view.</summary>
     private WindowHost MainHost
@@ -368,8 +360,6 @@ internal sealed class PopOutScreen : MonoBehaviour
             return true;
         }
     }
-
-    // ---- windows -----------------------------------------------------------------------------------------------
 
     /// <summary>True unless the window's content lives on the pop-out screen (where <see cref="Layout"/> places it).</summary>
     internal bool OnMainScreen(GameWindow window) => host == null || !host.Windows.Contains(window.DataContext);
@@ -495,8 +485,6 @@ internal sealed class PopOutScreen : MonoBehaviour
         });
     }
 
-    // ---- the screen --------------------------------------------------------------------------------------------
-
     private bool Open()
     {
         if (host != null)
@@ -508,71 +496,14 @@ internal sealed class PopOutScreen : MonoBehaviour
             return false;
         try
         {
-            screenDisplay = index;
-            Display display = Display.displays[index];
-            monitor = MonitorWindow.For(index);
-            if (!display.active)
-            {
-                monitor.BeforeActivate();
-                display.Activate();
-            }
-            SecondaryDisplayBlanker.Register(index);
-
-            root = (ScalableUserControl)Noesis.GUI.ParseXaml(RootXaml);
-            host = FindHost(root);
-            if (host == null)
-                throw new InvalidOperationException("pop-out window host missing");
-            // WindowHost's constructor makes itself the game's "current" host; the game means the main one by that.
-            SetCurrentHost?.Invoke(Singleton<WindowHostManager>.Instance, new object[] { mainHost });
-            backdrop = (Grid)root.FindName("Backdrop");
-            hint = (TextBlock)root.FindName("Hint");
-            scale = (ScaleTransform)root.FindName("Scale");
-            items = (ItemsControl)root.FindName("Items");
-            root.PreviewMouseLeftButtonDown += (sender, args) => pressed = true;
-            root.PreviewMouseLeftButtonUp += (sender, args) => pressed = false;
-            root.PreviewMouseRightButtonDown += (sender, args) => LendMenu();
-            root.PreviewMouseRightButtonUp += (sender, args) => LendMenu();
-            root.GotMouseCapture += OnCapture;
-            HookOverlays();
-            backdropBrush = backdrop.Background as SolidColorBrush;
-            hint.Text = "Pop-out screen\n\nThe pop-out button in a window's title bar moves it here, " +
-                        "the same button on this screen sends it back.";
-            // The window templates (and everything they use) live in the main game view's resources. A flat copy,
-            // so the main view's own dictionaries never get a second owner.
-            root.Resources = Flatten(mainView.Resources);
-            root.DataContext = mainView.DataContext;
-            builtFor = mainView;
-            BuildMenu();
-
-            screen = new GameObject("SeaPowerPopOut screen");
-            UnityEngine.Object.DontDestroyOnLoad(screen);
-            screenCamera = screen.AddComponent<UnityEngine.Camera>();
-            screenCamera.cullingMask = 0;
-            screenCamera.depth = 90f;
-            screenCamera.targetDisplay = index;
-            screenCamera.backgroundColor = UnityEngine.Color.black;
-            screenCamera.useOcclusionCulling = false;
-            screenCamera.allowHDR = false;
-            screenCamera.allowMSAA = false;
-            var view = screen.AddComponent<NoesisView>();
-            view.UseRealTimeClock = true;             // windows keep animating while the game is paused
-            if (DM._noesisView != null)
-                view.DPIScale = DM._noesisView.DPIScale;
-            CreateView.Invoke(view, new object[] { root });
-            screenView = view;
-
+            Display display = ActivateDisplay(index);
+            BuildRoot();
+            BuildView(index);
             // Our host and view grabbed the game's window commands for their own keyboard; give it back.
             WindowHostCommands.OpenWindowCommand.Keyboard = mainView.Keyboard;
             WindowHostCommands.CloseWindowCommand.Keyboard = mainView.Keyboard;
-
             UpdateScreen(force: true);
-            if (Screen.fullScreenMode == FullScreenMode.ExclusiveFullScreen)
-                ModLog.Warn("The game runs in exclusive fullscreen: with a second monitor in use the picture of the world view " +
-                            "can freeze there (Unity). Borderless windowed (Options > Graphics) avoids it.");
-            ModLog.Info($"Pop-out screen open on monitor {index + 1} ({display.renderingWidth}x{display.renderingHeight})" +
-                        (index + 1 != Settings.Monitor.Value && GameDrawsOn(Settings.Monitor.Value - 1)
-                            ? $" - monitor {Settings.Monitor.Value} shows the game's world view or map" : "") +
-                        (shared ? ", over the game's own view (no free monitor)" : ""));
+            LogOpened(index, display);
             return true;
         }
         catch (Exception ex)
@@ -583,47 +514,134 @@ internal sealed class PopOutScreen : MonoBehaviour
         }
     }
 
+    /// <summary>Unity shows the display as a window over the whole monitor; activating it cannot be undone.</summary>
+    private Display ActivateDisplay(int index)
+    {
+        screenDisplay = index;
+        Display display = Display.displays[index];
+        monitor = MonitorWindow.For(index);
+        if (!display.active)
+        {
+            monitor.BeforeActivate();
+            display.Activate();
+        }
+        SecondaryDisplayBlanker.Register(index);
+        return display;
+    }
+
+    /// <summary>The screen's XAML root: our window host, the backdrop, the scaled layer of the windows and the unit menu.</summary>
+    private void BuildRoot()
+    {
+        root = (ScalableUserControl)Noesis.GUI.ParseXaml(RootXaml);
+        host = FindHost(root);
+        if (host == null)
+            throw new InvalidOperationException("pop-out window host missing");
+        // WindowHost's constructor makes itself the game's "current" host; the game means the main one by that.
+        SetCurrentHost?.Invoke(Singleton<WindowHostManager>.Instance, new object[] { mainHost });
+        backdrop = (Grid)root.FindName("Backdrop");
+        hint = (TextBlock)root.FindName("Hint");
+        scale = (ScaleTransform)root.FindName("Scale");
+        items = (ItemsControl)root.FindName("Items");
+        root.PreviewMouseLeftButtonDown += (sender, args) => pressed = true;
+        root.PreviewMouseLeftButtonUp += (sender, args) => pressed = false;
+        root.PreviewMouseRightButtonDown += (sender, args) => unitMenu?.Lend();
+        root.PreviewMouseRightButtonUp += (sender, args) => unitMenu?.Lend();
+        root.GotMouseCapture += OnCapture;
+        HookOverlays();
+        backdropBrush = backdrop.Background as SolidColorBrush;
+        hint.Text = "Pop-out screen\n\nThe pop-out button in a window's title bar moves it here, " +
+                    "the same button on this screen sends it back.";
+        root.Resources = ScreenResources.Flatten(mainView.Resources);
+        root.DataContext = mainView.DataContext;
+        builtFor = mainView;
+        unitMenu = UnitMenuCopy.Build(mainView, (Noesis.Canvas)root.FindName("MenuCanvas"));
+    }
+
+    /// <summary>
+    /// A camera on the display and a NoesisView of the root, built the way the game builds its own second-monitor map
+    /// (<c>SecondDisplayMapHandler</c>).
+    /// </summary>
+    private void BuildView(int index)
+    {
+        screen = new GameObject("SeaPowerPopOut screen");
+        UnityEngine.Object.DontDestroyOnLoad(screen);
+        screenCamera = screen.AddComponent<UnityEngine.Camera>();
+        screenCamera.cullingMask = 0;
+        screenCamera.depth = 90f;
+        screenCamera.targetDisplay = index;
+        screenCamera.backgroundColor = UnityEngine.Color.black;
+        screenCamera.useOcclusionCulling = false;
+        screenCamera.allowHDR = false;
+        screenCamera.allowMSAA = false;
+        var view = screen.AddComponent<NoesisView>();
+        view.UseRealTimeClock = true;             // windows keep animating while the game is paused
+        if (DM._noesisView != null)
+            view.DPIScale = DM._noesisView.DPIScale;
+        CreateView.Invoke(view, new object[] { root });
+        screenView = view;
+    }
+
+    private void LogOpened(int index, Display display)
+    {
+        if (Screen.fullScreenMode == FullScreenMode.ExclusiveFullScreen)
+            ModLog.Warn("The game runs in exclusive fullscreen: with a second monitor in use the picture of the world view " +
+                        "can freeze there (Unity). Borderless windowed (Options > Graphics) avoids it.");
+        ModLog.Info($"Pop-out screen open on monitor {index + 1} ({display.renderingWidth}x{display.renderingHeight})" +
+                    (index + 1 != Settings.Monitor.Value && GameDrawsOn(Settings.Monitor.Value - 1)
+                        ? $" - monitor {Settings.Monitor.Value} shows the game's world view or map" : "") +
+                    (shared ? ", over the game's own view (no free monitor)" : ""));
+    }
+
     private void UpdateScreen(bool force)
     {
-        // The game scales its UI by the screen's height. Same here, by the short side, so a portrait monitor gets
-        // the size a landscape one of that resolution would (by its long side the windows would come out huge).
+        ApplyScale(force);
+        ApplySeeThrough(force);
+        hint.Visibility = !shared && !seeThrough && host.Windows.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        monitor.KeepOnTop(seeThrough && Settings.OnTop.Value);
+        if (GameMouse.OnDisplay(screenDisplay, out Vector3 p))
+            pointer = new Vector2(p.x, screenCamera.pixelHeight - p.y);
+        if (mainView != null && !ReferenceEquals(root.DataContext, mainView.DataContext))
+            root.DataContext = mainView.DataContext;
+    }
+
+    /// <summary>
+    /// The game scales its UI by the screen's height. Same here, by the short side, so a portrait monitor gets the size a
+    /// landscape one of that resolution would (by its long side the windows would come out huge).
+    /// </summary>
+    private void ApplyScale(bool force)
+    {
         int shortSide = Mathf.Max(1, Mathf.Min(screenCamera.pixelWidth, screenCamera.pixelHeight));
         float s = SmartWindows.HostArea.UiScale(shortSide) * Settings.Scale.Value;
-        if (force || Mathf.Abs(s - appliedScale) > 0.001f)
-        {
-            scale.ScaleX = s;
-            scale.ScaleY = s;
-            appliedScale = s;
-        }
+        if (!force && Mathf.Abs(s - appliedScale) <= 0.001f)
+            return;
+        scale.ScaleX = s;
+        scale.ScaleY = s;
+        appliedScale = s;
+    }
 
+    /// <summary>
+    /// Sharing the monitor with the game's own map / world view: the windows are drawn over it. On a monitor of our own
+    /// made see-through, the backdrop only shows in the frame around each window; else it covers the monitor.
+    /// </summary>
+    private void ApplySeeThrough(bool force)
+    {
         bool gameThere = GameDrawsOn(screenDisplay);
         if (!gameThere && Settings.SeeThrough.Value)
             monitor.Search(Display.displays[screenDisplay]);
         bool see = !gameThere && Settings.SeeThrough.Value && monitor.Found;
-        if (force || gameThere != shared || see != seeThrough)
-        {
-            // Sharing the monitor with the game's own map / world view: draw the windows over it, see-through.
-            // On a monitor of our own made see-through, the backdrop only shows in the frame around each window.
-            shared = gameThere;
-            seeThrough = see;
-            screenCamera.clearFlags = shared ? CameraClearFlags.Depth : CameraClearFlags.SolidColor;
-            if (shared)
-                backdrop.Background = null;
-            else if (seeThrough)
-                backdrop.SetResourceReference(Panel.BackgroundProperty, FrameBrushKey);
-            else
-                backdrop.Background = backdropBrush;
-            if (!seeThrough)
-                monitor.Unshape();
-        }
-        hint.Visibility = !shared && !seeThrough && host.Windows.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-        monitor.KeepOnTop(seeThrough && Settings.OnTop.Value);
-
-        if (GameMouse.OnDisplay(screenDisplay, out Vector3 p))
-            pointer = new Vector2(p.x, screenCamera.pixelHeight - p.y);
-
-        if (mainView != null && !ReferenceEquals(root.DataContext, mainView.DataContext))
-            root.DataContext = mainView.DataContext;
+        if (!force && gameThere == shared && see == seeThrough)
+            return;
+        shared = gameThere;
+        seeThrough = see;
+        screenCamera.clearFlags = shared ? CameraClearFlags.Depth : CameraClearFlags.SolidColor;
+        if (shared)
+            backdrop.Background = null;
+        else if (seeThrough)
+            backdrop.SetResourceReference(Panel.BackgroundProperty, FrameBrushKey);
+        else
+            backdrop.Background = backdropBrush;
+        if (!seeThrough)
+            monitor.Unshape();
     }
 
     /// <summary>The game's second-monitor map or detached world view uses that display too.</summary>
@@ -654,76 +672,12 @@ internal sealed class PopOutScreen : MonoBehaviour
         }
     }
 
-    // ---- the unit menu -----------------------------------------------------------------------------------------
-
-    /// <summary>
-    /// The game opens its unit menu (right-click on a unit in the formation manager) from the context menu of a
-    /// canvas of the main game view, <c>MainGameView.ContextMenuCanvas</c> - so on the main screen, wherever the
-    /// click was. This screen gets a copy of that menu, on a canvas in the scaled layer of the windows so it comes
-    /// out at their size.
-    /// </summary>
-    private void BuildMenu()
-    {
-        homeCanvas = mainView.ContextMenuCanvas;
-        homeMenu = homeCanvas?.ContextMenu;
-        menuCanvas = (Noesis.Canvas)root.FindName("MenuCanvas");
-        if (homeMenu == null || menuCanvas == null)
-        {
-            ModLog.Warn("The game's unit menu wasn't found - right-clicking a unit on the pop-out monitor opens it on the main screen.");
-            return;
-        }
-        // Its place is the mouse; the target only makes it part of this screen (scale, see-through cut-out).
-        menu = new ContextMenu { ItemContainerStyle = homeMenu.ItemContainerStyle, PlacementTarget = menuCanvas };
-        foreach (object key in homeMenu.Resources.Keys)   // the templates of its entries
-            menu.Resources[key] = homeMenu.Resources[key];
-        // As on the game's menu: right-clicks on it do nothing.
-        menu.PreviewMouseRightButtonDown += (sender, args) => args.Handled = true;
-        menu.PreviewMouseRightButtonUp += (sender, args) => args.Handled = true;
-        menuCanvas.ContextMenu = menu;
-    }
-
-    /// <summary>
-    /// A right-click on this screen: until the next frame the main game view's menu canvas is ours, so a unit menu
-    /// the click opens opens over here (the game looks the canvas up each time it opens the menu).
-    /// </summary>
-    private void LendMenu()
-    {
-        MainGameView view = MainGameView.Instance;
-        if (menu == null || view == null || !ReferenceEquals(view.ContextMenuCanvas, homeCanvas))
-            return;
-        view.ContextMenuCanvas = menuCanvas;
-        lentTo = view;
-    }
-
-    private void ReturnMenu()
-    {
-        if (lentTo == null)
-            return;
-        if (ReferenceEquals(lentTo.ContextMenuCanvas, menuCanvas))
-            lentTo.ContextMenuCanvas = homeCanvas;
-        lentTo = null;
-    }
-
-    /// <summary>
-    /// A click reaches only the view of the monitor it was on, so the unit menu open on the other screen would stay
-    /// open. Closes it, as a click anywhere beside the menu does on one screen.
-    /// </summary>
-    private void CloseMenuElsewhere()
-    {
-        if (menu == null || !(UnityEngine.Input.GetMouseButtonDown(0) || UnityEngine.Input.GetMouseButtonDown(1)
-                              || UnityEngine.Input.GetMouseButtonDown(2)))
-            return;
-        ContextMenu other = GameMouse.OnDisplay(screenDisplay, out _) ? homeMenu : menu;
-        if (other.IsOpen)
-            other.IsOpen = false;
-    }
-
     private void Teardown()
     {
         deferred.Clear();
         try
         {
-            ReturnMenu();
+            unitMenu?.Return();
             host?.Windows.Clear();
             monitor?.Release();
         }
@@ -733,17 +687,12 @@ internal sealed class PopOutScreen : MonoBehaviour
         }
         if (screen != null)
             Destroy(screen);
-        homeCanvas = null;
-        menuCanvas = null;
-        homeMenu = null;
-        menu = null;
+        unitMenu = null;
         monitor = null;
         seeThrough = false;
         screenView = null;
         items = null;
-        windows.Clear();
-        overlays.Clear();
-        lastKeep.Clear();
+        cutOut.Clear();
         pressed = false;
         builtFor = null;
         screenDisplay = -1;
@@ -758,57 +707,11 @@ internal sealed class PopOutScreen : MonoBehaviour
         WindowHostCommands.CloseWindowCommand.UpdateCanExecute();
     }
 
-    // ---- see-through -------------------------------------------------------------------------------------------
-
     /// <summary>A window on the pop-out screen: part of the cut-out, and it snaps while dragged.</summary>
     private void Track(GameWindow window)
     {
-        if (!windows.Contains(window))
-            windows.Add(window);
-        SmartWindows.SnapController.OnPopOutMonitor(window, windows, () => items);
-    }
-
-    /// <summary>What of the monitor stays visible: every window with its frame, and its open popups.</summary>
-    private void CollectShape()
-    {
-        keep.Clear();
-        for (int i = windows.Count - 1; i >= 0; i--)
-        {
-            GameWindow window = windows[i];
-            if (VisualTreeHelper.GetParent(window) == null)
-            {
-                windows.RemoveAt(i);                  // closed or sent back (loading again adds it again)
-                continue;
-            }
-            // The template root: the window plus the resize border around it.
-            if (window.Visibility == Visibility.Visible && VisualTreeHelper.GetChildrenCount(window) > 0)
-                AddBounds(VisualTreeHelper.GetChild(window, 0) as FrameworkElement);
-        }
-        for (int i = overlays.Count - 1; i >= 0; i--)
-        {
-            (UIElement element, float since) = overlays[i];
-            if (IsOpen(element))
-                AddBounds(element is Popup popup ? popup.Child as FrameworkElement : element as FrameworkElement);
-            else if (Time.unscaledTime - since > 0.5f)
-                overlays.RemoveAt(i);
-        }
-        // While a window is dragged or resized the cut-out and the picture may be a frame apart; last frame's
-        // parts as well cover that.
-        int count = keep.Count;
-        if (pressed)
-            keep.AddRange(lastKeep);
-        lastKeep.Clear();
-        for (int i = 0; i < count; i++)
-            lastKeep.Add(keep[i]);
-    }
-
-    private void AddBounds(FrameworkElement element)
-    {
-        if (element == null || element.ActualWidth <= 0f || element.ActualHeight <= 0f)
-            return;
-        Point a = element.PointToScreen(new Point(0f, 0f));
-        Point b = element.PointToScreen(new Point(element.ActualWidth, element.ActualHeight));
-        keep.Add(UnityEngine.Rect.MinMaxRect(Math.Min(a.X, b.X), Math.Min(a.Y, b.Y), Math.Max(a.X, b.X), Math.Max(a.Y, b.Y)));
+        cutOut.Track(window);
+        SmartWindows.SnapController.OnPopOutMonitor(window, cutOut.Windows, () => items);
     }
 
     /// <summary>
@@ -841,7 +744,7 @@ internal sealed class PopOutScreen : MonoBehaviour
             UIElement target = overlay is ToolTip tip ? tip.PlacementTarget
                 : overlay is ContextMenu menu ? menu.PlacementTarget : null;
             if (target != null ? root.IsAncestorOf(target) : ReferenceEquals(overlay.View, root.View))
-                TrackOverlay(overlay);
+                cutOut.TrackOverlay(overlay);
         }
         catch (Exception ex)
         {
@@ -853,36 +756,15 @@ internal sealed class PopOutScreen : MonoBehaviour
     internal void PopupOpened(Popup popup, UIElement anchor)
     {
         if (popup != null && anchor != null && root != null && root.IsAncestorOf(anchor))
-            TrackOverlay(popup);
+            cutOut.TrackOverlay(popup);
     }
 
     // A drop-down list holds the mouse while open; its popup is part of its template.
     private void OnCapture(object sender, MouseEventArgs e)
     {
         if (e.Source is ComboBox box && SmartWindows.VisualSearch.First<Popup>(box, budget: 200) is Popup popup)
-            TrackOverlay(popup);
+            cutOut.TrackOverlay(popup);
     }
-
-    private void TrackOverlay(UIElement overlay)
-    {
-        for (int i = 0; i < overlays.Count; i++)
-        {
-            if (ReferenceEquals(overlays[i].element, overlay))
-            {
-                overlays[i] = (overlay, Time.unscaledTime);
-                return;
-            }
-        }
-        overlays.Add((overlay, Time.unscaledTime));
-    }
-
-    private static bool IsOpen(UIElement overlay) => overlay switch
-    {
-        Popup popup => popup.IsOpen,
-        ToolTip tip => tip.IsOpen,
-        ContextMenu menu => menu.IsOpen,
-        _ => false,
-    };
 
     /// <summary>
     /// A press on the screen released over another program (the pointer ran out of the cut-out faster than the
@@ -895,52 +777,13 @@ internal sealed class PopOutScreen : MonoBehaviour
             releasedFrames = 0;
             return;
         }
-        // A release the screen does get arrives a frame or two after the button is physically up.
-        if (++releasedFrames < 3)
+        if (++releasedFrames < ReleaseAfterFrames)
             return;
         pressed = false;
         releasedFrames = 0;
         screenView.MouseButtonUp((int)pointer.x, (int)pointer.y, MouseButton.Left);
         ModLog.Debug("Mouse button released outside the pop-out windows");
     }
-
-    /// <summary>
-    /// <c>NoesisView.MousePosition</c> just returned the mouse position relative to the monitor it is on, bottom up,
-    /// in the monitor's own pixels. NoesisView then flips it with its camera's <c>pixelHeight</c> - which for a camera
-    /// on another display is not that display's height, so on a monitor of another height (or a Windows scaling
-    /// other than the game's) the pointer sat off by the difference: no resize cursor at the edges, drags that jump,
-    /// tooltips far from the cursor, right-clicks landing on the wrong thing. Clicks take another way and land right.
-    /// <para>Corrected for every view on another monitor - the pop-out screen and the game's own second-monitor map /
-    /// world view - so that the flip comes out at the monitor's real height. What the flip uses is read from the
-    /// camera right here, so the correction is zero wherever the game already gets it right.</para>
-    /// </summary>
-    internal void FixPointer(NoesisView view, ref Vector3 position)
-    {
-        if (position == Vector3.zero || view == null)
-            return;
-        int index = (int)position.z;
-        Display[] displays = Display.displays;
-        if (index < 1 || index >= displays.Length)
-            return;
-        UnityEngine.Camera camera = view.GetComponent<UnityEngine.Camera>();
-        if (camera == null || camera.targetDisplay != index)
-            return;
-
-        Display display = displays[index];
-        float real = display.renderingHeight, mouse = display.systemHeight;
-        if (real < 1f || mouse < 1f)
-            return;
-        float k = real / mouse;                       // mouse pixels -> pixels of the picture (1 unless scaled)
-        float seen = camera.pixelHeight;              // what NoesisView flips with
-        if (pointerLogged.Add(index))
-            ModLog.Info($"Pointer on monitor {index + 1}: camera {camera.pixelWidth}x{camera.pixelHeight}, monitor " +
-                        $"{display.systemWidth}x{display.systemHeight} (rendering {display.renderingWidth}x{display.renderingHeight}), " +
-                        $"game window {Screen.width}x{Screen.height}; first mouse position {position.x:0},{position.y:0}");
-        position.x *= k;
-        position.y = position.y * k + seen - real;
-    }
-
-    // ---- helpers -----------------------------------------------------------------------------------------------
 
     private static string Kind(object content) => content?.GetType().Name ?? "";
 
@@ -958,50 +801,10 @@ internal sealed class PopOutScreen : MonoBehaviour
         return null;
     }
 
-    /// <summary>Every entry of a dictionary and its merged dictionaries, in lookup precedence, in one new dictionary.</summary>
-    private static ResourceDictionary Flatten(ResourceDictionary source)
-    {
-        var flat = new ResourceDictionary();
-        CopyInto(source, flat, 0);
-        ModLog.Debug($"{flat.Count} resources copied for the pop-out screen");
-        return flat;
-    }
-
-    private static void CopyInto(ResourceDictionary from, ResourceDictionary to, int depth)
-    {
-        if (from == null || depth > 16)
-            return;
-        ResourceDictionaryCollection merged = from.MergedDictionaries;
-        for (int i = 0; merged != null && i < merged.Count; i++)
-            CopyInto(merged[i], to, depth + 1);   // later merged dictionaries win over earlier ones,
-        foreach (object key in from.Keys)         // the dictionary's own entries over all of them
-            to[key] = from[key];
-    }
-
-    /// <summary>
-    /// Brings over what was added to the main game view's resources since the screen opened. A window remembered as
-    /// popped out opens the screen while the mission UI is still loading, and other mods add the templates of their
-    /// windows after that; without its template a window's content draws nothing.
-    /// </summary>
     private void CopyNewResources()
     {
         if (root?.Resources != null && mainView != null)
-            CopyMissing(mainView.Resources, root.Resources, 0);
-    }
-
-    // Lookup precedence again, but the first hit counts: own entries, then the merged dictionaries from the last.
-    private static void CopyMissing(ResourceDictionary from, ResourceDictionary to, int depth)
-    {
-        if (from == null || depth > 16)
-            return;
-        foreach (object key in from.Keys)
-        {
-            if (!to.Contains(key))
-                to[key] = from[key];
-        }
-        ResourceDictionaryCollection merged = from.MergedDictionaries;
-        for (int i = (merged?.Count ?? 0) - 1; i >= 0; i--)
-            CopyMissing(merged[i], to, depth + 1);
+            ScreenResources.CopyMissing(mainView.Resources, root.Resources);
     }
 
     /// <summary>Not a window inside another window's content.</summary>

@@ -18,7 +18,6 @@ internal sealed class TreeCollapse
 {
     private const float MinWindowWidth = 20f;
 
-
     private readonly GameWindow window;
     private readonly UnitTreeBrowserView view;
     private readonly FrameworkElement block;
@@ -63,8 +62,6 @@ internal sealed class TreeCollapse
         }
     }
 
-    // ---- window size --------------------------------------------------------------------------------------------
-
     private void ResizeWindow(bool treeVisible)
     {
         float width = float.IsNaN(window.Width) || window.Width <= 0f ? window.ActualWidth : window.Width;
@@ -99,8 +96,6 @@ internal sealed class TreeCollapse
         }
         GameMouse.MarkUserPositioned?.Invoke(window, null);
     }
-
-    // ---- search panel -------------------------------------------------------------------------------------------
 
     private void HidePanel()
     {

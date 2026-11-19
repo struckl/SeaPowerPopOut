@@ -51,8 +51,6 @@ internal static class WorldViewTexture
     public static bool ResolveNeeded =>
         camTexture != null && shownTexture != null && camTexture != shownTexture && camTexture.IsCreated() && shownTexture.IsCreated();
 
-    // ---- every frame, once the World View window and its Pip3DView are known --------------------------------------
-
     public static void Step(Pip3DView view, CameraManager cm)
     {
         if (DesktopGame.PhotoMode)
@@ -247,8 +245,6 @@ internal static class WorldViewTexture
             UnityEngine.Object.Destroy(shown);
         }
     }
-
-    // ---- hooks ----------------------------------------------------------------------------------------------------
 
     /// <summary>The game narrows the cameras for its pip image: only full rectangles (and our own) go through.</summary>
     public static bool AllowRect(Rect rect) => selfRects || (rect.width > 0.999f && rect.height > 0.999f);

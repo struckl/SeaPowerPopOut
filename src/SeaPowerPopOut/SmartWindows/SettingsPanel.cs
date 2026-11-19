@@ -70,8 +70,6 @@ internal static class SettingsPanel
         Show(popup, anchor);
     }
 
-    // ---- rows ---------------------------------------------------------------------------------------------------
-
     private static TextBlock Label(string key, bool bold = false, bool dim = false) => new TextBlock
     {
         Text = Loc.Get(key),

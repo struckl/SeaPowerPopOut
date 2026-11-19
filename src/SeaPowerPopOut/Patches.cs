@@ -147,7 +147,7 @@ internal static class Patches
     private static void MousePosition(NoesisView __instance, ref Vector3 __result)
     {
         if (!PopOutScreen.Quitting)
-            PopOutScreen.Instance?.FixPointer(__instance, ref __result);
+            PointerFix.Apply(__instance, ref __result);
     }
 
     private static bool GetTabIndex(object __instance, ref int __result) => FormationTabs.Get(__instance, ref __result);

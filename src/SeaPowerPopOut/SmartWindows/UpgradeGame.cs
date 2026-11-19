@@ -96,8 +96,6 @@ internal static class UpgradeGame
         ok = true;
     }
 
-    // ---- reading ------------------------------------------------------------------------------------------------
-
     public static LinearCampaignTaskForceStatusViewModel StatusOf(LinearCampaignTaskForceBuilderViewModel vm) =>
         (LinearCampaignTaskForceStatusViewModel)statusField.GetValue(vm);
 
@@ -204,8 +202,6 @@ internal static class UpgradeGame
         }
         return count;
     }
-
-    // ---- doing --------------------------------------------------------------------------------------------------
 
     /// <summary>
     /// Sells the old ship, buys the selected one with the lowered crew skill and confirms the purchase. Returns a text key

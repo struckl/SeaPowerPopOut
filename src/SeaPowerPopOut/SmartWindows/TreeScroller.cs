@@ -177,8 +177,6 @@ internal sealed class TreeScroller
         centre = false;
     }
 
-    // ---- finding things -----------------------------------------------------------------------------------------
-
     /// <summary>The rows from the top of the tree down to the entry: the entry's own row, or the deepest collapsed one above it.</summary>
     private static TreeViewItem RowFor(TreeView tree, List<MuseumEntry> path, MuseumEntry selected)
     {

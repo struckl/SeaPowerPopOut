@@ -121,8 +121,6 @@ internal static class WindowLook
         }
     }
 
-    // ---- applying ------------------------------------------------------------------------------------------------
-
     private static void Apply(GameWindow window, State state, LookValues look)
     {
         state.Applied = !look.IsDefault;
@@ -326,8 +324,6 @@ internal static class WindowLook
         }
         return 0.299f * r + 0.587f * g + 0.114f * bl;
     }
-
-    // ---- scale ---------------------------------------------------------------------------------------------------
 
     private static void ApplyScale(GameWindow window, float scale)
     {
