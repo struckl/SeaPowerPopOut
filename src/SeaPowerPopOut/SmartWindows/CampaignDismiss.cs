@@ -12,23 +12,15 @@ namespace SeaPowerPopOut.SmartWindows;
 internal static class CampaignDismiss
 {
     private static MethodInfo repairEvaluation, logisticsState;
-    private static PropertyInfo historicalReinforcements;
 
     public static bool Apply(Harmony harmony)
     {
-        Type status = AccessTools.TypeByName("SeapowerUI.ViewModels.LinearCampaignTaskForceStatusViewModel");
-        Type item = AccessTools.TypeByName("SeapowerUI.ViewModels.LinearCampaignTaskForceBuilderRosterItem");
-        if (status == null || item == null)
-        {
-            ModLog.Warn("Task Force status not found (game updated?) - damaged ships cannot be dismissed.");
-            return false;
-        }
-
-        MethodInfo canDismiss = AccessTools.Method(status, "CanDismiss", new[] { item });
-        MethodInfo refund = AccessTools.Method(status, "CalculateDismissRefund", new[] { item, typeof(int) });
+        Type status = CampaignGame.Status;
+        Type item = CampaignGame.Item;
+        MethodInfo canDismiss = CampaignGame.CanDismissMethod;
+        MethodInfo refund = CampaignGame.DismissRefundMethod;
         repairEvaluation = AccessTools.Method(status, "GetRepairEvaluation", new[] { item });
         logisticsState = AccessTools.Method(status, "GetLogisticsState", new[] { item });
-        historicalReinforcements = AccessTools.Property(status, "UsesHistoricalReinforcements");   // not in every game build
         if (canDismiss == null || refund == null || repairEvaluation == null || logisticsState == null)
         {
             ModLog.Warn("Task Force dismiss members not found (game updated?) - damaged ships cannot be dismissed.");
@@ -49,7 +41,7 @@ internal static class CampaignDismiss
             object logistics = logisticsState.Invoke(__instance, new[] { item });
             if (logistics == null || !Repair(__instance, item, out bool repairable, out _))
                 return;
-            bool historical = historicalReinforcements != null && (bool)historicalReinforcements.GetValue(__instance);
+            bool historical = CampaignGame.UsesHistoricalReinforcements(__instance);
             string airbase = Read<string>(item, "CampaignAirbaseId");
             __result = DismissRules.MayDismissDamaged(Read<bool>(item, "IsAirUnit"), !string.IsNullOrWhiteSpace(airbase),
                 historical, Read<bool>(logistics, "IsDestroyed"), repairable);

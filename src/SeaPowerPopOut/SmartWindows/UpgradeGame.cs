@@ -32,11 +32,11 @@ internal static class UpgradeGame
 {
     private static bool resolved, ok;
     private static FieldInfo statusField, crewField, creditsField;
-    private static PropertyInfo activeItems, historical;
-    private static MethodInfo canDismiss, canDecommission, dismissRefund, decommissionRefund, dismissTotal, decommissionTotal;
+    private static PropertyInfo activeItems;
+    private static MethodInfo canDecommission, decommissionRefund, dismissTotal, decommissionTotal;
     private static MethodInfo dismiss, remove, assign;
     private static MethodInfo scarcity, addSelected, confirm, refreshKeys;
-    private static MethodInfo countsAgainstCap, fleetCap, loadoutCap, scarcityCap, openIni, minCredits, skillName;
+    private static MethodInfo fleetCap, loadoutCap, scarcityCap, minCredits, skillName;
 
     public static bool Available
     {
@@ -52,8 +52,8 @@ internal static class UpgradeGame
     {
         resolved = true;
         Type builder = typeof(LinearCampaignTaskForceBuilderViewModel);
-        Type status = typeof(LinearCampaignTaskForceStatusViewModel);
-        Type rules = AccessTools.TypeByName("SeapowerUI.ViewModels.LinearCampaignTaskForceModeRules");
+        Type status = CampaignGame.Status;
+        Type rules = CampaignGame.Rules;
         Type crew = AccessTools.TypeByName("SeapowerUI.ViewModels.LinearCampaignTaskForceCrewSkillRules");
         if (rules == null || crew == null)
         {
@@ -63,10 +63,7 @@ internal static class UpgradeGame
 
         statusField = AccessTools.Field(builder, "_statusViewModel");
         activeItems = AccessTools.Property(status, "ActiveItems");
-        historical = AccessTools.Property(status, "UsesHistoricalReinforcements");     // only in newer builds
-        canDismiss = AccessTools.Method(status, "CanDismiss", new[] { typeof(Item) });
         canDecommission = AccessTools.Method(status, "CanDecommission", new[] { typeof(Item) });
-        dismissRefund = AccessTools.Method(status, "CalculateDismissRefund", new[] { typeof(Item), typeof(int) });
         decommissionRefund = AccessTools.Method(status, "CalculateDecommissionRefund", new[] { typeof(Item) });
         dismissTotal = AccessTools.Method(status, "CalculateDismissRefundTotal", new[] { typeof(Item), typeof(int) });
         decommissionTotal = AccessTools.Method(status, "CalculateDecommissionRefundTotal", new[] { typeof(Item) });
@@ -77,10 +74,9 @@ internal static class UpgradeGame
         addSelected = AccessTools.Method(builder, "AddSelectedItem", new[] { typeof(bool) });
         confirm = AccessTools.Method(builder, "ConfirmTaskForceSelection", Type.EmptyTypes);
         refreshKeys = AccessTools.Method(builder, "RefreshCurrentTaskForceOwnershipKeys", Type.EmptyTypes);
-        countsAgainstCap = AccessTools.Method(rules, "CountsAgainstFleetCap", new[] { typeof(Item) });
         fleetCap = AccessTools.Method(rules, "GetFleetCapValue", new[] { typeof(Item) });
         scarcityCap = AccessTools.Method(rules, "GetScarcitySurchargeCapValue", new[] { typeof(Item) });
-        openIni = AccessTools.Method(rules, "OpenCampaignIni", Type.EmptyTypes);
+        MethodInfo openIni = CampaignGame.OpenIniMethod;
         loadoutCap = openIni == null ? null : AccessTools.Method(rules, "GetAppliedLoadoutCapValue", new[] { openIni.ReturnType, typeof(Item) });
         minCredits = AccessTools.Method(crew, "GetMinimumSurvivalCreditsForSkill", new[] { typeof(ObjectBase.CrewSkill) });
         skillName = AccessTools.Method(crew, "GetDisplayName", new[] { typeof(ObjectBase.CrewSkill) });
@@ -88,9 +84,10 @@ internal static class UpgradeGame
         crewField = AccessTools.Field(typeof(Item), "<CrewSkill>k__BackingField");
         creditsField = AccessTools.Field(typeof(Item), "<CrewSkillSurvivalCredits>k__BackingField");
 
-        var needed = new object[] { statusField, activeItems, canDismiss, canDecommission, dismissRefund, decommissionRefund,
+        var needed = new object[] { statusField, activeItems, CampaignGame.CanDismissMethod, canDecommission,
+            CampaignGame.DismissRefundMethod, decommissionRefund,
             dismissTotal, decommissionTotal, dismiss, remove, assign, scarcity, addSelected, confirm, refreshKeys,
-            countsAgainstCap, fleetCap, scarcityCap, openIni, loadoutCap, minCredits, skillName, crewField, creditsField };
+            CampaignGame.CountsAgainstCapMethod, fleetCap, scarcityCap, openIni, loadoutCap, minCredits, skillName, crewField, creditsField };
         if (needed.Any(m => m == null))
         {
             ModLog.Warn("Upgrade ship: a game member was not found (game updated?) - feature off.");
@@ -103,9 +100,6 @@ internal static class UpgradeGame
 
     public static LinearCampaignTaskForceStatusViewModel StatusOf(LinearCampaignTaskForceBuilderViewModel vm) =>
         (LinearCampaignTaskForceStatusViewModel)statusField.GetValue(vm);
-
-    public static bool UsesHistoricalReinforcements(LinearCampaignTaskForceStatusViewModel status) =>
-        historical != null && (bool)historical.GetValue(status);
 
     public static string SkillName(int skill) => (string)skillName.Invoke(null, new object[] { (ObjectBase.CrewSkill)skill });
 
@@ -122,7 +116,7 @@ internal static class UpgradeGame
         LinearCampaignTaskForceStatusViewModel status = StatusOf(vm);
         if (status == null)
             return "up_nostatus";
-        if (UsesHistoricalReinforcements(status))
+        if (CampaignGame.UsesHistoricalReinforcements(status))
             return "up_hist";
         if (vm.PendingPurchaseItems.Count > 0 || vm.HasPendingTransactions)
             return "up_pending";
@@ -144,9 +138,9 @@ internal static class UpgradeGame
             return list;
 
         int surcharge = (int)scarcity.Invoke(null, new object[] { selected });
-        object ini = openIni.Invoke(null, null);
+        object ini = CampaignGame.OpenIni();
         int newCap = 0;
-        if ((bool)countsAgainstCap.Invoke(null, new object[] { selected }))
+        if (CampaignGame.CountsAgainstCap(selected))
         {
             newCap = (int)fleetCap.Invoke(null, new object[] { selected })
                 + (int)loadoutCap.Invoke(null, new[] { ini, selected })
@@ -157,15 +151,16 @@ internal static class UpgradeGame
         {
             if (ship.IsAirUnit || !string.Equals(ship.Category, selected.Category, StringComparison.OrdinalIgnoreCase))
                 continue;
-            bool sold = (bool)canDismiss.Invoke(status, new object[] { ship });
+            // Through the game's own dismiss rules, and so through CampaignDismiss when that is on (see CampaignGame).
+            bool sold = (bool)CampaignGame.CanDismissMethod.Invoke(status, new object[] { ship });
             bool decommission = !sold && (bool)canDecommission.Invoke(status, new object[] { ship });
             if (!sold && !decommission)
                 continue;
 
-            int oldCap = (bool)countsAgainstCap.Invoke(null, new object[] { ship }) ? (int)fleetCap.Invoke(null, new object[] { ship }) : 0;
+            int oldCap = CampaignGame.CountsAgainstCap(ship) ? (int)fleetCap.Invoke(null, new object[] { ship }) : 0;
             int refundBase = decommission
                 ? (int)decommissionRefund.Invoke(status, new object[] { ship })
-                : (int)dismissRefund.Invoke(status, new object[] { ship, 1 });
+                : (int)CampaignGame.DismissRefundMethod.Invoke(status, new object[] { ship, 1 });
             int refund = decommission
                 ? (int)decommissionTotal.Invoke(status, new object[] { ship })
                 : (int)dismissTotal.Invoke(status, new object[] { ship, 1 });

@@ -200,25 +200,9 @@ internal static class TitleMenu
             };
             body.Children.Add(row);
         }
-        popup.Child = new Border
-        {
-            Background = Brush("#F0202020"),
-            BorderBrush = Brush("#FF808080"),
-            BorderThickness = new Thickness(1f),
-            Padding = new Thickness(4f),
-            MinWidth = 140f,
-            Child = body,
-        };
-        // Noesis only shows a popup that is part of the visual tree: it lives next to the button while it is open.
-        popup.Closed += (sender, args) => host.Children.Remove(popup);
-        host.Children.Add(popup);
-        popup.IsOpen = true;
-        PopOutScreen.Instance?.PopupOpened(popup, kebab);
-    }
-
-    private static Brush Brush(string argb)
-    {
-        ColorText.TryParse(argb, out byte a, out byte r, out byte g, out byte b);
-        return new SolidColorBrush(Color.FromArgb(a, r, g, b));
+        Border frame = PopupFrame.Frame(4f, 140f);
+        frame.Child = body;
+        popup.Child = frame;
+        PopupFrame.Show(popup, kebab);
     }
 }

@@ -17,24 +17,22 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class CampaignSwapPrice
 {
-    private static MethodInfo openIni, countsAgainstCap, rosterCost, copyEmptyState, capHeadroom, formatText;
+    private static MethodInfo rosterCost, copyEmptyState, capHeadroom, formatText;
     private static FieldInfo capPoints, availablePoints;
 
     public static bool Apply(Harmony harmony)
     {
-        Type status = typeof(LinearCampaignTaskForceStatusViewModel);
-        Type item = typeof(LinearCampaignTaskForceBuilderRosterItem);
+        Type status = CampaignGame.Status;
+        Type item = CampaignGame.Item;
+        Type rules = CampaignGame.Rules;
         MethodInfo evaluate = AccessTools.Method(status, "EvaluateUnitVersionSwap");
-        Type rules = AccessTools.TypeByName("SeapowerUI.ViewModels.LinearCampaignTaskForceModeRules");   // internal class
-        rosterCost = AccessTools.Method(rules, "ReadRosterTaskForceCost");
-        openIni = AccessTools.Method(rules, "OpenCampaignIni");
-        countsAgainstCap = AccessTools.Method(rules, "CountsAgainstFleetCap");
+        rosterCost = rules == null ? null : AccessTools.Method(rules, "ReadRosterTaskForceCost");
         copyEmptyState = AccessTools.Method(item, "CopyEmptyPurchaseStateFrom");
         capHeadroom = AccessTools.Method(status, "ReadFleetCapHeadroom");
         formatText = AccessTools.Method(status, "FormatText");
         capPoints = AccessTools.Field(status, "_capPoints");
         availablePoints = AccessTools.Field(status, "_availablePoints");
-        if (evaluate == null || rules == null || openIni == null || countsAgainstCap == null || rosterCost == null || copyEmptyState == null || capHeadroom == null || formatText == null ||
+        if (evaluate == null || CampaignGame.OpenIniMethod == null || CampaignGame.CountsAgainstCapMethod == null || rosterCost == null || copyEmptyState == null || capHeadroom == null || formatText == null ||
             capPoints == null || availablePoints == null)
         {
             ModLog.Warn("Task Force hull swap pricing not found (game updated?) - swap prices stay as the game computes them.");
@@ -52,7 +50,7 @@ internal static class CampaignSwapPrice
             return;
         try
         {
-            object campaignIni = openIni.Invoke(null, null);
+            object campaignIni = CampaignGame.OpenIni();
             int roster = (int)rosterCost.Invoke(null, new object[] { campaignIni, item.UnitFolder, newUnitType, item.Category, replacement.VariantReference });
             if (roster == replacement.BaseCostPerUnit)
                 return;
@@ -84,7 +82,7 @@ internal static class CampaignSwapPrice
         if (costDelta <= 0)
             return;
         int cap = (int)capPoints.GetValue(vm);
-        if (cap > 0 && (bool)countsAgainstCap.Invoke(null, new object[] { item }))
+        if (cap > 0 && CampaignGame.CountsAgainstCap(item))
         {
             float headroom = (float)capHeadroom.Invoke(vm, null);
             if (costDelta > headroom + 0.01f)

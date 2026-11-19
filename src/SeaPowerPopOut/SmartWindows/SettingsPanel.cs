@@ -7,6 +7,8 @@ using GameWindow = SeapowerUI.Window;
 
 namespace SeaPowerPopOut.SmartWindows;
 
+using static PopupFrame;
+
 /// <summary>
 /// The settings entry in the title bar's menu of a remembered window and the settings panel it opens. Every change is written
 /// to the config at once; options that shape a window (the frame) apply to windows opened afterwards.
@@ -48,18 +50,8 @@ internal static class SettingsPanel
         body.Children.Add(Field(null, SmartSettings.WindowPatterns, text => text.Trim().Length > 0, wide: true));
         body.Children.Add(Label("note", dim: true));
 
-        var frame = new Border
-        {
-            Background = Brush("#F0202020"),
-            BorderBrush = Brush("#FF808080"),
-            BorderThickness = new Thickness(1f),
-            Padding = new Thickness(10f),
-            MinWidth = 280f,
-            Child = body,
-        };
-        // Noesis only shows a popup that is part of the visual tree: it lives next to the gear while it is open.
-        if (!(VisualTreeHelper.GetParent(anchor) is Panel host))
-            return;
+        Border frame = Frame(10f, 280f);
+        frame.Child = body;
         var popup = new Popup
         {
             Child = frame,
@@ -68,10 +60,7 @@ internal static class SettingsPanel
             StaysOpen = false,
         };
         backHolder.Tag = popup;
-        popup.Closed += (sender, args) => host.Children.Remove(popup);
-        host.Children.Add(popup);
-        popup.IsOpen = true;
-        PopOutScreen.Instance?.PopupOpened(popup, anchor);
+        Show(popup, anchor);
     }
 
     // ---- rows ---------------------------------------------------------------------------------------------------
@@ -146,12 +135,6 @@ internal static class SettingsPanel
         var box = new TextBox { Text = text, Width = width };
         box.LostFocus += (s, e) => box.Text = store(box.Text);
         return box;
-    }
-
-    private static Brush Brush(string argb)
-    {
-        ColorText.TryParse(argb, out byte a, out byte r, out byte g, out byte b);
-        return new SolidColorBrush(Color.FromArgb(a, r, g, b));
     }
 
     private static bool ValidColour(string text) => ColorText.TryParse(text, out _, out _, out _, out _);

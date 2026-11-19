@@ -5,6 +5,8 @@ using GameWindow = SeapowerUI.Window;
 
 namespace SeaPowerPopOut.SmartWindows;
 
+using static PopupFrame;
+
 /// <summary>
 /// The entry in the title bar's menu (the three dots) that opens the look menu of a window: opacity, scale, outline and level.
 /// The choices are kept per window pattern (see <see cref="LookStore"/>) and applied by <see cref="WindowLook"/>.
@@ -24,20 +26,10 @@ internal static class LookMenu
     private static void Open(UIElement anchor, string pattern)
     {
         Loc.Reload();
-        if (!(VisualTreeHelper.GetParent(anchor) is Panel host))
-            return;
-        var frame = new Border
-        {
-            Name = MenuName,
-            Background = Brush("#F0202020"),
-            BorderBrush = Brush("#FF808080"),
-            BorderThickness = new Thickness(1f),
-            Padding = new Thickness(10f),
-            MinWidth = 230f,
-        };
+        Border frame = Frame(10f, 230f);
+        frame.Name = MenuName;
         Build(frame, pattern);
 
-        // Noesis only shows a popup that is part of the visual tree: it lives next to the button while it is open.
         var popup = new Popup
         {
             Child = frame,
@@ -46,10 +38,7 @@ internal static class LookMenu
             StaysOpen = false,
         };
         frame.Tag = popup;                                  // the Back row finds the popup to close here
-        popup.Closed += (sender, args) => host.Children.Remove(popup);
-        host.Children.Add(popup);
-        popup.IsOpen = true;
-        PopOutScreen.Instance?.PopupOpened(popup, anchor);
+        Show(popup, anchor);
     }
 
     /// <summary>Fills the menu from what is stored now; called again after every change.</summary>
@@ -173,10 +162,4 @@ internal static class LookMenu
     };
 
     private static string Percent(float v) => Math.Round(v * 100f).ToString("0", CultureInfo.InvariantCulture) + " %";
-
-    private static Brush Brush(string argb)
-    {
-        ColorText.TryParse(argb, out byte a, out byte r, out byte g, out byte b);
-        return new SolidColorBrush(Color.FromArgb(a, r, g, b));
-    }
 }

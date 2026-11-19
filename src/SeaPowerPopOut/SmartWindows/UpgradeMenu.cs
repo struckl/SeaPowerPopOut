@@ -6,6 +6,8 @@ using SeapowerUI.ViewModels;
 
 namespace SeaPowerPopOut.SmartWindows;
 
+using static PopupFrame;
+
 /// <summary>
 /// The list under the "Upgrade ship" button: one card per ship that can be replaced, with what the swap costs and
 /// returns, and an Upgrade button that does it. A popup next to the button (Noesis shows a popup only while it is
@@ -19,7 +21,7 @@ internal static class UpgradeMenu
     {
         Loc.Reload();
         UpgradeGame.Unavailable(vm, out List<UpgradeCandidate> candidates);
-        if (candidates.Count == 0 || !(VisualTreeHelper.GetParent(anchor) is Panel host))
+        if (candidates.Count == 0 || !(VisualTreeHelper.GetParent(anchor) is Panel))
             return;
         Close();
 
@@ -30,26 +32,16 @@ internal static class UpgradeMenu
         foreach (UpgradeCandidate c in candidates)
             rows.Children.Add(Card(c, vm, newShip));
 
-        var frame = new Border
-        {
-            Background = Brush("#F0202020"),
-            BorderBrush = Brush("#FF808080"),
-            BorderThickness = new Thickness(1f),
-            Padding = new Thickness(8f),
-            MinWidth = 420f,
-            MaxWidth = 560f,
-            Child = new ScrollViewer { MaxHeight = 560f, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, Content = rows },
-        };
+        Border frame = Frame(8f, 420f);
+        frame.MaxWidth = 560f;
+        frame.Child = new ScrollViewer { MaxHeight = 560f, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, Content = rows };
         var popup = new Popup { Child = frame, PlacementTarget = anchor, Placement = PlacementMode.Top, StaysOpen = false };
-        popup.Closed += (s, e) =>
+        open = popup;
+        Show(popup, anchor, () =>
         {
-            host.Children.Remove(popup);
             if (ReferenceEquals(open, popup))
                 open = null;
-        };
-        host.Children.Add(popup);
-        open = popup;
-        popup.IsOpen = true;
+        });
     }
 
     public static void Close()
@@ -67,11 +59,11 @@ internal static class UpgradeMenu
         text.Children.Add(Text(Format(c.Surcharge > 0 ? "up_price_sur" : "up_price", c.Cost, c.Surcharge), "#FFE0E0E0", 12f, wrap: true));
         text.Children.Add(Text($"{Loc.Get("up_crew")}: {UpgradeGame.SkillName(c.OldSkill)} -> {UpgradeGame.SkillName(c.NewSkill)}"
             + (c.NewSkill == c.OldSkill ? $" ({Loc.Get("up_min")})" : ""), c.NewSkill < c.OldSkill ? "#FFFFC060" : "#FFA0A0A0", 12f));
-        int after = c.Available + c.RefundBase - c.Cost - c.Surcharge;
+        int after = UpgradeRules.PointsAfter(c.Available, c.RefundBase, c.Cost, c.Surcharge);
         text.Children.Add(Text(Format("up_points2", c.Available, after), after >= 0 ? "#FF80E080" : "#FFFF7070", 12f));
         if (c.Cap > 0)
         {
-            int fleet = c.FleetValue - c.OldCap + c.NewCap;
+            int fleet = UpgradeRules.FleetAfter(c.FleetValue, c.OldCap, c.NewCap);
             text.Children.Add(Text(Format("up_fleet", c.FleetValue, fleet, c.Cap), fleet <= c.Cap ? "#FF80E080" : "#FFFF7070", 12f));
         }
         if (c.Aircraft > 0)
@@ -133,10 +125,4 @@ internal static class UpgradeMenu
         TextWrapping = wrap ? TextWrapping.Wrap : TextWrapping.NoWrap,
         Margin = new Thickness(0f, 1f, 0f, 1f),
     };
-
-    private static Brush Brush(string argb)
-    {
-        ColorText.TryParse(argb, out byte a, out byte r, out byte g, out byte b);
-        return new SolidColorBrush(Color.FromArgb(a, r, g, b));
-    }
 }

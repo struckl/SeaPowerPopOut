@@ -23,10 +23,16 @@ internal static class UpgradeRules
     public static UpgradeBlock Check(int available, int pending, int cost, int surcharge, int refund,
         int cap, int fleetValue, int oldShipCap, int newShipCap)
     {
-        if (pending + cost + surcharge > available + refund)
+        if (PointsAfter(available, refund, cost, surcharge) - pending < 0)
             return UpgradeBlock.Points;
-        if (cap > 0 && fleetValue - oldShipCap + newShipCap > cap)
+        if (cap > 0 && FleetAfter(fleetValue, oldShipCap, newShipCap) > cap)
             return UpgradeBlock.FleetCap;
         return UpgradeBlock.None;
     }
+
+    /// <summary>The campaign points left after the old ship is sold and the new one bought.</summary>
+    public static int PointsAfter(int available, int refund, int cost, int surcharge) => available + refund - cost - surcharge;
+
+    /// <summary>The fleet value with the new ship in place of the old one.</summary>
+    public static int FleetAfter(int fleetValue, int oldShipCap, int newShipCap) => fleetValue - oldShipCap + newShipCap;
 }
