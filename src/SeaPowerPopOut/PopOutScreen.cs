@@ -40,7 +40,6 @@ internal sealed class PopOutScreen : MonoBehaviour
     private const float SaveInterval = 3f;
     private const float DesignHeight = 1080f;
     private const float FrameWidth = 5f;          // resize border around popped-out windows (window units)
-    private const float SnapDistance = 6f;        // window units
     private const string FrameBrushKey = "Brush.Window.Header";
 
     private static readonly MethodInfo CreateView = AccessTools.Method(typeof(NoesisView), "CreateView", new[] { typeof(FrameworkElement) });
@@ -135,7 +134,6 @@ internal sealed class PopOutScreen : MonoBehaviour
     private readonly List<(UIElement element, float since)> overlays = new List<(UIElement, float)>();
     private readonly List<UnityEngine.Rect> keep = new List<UnityEngine.Rect>();
     private readonly List<UnityEngine.Rect> lastKeep = new List<UnityEngine.Rect>();
-    private static readonly ConditionalWeakTable<GameWindow, object> Snapping = new ConditionalWeakTable<GameWindow, object>();
     private static bool overlayHooks;
 
     // The game's unit menu (right-click in the formation manager) and our copy of it, see BuildMenu.
@@ -781,69 +779,7 @@ internal sealed class PopOutScreen : MonoBehaviour
     {
         if (!windows.Contains(window))
             windows.Add(window);
-        if (window.HeaderThumb != null && !Snapping.TryGetValue(window, out _))
-        {
-            Snapping.Add(window, new object());
-            // Runs after the game's own handler, which has just moved the window with the mouse.
-            window.HeaderThumb.DragDelta += (sender, args) => SnapWindow(window);
-        }
-    }
-
-    /// <summary>
-    /// Snaps a dragged window to the monitor's edges and to the other windows there: side by side or stacked with
-    /// one frame between them, edges in line. The game's drag handler has just set the unsnapped position (the
-    /// header thumb measures the mouse from where it was grabbed), so a snap never accumulates.
-    /// </summary>
-    private void SnapWindow(GameWindow window)
-    {
-        if (!Settings.Snap.Value || items == null || window.Maximized || SmartWindows.SnapController.Suspended)
-            return;
-        float w = window.ActualWidth, h = window.ActualHeight, x = window.X, y = window.Y;
-        if (w <= 0f || h <= 0f)
-            return;
-        float bestX = x, bestY = y, dx = SnapDistance, dy = SnapDistance;
-        void TryX(float c)
-        {
-            float d = Math.Abs(c - x);
-            if (d < dx) { dx = d; bestX = c; }
-        }
-        void TryY(float c)
-        {
-            float d = Math.Abs(c - y);
-            if (d < dy) { dy = d; bestY = c; }
-        }
-
-        TryX(0f);
-        TryX(items.ActualWidth - w);
-        TryY(0f);
-        TryY(items.ActualHeight - h);
-        foreach (GameWindow other in windows)
-        {
-            if (ReferenceEquals(other, window) || other.Visibility != Visibility.Visible)
-                continue;
-            float ox = other.X, oy = other.Y, ow = other.ActualWidth, oh = other.ActualHeight;
-            float gap = Math.Max(window.ResizeHandleWidth, other.ResizeHandleWidth);
-            bool beside = y < oy + oh + gap + SnapDistance && y + h > oy - gap - SnapDistance;
-            bool stacked = x < ox + ow + gap + SnapDistance && x + w > ox - gap - SnapDistance;
-            if (beside)
-            {
-                TryX(ox + ow + gap);
-                TryX(ox - gap - w);
-                TryY(oy);
-                TryY(oy + oh - h);
-            }
-            if (stacked)
-            {
-                TryY(oy + oh + gap);
-                TryY(oy - gap - h);
-                TryX(ox);
-                TryX(ox + ow - w);
-            }
-        }
-        if (bestX != x)
-            window.X = bestX;
-        if (bestY != y)
-            window.Y = bestY;
+        SmartWindows.SnapController.OnPopOutMonitor(window, windows, () => items);
     }
 
     /// <summary>What of the monitor stays visible: every window with its frame, and its open popups.</summary>

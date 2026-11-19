@@ -73,6 +73,66 @@ internal static class WindowGeometry
     }
 
     /// <summary>
+    /// The pop-out monitor's rule: snaps a window (by position only) to the edges of the area and to the windows beside
+    /// or above / below it, with its gap (one resize frame) between them and its other edges in line with theirs. Each
+    /// axis takes the nearest target closer than the distance.
+    /// </summary>
+    public static WinRect SnapApart(WinRect moving, IList<(WinRect rect, float gap)> others, WinRect area, float distance)
+    {
+        var x = new Nearest(moving.X, distance);
+        var y = new Nearest(moving.Y, distance);
+        x.Try(area.X);
+        x.Try(area.Right - moving.W);
+        y.Try(area.Y);
+        y.Try(area.Bottom - moving.H);
+        foreach ((WinRect o, float gap) in others)
+        {
+            float reach = gap + distance;
+            if (moving.Y < o.Bottom + reach && moving.Bottom > o.Y - reach)
+            {
+                x.Try(o.Right + gap);
+                x.Try(o.X - gap - moving.W);
+                y.Try(o.Y);
+                y.Try(o.Bottom - moving.H);
+            }
+            if (moving.X < o.Right + reach && moving.Right > o.X - reach)
+            {
+                y.Try(o.Bottom + gap);
+                y.Try(o.Y - gap - moving.H);
+                x.Try(o.X);
+                x.Try(o.Right - moving.W);
+            }
+        }
+        return new WinRect(x.Best, y.Best, moving.W, moving.H);
+    }
+
+    /// <summary>The target nearest to a start value, if closer than the distance; else the start value.</summary>
+    private sealed class Nearest
+    {
+        private readonly float from;
+        private float within;
+
+        public Nearest(float from, float distance)
+        {
+            this.from = from;
+            within = distance;
+            Best = from;
+        }
+
+        public float Best { get; private set; }
+
+        public void Try(float target)
+        {
+            float d = Math.Abs(target - from);
+            if (d < within)
+            {
+                within = d;
+                Best = target;
+            }
+        }
+    }
+
+    /// <summary>
     /// Keeps the window reachable: at least <paramref name="minVisible"/> pixels of its width stay on screen at the
     /// left and right edge, and its title bar (the top <paramref name="titleHeight"/> pixels) stays on screen.
     /// </summary>
