@@ -99,7 +99,9 @@ mod, rewritten in the `SmartWindows/` folder. Thanks to rgreat for the original.
   plain backdrop. Both were run in the game.
 
 Settings are in `BepInEx/config/dev.sewerlabs.seapowerpopout.smartwindows.cfg`; each feature has its own switch and
-`Enable window memory = false` turns all of it off. Tested in the game on 0.8.7 (see `CHANGELOG.md` for what was and
+`Enable window memory = false` turns all of it off. Snapping has two switches: `3. Placement > Snap windows` (with
+`Snap distance`) for the main screen, Pop-Out's own `2. Pop-out screen > Snap windows` for the pop-out monitor (fixed
+distance 6, windows one resize frame apart). Tested in the game on 0.8.7 (see `CHANGELOG.md` for what was and
 was not run); `modtool compat` passes for the globe build, which has not been run in the game.
 
 ## Compatibility
@@ -184,16 +186,24 @@ src/SeaPowerPopOut/
   Patches.cs          every hook: WindowHost open/close, Window loaded, mouse over UI, NoesisView pointer,
                       mission start/end, formation manager tabs
   PopOutScreen.cs     the pop-out monitor (display, NoesisView, second WindowHost), title-bar buttons, moving
-                      windows between the screens, unit menu, see-through cut-out, snapping, pointer fix
+                      windows between the screens
+  ScreenCutOut.cs     what of the see-through monitor stays visible (windows, open tooltips and menus)
+  UnitMenuCopy.cs     the game's unit menu on the pop-out monitor
+  ScreenResources.cs  the pop-out screen's copy of the main view's resources
+  PointerFix.cs       the pointer of views on other monitors
+  GameMouse.cs        the game's mouse state, shared with Smart Windows
   MonitorWindow.cs    the Unity window of the pop-out display: found, cut to the windows, kept on top
   CornerResize.cs     wide resize corners on every game window
   FormationTabs.cs    the formation manager's tab index counted over every tab (game bug)
   Native.cs           the Win32 calls (window region, topmost, mouse button state)
-  Layout.cs           remembered popped-out windows and their placement
+  Layout.cs           remembered popped-out windows and their placement (same store as SmartWindows/SavedLayouts)
   Settings.cs         config
+  SmartWindows/       the Smart Windows features: each declares its switch, hooks and handlers (Feature.cs),
+                      SmartFeatures.cs runs them in order; SnapController.cs snaps on both screens
   mod/_info.ini       Mod Manager entry
 tools/package.ps1     release build → dist/SeaPowerPopOut/
-tools/shot-director/  dev-only plugin and scripts that took the Workshop screenshots (docs/workshop.md)
+tools/shot-director/  dev-only plugin and scripts that took the Workshop screenshots (docs/workshop.md); keeps the
+                      pop-out commands (popout, popin, place, rclick ...) the workspace's tools/perf-director lacks
 workshop/             Workshop description, preview.jpg, screenshots/
 ```
 

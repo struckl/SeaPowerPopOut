@@ -9,6 +9,15 @@
   - Its title bar has a menu of its own: a click on our button opened theirs
   - Windows of other authors' mods now keep their title bar as their author made it (no Pop-Out menu); the game's windows and R.A.T.S. windows keep it
 - The mod folder carries this CHANGELOG.md, so R.A.T.S. Keel's What's new can show what changed when there are no Workshop notes (a local copy, the GitHub zip).
+- **Fixed: the "Upgrade ship" list could be cut off on the see-through pop-out monitor**
+  - Cause: it was the one popup of the mod that did not tell the pop-out screen it was open
+  - Now every popup of the mod opens the same way
+- Changed (internal): the Smart Windows features declare their own switch, hooks and handlers; one list runs them (was: the window memory and one hook file knew every feature)
+- Changed (internal): one snap feature for both screens, one layout store for both screens, one Unit Status tab host for the Reference and Track tabs, the Unit Reference tree sorted and grouped by one hook
+- Changed (internal): repeated code written once (visual tree search, UI scale, popup frame, campaign members, retries); long functions split; PopOutScreen split into smaller classes
+- Changed (internal): a window brought back after hiding the Unit Reference tree keeps 30 units of its title bar on screen like every other window (was 28)
+- Changed (internal): a missing "Only countries with units" hook no longer writes the setting off into the config; the feature just stays off for that run
+- Removed: `tools/workshop-upload` (the workspace's `modtool workshop` does it)
 
 ## 1.2.3 - 2026-11-12 - in-game name R.A.T.S. Pop-Out Windows
 
