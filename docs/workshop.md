@@ -8,8 +8,8 @@ owns the item. No SteamCMD needed.
 1. Bump the version in `src/SeaPowerPopOut/Plugin.cs` (`Version`) and `src/SeaPowerPopOut/SeaPowerPopOut.csproj`
    (`<Version>`), add the entry to [CHANGELOG.md](../CHANGELOG.md).
 2. Check `src/SeaPowerPopOut/mod/_info.ini`: Mod Manager name and description, and `[Compatibility]`
-   (`ApproximateVersion` = the game version tested against; it accepts later patch versions of that minor
-   version).
+   (`GreaterThanEqualToVersion` and `LessThanVersion` = the game versions it declares to fit; the game skips
+   Workshop updates whose declaration does not fit).
 3. Run the checklist in [testing.md](testing.md) on the current game version.
 4. Close Sea Power, then stage and install the release folder:
 
