@@ -28,16 +28,15 @@ namespace SeaPowerPopOut;
 /// or drop-down they have open, so around them the desktop shows through and the windows float freely.</para>
 /// </summary>
 [DefaultExecutionOrder(10000)]   // LateUpdate after the NoesisViews: the cut-out follows this frame's layout
-internal sealed class PopOutScreen : MonoBehaviour
+internal sealed class PopOutScreen : ModHost
 {
-    internal static PopOutScreen Instance { get; private set; }
+    internal static new PopOutScreen Instance => (PopOutScreen)ModHost.Instance;
 
     // The map and its 3D inset stay on the main screen: they lean on its layout, and the game has its own options
     // to put the map or the world view on another monitor.
     private static readonly HashSet<string> StayHome = new HashSet<string> { SmartWindows.GameWindows.MapViewModel, SmartWindows.GameWindows.WorldViewModel };
 
     private const float SaveInterval = 3f;
-    private const float HookCheckInterval = 0.5f;      // until the game's first window host exists
     private const float YieldCheckInterval = 1f;       // while no screen is open: does the game want a monitor back?
     private const int ReleaseAfterFrames = 3;          // a release the screen does get arrives a frame or two late
     private const int ShapeErrorsLogged = 3;           // the cut-out runs every frame: an error is not logged each time
@@ -143,24 +142,17 @@ internal sealed class PopOutScreen : MonoBehaviour
     private readonly Queue<Action> deferred = new Queue<Action>();
     private float nextSave, nextYieldCheck;
 
-    // Stage two of the patches (see Patches): applied once the game's first window host exists.
-    private enum WindowHooks { Waiting, Applied, Failed }
-    private WindowHooks windowHooks = WindowHooks.Waiting;
-    private float nextHookCheck;
+    // Stage two of the patches (see Patches) goes in once the game's first window host exists; the Smart Windows hooks follow.
+    private Harmony smartHarmony;
 
-    private void Awake() => Instance = this;
+    // Until the game's first window host exists.
+    protected override float HookPollSeconds => 0.5f;
 
-    private void Update()
+    protected override void Tick()
     {
         SmartWindows.SmartFeatures.Update();
-        if (windowHooks == WindowHooks.Waiting && Time.unscaledTime >= nextHookCheck)
-        {
-            nextHookCheck = Time.unscaledTime + HookCheckInterval;
-            // A WindowHost registers itself with WindowHostManager when it is built, which only happens while
-            // NoesisGUI runs (the main menu view has one) - from then on Noesis types are safe to touch.
-            if (Singleton<WindowHostManager>.InstanceExists())
-                ApplyWindowHooks();
-        }
+        if (smartHarmony == null && HookRegistry.IsActive(Patches.WindowsFeature))
+            ApplySmartHooks();
         while (deferred.Count > 0)
         {
             try { deferred.Dequeue()(); }
@@ -204,61 +196,43 @@ internal sealed class PopOutScreen : MonoBehaviour
         }
     }
 
-    /// <summary>True from the moment the game starts to close: nothing touches Noesis after that.</summary>
-    internal static bool Quitting { get; private set; }
-
     /// <summary>
-    /// The game closes: the pop-out screen goes now, while every Noesis view is still alive. Unity calls this before any
-    /// OnDestroy; the game's GameMain.OnDestroy (our mission-end hook) used to tear the screen down later, in the middle of
-    /// the shutdown, when Noesis was being taken apart already - an access violation in Noesis.dll on quit (Keel report #6).
+    /// The game closes (ModHost calls this from OnApplicationQuit, before any OnDestroy): the pop-out screen goes now, while
+    /// every Noesis view is still alive. The game's GameMain.OnDestroy (the mission-end hook) used to tear the screen down later,
+    /// in the middle of the shutdown, when Noesis was being taken apart already - an access violation in Noesis.dll on quit
+    /// (Keel report #6).
     /// </summary>
-    private void OnApplicationQuit()
+    protected override void Teardown()
     {
         Layout.Save();
         SmartWindows.SmartFeatures.Save();
-        Quitting = true;
-        try
-        {
-            if (host != null)
-                Teardown();
-        }
-        catch (Exception ex)
-        {
-            ModLog.Debug($"teardown on quit: {ex.Message}");
-        }
+        if (host != null)
+            TearDownScreen();
         mainView = null;
         mainHost = null;
     }
 
-    private void ApplyWindowHooks()
+    private void ApplySmartHooks()
     {
-        try
-        {
-            windowHooks = Patches.ApplyWindowHooks() ? WindowHooks.Applied : WindowHooks.Failed;
-        }
-        catch (Exception ex)
-        {
-            windowHooks = WindowHooks.Failed;
-            ModLog.Error($"Window hooks failed, pop-out inactive: {ex}");
-        }
+        smartHarmony = new Harmony(ModInfo.Guid);
+        SmartWindows.SmartFeatures.Apply(smartHarmony);
 
         // Listed here rather than at plugin load, where Unity reported only the game's monitor.
         Display[] displays = Display.displays;
         for (int i = 0; i < displays.Length; i++)
             ModLog.Info($"Monitor {i + 1}: {displays[i].systemWidth}x{displays[i].systemHeight}" + (i == 0 ? " (game)" : ""));
-        if (windowHooks == WindowHooks.Applied)
-            ModLog.Info(DisplayAvailable
-                ? $"Window hooks in place. Pop-out monitor: {ChooseDisplay() + 1}"
-                : "Window hooks in place. Only one monitor - the pop-out buttons stay hidden.");
+        ModLog.Info(DisplayAvailable
+            ? $"Window hooks in place. Pop-out monitor: {ChooseDisplay() + 1}"
+            : "Window hooks in place. Only one monitor - the pop-out buttons stay hidden.");
     }
 
-    internal void MissionReady()
+    protected override void OnMissionReady()
     {
         try
         {
             // A screen left over from another mission goes; one opened while this mission's UI was loading stays.
             if (host != null && !ReferenceEquals(builtFor, MainGameView.Instance))
-                Teardown();
+                TearDownScreen();
             if (MainHost == null)
             {
                 ModLog.Warn("The main screen's window host wasn't found - pop-out is off for this mission.");
@@ -280,14 +254,12 @@ internal sealed class PopOutScreen : MonoBehaviour
         }
     }
 
-    internal void MissionEnded()
+    protected override void OnMissionEnded()
     {
-        if (Quitting)
-            return;                                   // torn down in OnApplicationQuit; Noesis is going away now
         try
         {
             Layout.Save();
-            Teardown();
+            TearDownScreen();
             mainView = null;
             mainHost = null;
         }
@@ -508,7 +480,7 @@ internal sealed class PopOutScreen : MonoBehaviour
         catch (Exception ex)
         {
             ModLog.Error($"Could not open the pop-out screen: {ex}");
-            Teardown();
+            TearDownScreen();
             return false;
         }
     }
@@ -671,7 +643,7 @@ internal sealed class PopOutScreen : MonoBehaviour
         }
     }
 
-    private void Teardown()
+    private void TearDownScreen()
     {
         deferred.Clear();
         try

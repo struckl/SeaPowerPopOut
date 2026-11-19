@@ -38,9 +38,6 @@ internal static class WindowMemory
     /// <summary>The remembered-window pattern of a window (the key of its layout and look), or null.</summary>
     public static string PatternOf(GameWindow window) => Active ? patterns.Match(WindowNames.Of(window)) : null;
 
-    /// <summary>Plugin's call at load: starts every Smart Windows feature, this one among them.</summary>
-    public static void Init() => SmartFeatures.Init();
-
     private static void Start()
     {
         patterns = new PatternList(SmartSettings.WindowPatterns.Value);

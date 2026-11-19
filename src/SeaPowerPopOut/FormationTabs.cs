@@ -14,7 +14,7 @@ namespace SeaPowerPopOut;
 /// </summary>
 internal static class FormationTabs
 {
-    private const string TypeName = "SeapowerUI.ViewModels.FormationManagerViewModel";
+    internal const string TypeName = "SeapowerUI.ViewModels.FormationManagerViewModel";
 
     private static FieldInfo selected;        // FormationManagerCategory _selectedCategory
     private static FieldInfo tabOrder;        // static FormationManagerCategory[] TabOrder: the TabControl's order

@@ -125,8 +125,10 @@ For a bug, add `<Sea Power>\BepInEx\LogOutput.log` as a link; it has a line for 
 
 ## Building from source
 
-Requires the .NET SDK 8, Sea Power installed, and Anchor Chain subscribed (the build references the game's and
-Anchor Chain's assemblies).
+Requires the .NET SDK 8 and Sea Power installed (the build references the game's assemblies). Anchor Chain's library
+comes from Keel's copy, and the common project part, entry point, host, log, settings and hook registry are the shared
+skeleton in the Keel repo (`SeaPowerKeel\shared`, found through the workspace folder with `mods.json` above this repo;
+`-p:RatsWorkspace=<folder>` for a clone elsewhere).
 
 **Two game versions, one build.** Sea Power exists in 0.8.7 (flat map) and the 3D-globe build (the public beta of
 26 October 2026). The windows and the Harmony targets this mod uses are the same in both: a DLL built against either
@@ -182,11 +184,12 @@ height from the camera itself so the correction is zero where the game already g
 
 ```
 src/SeaPowerPopOut/
-  Plugin.cs           entry point (Anchor Chain plugin)
-  Patches.cs          every hook: WindowHost open/close, Window loaded, mouse over UI, NoesisView pointer,
-                      mission start/end, formation manager tabs
+  Plugin.cs           entry point (the shared ModEntry starts it)
+  ModInfo.cs          what the shared skeleton reads: GUID, name, version, log source
+  Patches.cs          every hook, declared in the shared HookRegistry: WindowHost open/close, Window loaded, mouse over
+                      UI, NoesisView pointer, formation manager tabs (mission start/end: the shared MissionHooks)
   PopOutScreen.cs     the pop-out monitor (display, NoesisView, second WindowHost), title-bar buttons, moving
-                      windows between the screens
+                      windows between the screens; it is the mod's host (shared ModHost)
   ScreenCutOut.cs     what of the see-through monitor stays visible (windows, open tooltips and menus)
   UnitMenuCopy.cs     the game's unit menu on the pop-out monitor
   ScreenResources.cs  the pop-out screen's copy of the main view's resources

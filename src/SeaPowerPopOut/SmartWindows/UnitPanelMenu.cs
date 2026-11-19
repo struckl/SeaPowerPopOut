@@ -60,7 +60,7 @@ internal static class UnitPanelMenu
     private static bool OverFlagOrName(FrameworkElement view, MouseButtonEventArgs e)
     {
         DependencyObject hit = VisualTreeHelper.HitTest(view, e.GetPosition(view)).VisualHit ?? e.Source as DependencyObject;
-        System.Text.StringBuilder seen = Settings.VerboseLog.Value ? new System.Text.StringBuilder() : null;
+        System.Text.StringBuilder seen = ModSettings.Verbose ? new System.Text.StringBuilder() : null;
         for (int i = 0; hit != null && i < ParentsToCheck; i++, hit = VisualTreeHelper.GetParent(hit))
         {
             string path = hit is Image ? Bindings.PathOf(hit, Image.SourceProperty)

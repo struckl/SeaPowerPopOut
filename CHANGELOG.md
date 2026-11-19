@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Changed (internal): the mod's start, log, Mod Manager check, config file, hook list, mission start/end hooks and quit guard are the shared R.A.T.S. skeleton, as in the other mods; one DLL for both games as before
+  - A mistake in a per-frame update is now logged (the first five only) and the next frame goes on
+  - The main config file is written a moment after the last change instead of on every change, and at once when the game closes
+  - The Mod Manager check reads its line a little more leniently (any number after "Mod")
+  - A hook that fails halfway takes the ones before it back out; a missing optional hook (formation tabs, pointer) says so in the log in the shared wording
 - **Fixed: a crash in Noesis.dll when closing the game** (Keel report #6)
   - Cause: the pop-out screen was taken down in the middle of the game's shutdown, when the UI engine was being taken apart already
   - Now it goes first, when the game starts to close; from then on the mod leaves every window to the game

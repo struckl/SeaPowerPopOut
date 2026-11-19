@@ -1,14 +1,11 @@
-﻿using System;
+using System.Runtime.CompilerServices;
 using AnchorChain;
-using HarmonyLib;
-using UnityEngine;
 
 namespace SeaPowerPopOut;
 
 /// <summary>
-/// Entry point. Loaded by Anchor Chain (the Sea Power community chainloader on top of BepInEx 5), which scans
-/// every mod folder â€” Steam Workshop items and <c>StreamingAssets/&lt;folder&gt;</c> â€” for classes implementing
-/// <see cref="IAnchorChainMod"/>.
+/// Entry point. A mod loader (Keel or Anchor Chain) finds the class by its attribute and calls TriggerEntryPoint; the
+/// start itself is the shared ModEntry.
 /// </summary>
 [ACPlugin(Guid, Name, Version)]
 public class Plugin : IAnchorChainMod
@@ -17,52 +14,18 @@ public class Plugin : IAnchorChainMod
     public const string Name = "R.A.T.S. Pop-Out Windows";
     public const string Version = "1.2.3";
 
-    // Anchor Chain loads assemblies with Assembly.LoadFile, so the same DLL found in two folders would be two
-    // separate assemblies with separate statics. The marker lives on the AppDomain so only the first one starts.
-    private const string LoadedMarker = Guid + ".loaded";
+    public void TriggerEntryPoint() => ModEntry.Trigger(Start);
 
-    public void TriggerEntryPoint()
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void Start() => ModEntry.Start<PopOutScreen>(Settings.Bind, Patches.Declare, Steps);
+
+    // After the settings and the load-stage hooks: only the hooks on plain game classes so far, the window hooks follow once
+    // NoesisGUI runs (see Patches).
+    private static void Steps()
     {
-        if (AppDomain.CurrentDomain.GetData(LoadedMarker) != null)
-        {
-            ModLog.Warn("Already loaded from another folder; skipping this copy.");
-            return;
-        }
-        AppDomain.CurrentDomain.SetData(LoadedMarker, true);
-
-        try
-        {
-            if (!ModState.TickedInModManager())
-            {
-                ModLog.Info("Unticked in the Mod Manager - inactive.");
-                return;
-            }
-            Native.CaptureMainWindow();
-            Settings.Init();
-            if (!Settings.Enabled.Value)
-            {
-                ModLog.Info("Disabled in config.");
-                return;
-            }
-            Layout.Load();
-            SmartWindows.SmartSettings.Init();
-            SmartWindows.WindowMemory.Init();
-
-            // Only the hooks on plain game classes now; the window hooks follow once NoesisGUI runs (see Patches).
-            if (!Patches.ApplyGameHooks(new Harmony(Guid)))
-                return;
-
-            var host = new GameObject("SeaPowerPopOut");
-            UnityEngine.Object.DontDestroyOnLoad(host);
-            host.hideFlags = HideFlags.HideAndDontSave;
-            host.AddComponent<PopOutScreen>();
-
-            ModLog.Info($"{Name} {Version} loaded.");
-        }
-        catch (Exception ex)
-        {
-            // Never take the game down with us.
-            ModLog.Error($"Startup failed, mod inactive: {ex}");
-        }
+        Native.CaptureMainWindow();
+        Layout.Load();
+        SmartWindows.SmartSettings.Init();
+        SmartWindows.SmartFeatures.Init();
     }
 }

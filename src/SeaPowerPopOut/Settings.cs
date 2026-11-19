@@ -1,5 +1,3 @@
-using System.IO;
-using BepInEx;
 using BepInEx.Configuration;
 
 namespace SeaPowerPopOut;
@@ -11,9 +9,6 @@ namespace SeaPowerPopOut;
 /// </summary>
 internal static class Settings
 {
-    public static ConfigEntry<bool> Enabled;
-    public static ConfigEntry<bool> VerboseLog;
-
     public static ConfigEntry<int> Monitor;
     public static ConfigEntry<float> Scale;
     public static ConfigEntry<bool> UnlimitedSize;
@@ -26,15 +21,9 @@ internal static class Settings
 
     public static ConfigEntry<bool> WideCorners;
 
-    public static void Init()
+    /// <summary>Binds the entries after the shared "1. General" section (ModSettings).</summary>
+    public static void Bind(ConfigFile file)
     {
-        var file = new ConfigFile(Path.Combine(Paths.ConfigPath, Plugin.Guid + ".cfg"), saveOnInit: true);
-
-        Enabled = file.Bind("1. General", "Enable mod", true,
-            "Master switch. Needs a restart.");
-        VerboseLog = file.Bind("1. General", "Verbose log", false,
-            "Write debug detail to BepInEx/LogOutput.log.");
-
         Monitor = file.Bind("2. Pop-out screen", "Monitor", 0,
             new ConfigDescription("Monitor the windows pop out to. 0 = automatic: the first monitor the game doesn't " +
                                   "use itself. 2 = the next monitor after the game's, 3 the one after - " +

@@ -1,49 +1,57 @@
 <#
 .SYNOPSIS
-    Builds a release of Sea Power Pop-Out Windows and stages the folder that goes to the Steam Workshop.
+    Builds a release of Sea Power: R.A.T.S. Pop-Out Windows and stages the folder that goes to the Steam Workshop.
 
 .DESCRIPTION
     Release build without the automatic deploy, then dist\SeaPowerPopOut\ with exactly what players get:
-    SeaPowerPopOut.dll, _info.ini, lang\*.ini, LICENSE.txt, CHANGELOG.md and preview.jpg – the Workshop preview (workshop\preview.jpg, if
-    present), which the game's upload screen only lets you pick from inside StreamingAssets.
-    With -Install the staged folder also replaces <GameDir>\Sea Power_Data\StreamingAssets\SeaPowerPopOut\, the
-    folder to pick in the game's Create Mod screen. Sea Power must be closed for that.
+    SeaPowerPopOut.dll (one DLL for both game versions), _info.ini, lang\*.ini, LICENSE.txt, CHANGELOG.md and preview.jpg - the
+    Workshop preview (workshop\preview.jpg, if present), which the game's upload screen only lets you pick from inside StreamingAssets.
+    The DLL is checked against both games' assemblies with the workspace's tools\compat-check: nothing missing on either.
+    The globe game's assemblies are -GlobeManagedDir when the installed game isn't the globe version; the 0.8.7 ones
+    -FlatManagedDir (default: _gamerefs in the workspace).
+    With -Install the staged folder also replaces <GameDir>\Sea Power_Data\StreamingAssets\SeaPowerPopOut\, the folder to pick in
+    the game's Create Mod screen. Sea Power must be closed for that. -Zip also writes dist\SeaPowerPopOut-<version>.zip.
+    The steps are the shared ones of every R.A.T.S. mod (SeaPowerKeel\shared\tools\RatsPackage.psm1); the workspace is found
+    above this repo, -Workspace names it for a clone elsewhere, -RatsShared another copy of the shared folder.
 
 .EXAMPLE
     powershell -ExecutionPolicy Bypass -File tools\package.ps1 -Install
 #>
 param(
     [string]$GameDir = $(if ($env:GameDir) { $env:GameDir } else { 'E:\Games\steamapps\common\Sea Power' }),
-    [switch]$Install
+    [string]$Workspace = $env:RatsWorkspace,
+    [string]$RatsShared = $env:RatsShared,
+    [string]$FlatManagedDir = $env:FlatManagedDir,
+    # The globe game's assemblies when the installed game isn't the globe version (a saved copy of its Managed).
+    [string]$GlobeManagedDir = $env:GlobeManagedDir,
+    [switch]$Install,
+    [switch]$Zip
 )
 
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
-$project = Join-Path $root 'src\SeaPowerPopOut\SeaPowerPopOut.csproj'
-$dist = Join-Path $root 'dist\SeaPowerPopOut'
-
-dotnet build $project -c Release -p:Deploy=false -p:GameDir="$GameDir"
-if ($LASTEXITCODE -ne 0) { throw 'Build failed.' }
-
-$out = Join-Path $root 'src\SeaPowerPopOut\bin\Release\netstandard2.1'
-if (Test-Path $dist) { Remove-Item -Recurse -Force $dist }
-New-Item -ItemType Directory -Force $dist | Out-Null
-Copy-Item (Join-Path $out 'SeaPowerPopOut.dll') $dist
-Copy-Item (Join-Path $root 'src\SeaPowerPopOut\mod\_info.ini') $dist
-# The window-handling texts in the game's nine languages, read from next to the DLL.
-Copy-Item -Recurse (Join-Path $root 'src\SeaPowerPopOut\mod\lang') (Join-Path $dist 'lang')
-Copy-Item (Join-Path $root 'LICENSE') (Join-Path $dist 'LICENSE.txt')
-Copy-Item (Join-Path $root 'CHANGELOG.md') $dist   # Keel's What's new shows its newest lines when there are no Workshop notes (local copies, GitHub zips)
-$preview = Join-Path $root 'workshop\preview.jpg'
-if (Test-Path $preview) { Copy-Item $preview $dist } else { Write-Warning 'workshop\preview.jpg missing - nothing to pick as the Workshop preview.' }
-
-$version = (Select-String -Path (Join-Path $root 'src\SeaPowerPopOut\Plugin.cs') -Pattern 'Version = "([^"]+)"').Matches[0].Groups[1].Value
-Write-Host "Staged Sea Power Pop-Out Windows $version in $dist"
-
-if ($Install) {
-    if (Get-Process -Name 'Sea Power' -ErrorAction SilentlyContinue) { throw 'Sea Power is running - close it first.' }
-    $target = Join-Path $GameDir 'Sea Power_Data\StreamingAssets\SeaPowerPopOut'
-    if (Test-Path $target) { Remove-Item -Recurse -Force $target }
-    Copy-Item -Recurse $dist $target
-    Write-Host "Installed to $target - pick this folder in Mods > Create Mod."
+if (-not $Workspace) {
+    $Workspace = $root
+    while ($Workspace -and -not (Test-Path (Join-Path $Workspace 'mods.json'))) { $Workspace = Split-Path -Parent $Workspace }
+    if (-not $Workspace) { throw 'No workspace (a folder with mods.json) above this repo - pass -Workspace.' }
 }
+if (-not $RatsShared) { $RatsShared = Join-Path $Workspace 'SeaPowerKeel\shared' }
+Import-Module (Join-Path $RatsShared 'tools\RatsPackage.psm1') -Force
+
+$name = 'SeaPowerPopOut'
+$project = Join-Path $root "src\$name\$name.csproj"
+$dist = Join-Path $root "dist\$name"
+if (-not $FlatManagedDir) { $FlatManagedDir = Join-Path $Workspace '_gamerefs\SeaPower-0.8.7-public\Managed' }
+if (-not $GlobeManagedDir) { $GlobeManagedDir = Join-Path $GameDir 'Sea Power_Data\Managed' }
+
+$env:RatsShared = $RatsShared.TrimEnd('\') + '\'      # the csproj's -p:RatsShared
+Build-RatsMod -Project $project -Dist $dist -GameDir $GameDir -GlobeManagedDir $GlobeManagedDir -FlatManagedDir $FlatManagedDir -Workspace $Workspace -SingleBuild | Out-Null
+Test-RatsCompat -Workspace $Workspace -Dist $dist -RootNamespace $name -GlobeManagedDir $GlobeManagedDir -FlatManagedDir $FlatManagedDir -SingleBuild
+Copy-RatsCommon -Root $root -Dist $dist -InfoIni (Join-Path $root "src\$name\mod\_info.ini")
+# The window-handling texts in the game's nine languages, read from next to the DLL.
+Copy-Item -Recurse (Join-Path $root "src\$name\mod\lang") (Join-Path $dist 'lang')
+$version = Get-RatsModVersion -PluginFile (Join-Path $root "src\$name\Plugin.cs")
+Write-Host "Staged Sea Power: R.A.T.S. Pop-Out Windows $version in $dist"
+Show-RatsStage -Dist $dist
+if ($Zip) { New-RatsZip -Dist $dist -Version $version }
+if ($Install) { Install-RatsMod -Dist $dist -GameDir $GameDir }
