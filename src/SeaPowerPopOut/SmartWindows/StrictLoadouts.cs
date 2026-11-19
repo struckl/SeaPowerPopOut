@@ -109,34 +109,12 @@ internal static class StrictLoadouts
             return;
         try
         {
-            object restriction = null;
-            MethodInfo allows = null;
-            if (!(bool)allowAllProperty.GetValue(builder))
-            {
-                restriction = restrictionField.GetValue(builder);
-                if (restriction != null)
-                {
-                    Type type = restriction.GetType();
-                    if (!(bool)type.GetProperty("IsAllowAll").GetValue(restriction))
-                        allows = type.GetMethod("Allows", new[] { typeof(string), typeof(string) });
-                }
-            }
+            Func<LinearCampaignTaskForceBuilderRosterItem, bool> offered = MissionOffers();
             int left = 0;
             for (int g = __result.Count - 1; g >= 0; g--)
             {
                 var variants = __result[g].Variants;
-                for (int i = variants.Count - 1; i >= 0; i--)
-                {
-                    var item = variants[i];
-                    if (item.IsCurrentTaskForceUnit)
-                        continue;
-                    if (LoadoutLocked(item) ||
-                        (allows != null && !(bool)allows.Invoke(restriction, new object[] { item.UnitType, item.VariantReference })))
-                    {
-                        variants.RemoveAt(i);
-                        left++;
-                    }
-                }
+                left += Drop(variants, item => !item.IsCurrentTaskForceUnit && (LoadoutLocked(item) || !offered(item)));
                 if (variants.Count == 0)
                     __result.RemoveAt(g);
             }
@@ -146,6 +124,37 @@ internal static class StrictLoadouts
         {
             ModLog.Debug($"strict loadouts (list): {ex.Message}");
         }
+    }
+
+    private static int Drop<T>(IList<T> list, Func<T, bool> unwanted)
+    {
+        int dropped = 0;
+        for (int i = list.Count - 1; i >= 0; i--)
+        {
+            if (unwanted(list[i]))
+            {
+                list.RemoveAt(i);
+                dropped++;
+            }
+        }
+        return dropped;
+    }
+
+    /// <summary>Whether the mission's restriction offers a ship (everything, when the mission allows all).</summary>
+    private static Func<LinearCampaignTaskForceBuilderRosterItem, bool> MissionOffers()
+    {
+        if ((bool)allowAllProperty.GetValue(builder))
+            return _ => true;
+        object restriction = restrictionField.GetValue(builder);
+        if (restriction == null)
+            return _ => true;
+        Type type = restriction.GetType();
+        if ((bool)type.GetProperty("IsAllowAll").GetValue(restriction))
+            return _ => true;
+        MethodInfo allows = type.GetMethod("Allows", new[] { typeof(string), typeof(string) });
+        if (allows == null)
+            return _ => true;
+        return item => (bool)allows.Invoke(restriction, new object[] { item.UnitType, item.VariantReference });
     }
 
     /// <summary>A ship with one fixed loadout whose loadout is not open (or has only locked ones).</summary>

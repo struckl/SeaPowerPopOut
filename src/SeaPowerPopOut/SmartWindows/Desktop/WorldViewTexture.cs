@@ -117,16 +117,43 @@ internal static class WorldViewTexture
 
     private static void EnsureTextures(CameraManager cm, float pixelsW, float pixelsH)
     {
-        int shownW = Math.Max(16, Math.Min(MaxSide, (int)Math.Round(pixelsW)));
-        int shownH = Math.Max(16, Math.Min(MaxSide, (int)Math.Round(pixelsH)));
+        int shownW = Side(pixelsW), shownH = Side(pixelsH);
+        double factor = SupersampleFactor(shownW, shownH);
+        int camW = factor <= 1d ? shownW : Math.Min(MaxSide, (int)Math.Round(shownW * factor));
+        int camH = factor <= 1d ? shownH : Math.Min(MaxSide, (int)Math.Round(shownH * factor));
+        if (!SizeSettled(shownW, shownH, camW, camH))
+            return;
+
+        RenderTexture oldCam = camTexture, oldShown = shownTexture;
+        MakeTextures(shownW, shownH, camW, camH);
+        foreach (Camera cam in Cameras(cm))
+        {
+            if (cam != null)
+                DrawInto(cam, camTexture);
+        }
+        Free(oldCam, oldShown);
+        ModLog.Debug($"desktop mode: World View texture {shownW}x{shownH}" + (camTexture != shownTexture ? $" (cameras draw {camW}x{camH})" : ""));
+    }
+
+    private static int Side(float pixels) => Math.Max(16, Math.Min(MaxSide, (int)Math.Round(pixels)));
+
+    /// <summary>The game's supersampling of the world view, lowered so the cameras' texture stays within the pixel limit.</summary>
+    private static double SupersampleFactor(int shownW, int shownH)
+    {
         double factor = 1;
         if (Supersample != null && Supersample.Invoke(null, null) is int configured)
             factor = Math.Max(1, configured);
         if (shownW * (double)shownH * factor * factor > MaxPixels)
             factor = Math.Max(1d, Math.Sqrt(MaxPixels / ((double)shownW * shownH)));
-        int camW = factor <= 1d ? shownW : Math.Min(MaxSide, (int)Math.Round(shownW * factor));
-        int camH = factor <= 1d ? shownH : Math.Min(MaxSide, (int)Math.Round(shownH * factor));
+        return factor;
+    }
 
+    /// <summary>
+    /// True when new textures are due: the window has a size the textures do not have, and it has kept it for a moment
+    /// (a window being resized would otherwise make new textures every frame). The first ones are made at once.
+    /// </summary>
+    private static bool SizeSettled(int shownW, int shownH, int camW, int camH)
+    {
         if (shownW != pendingW || shownH != pendingH)
         {
             pendingW = shownW;
@@ -135,10 +162,12 @@ internal static class WorldViewTexture
         }
         bool fits = shownTexture != null && shownTexture.width == shownW && shownTexture.height == shownH
                     && camTexture != null && camTexture.width == camW && camTexture.height == camH;
-        if (fits || (shownTexture != null && Time.unscaledTime - pendingSince < SettleSeconds))
-            return;
+        return !fits && (shownTexture == null || Time.unscaledTime - pendingSince >= SettleSeconds);
+    }
 
-        RenderTexture oldCam = camTexture, oldShown = shownTexture;
+    /// <summary>One texture when the cameras draw at the shown size, else a bigger one for them and the shown one.</summary>
+    private static void MakeTextures(int shownW, int shownH, int camW, int camH)
+    {
         int msaa = Math.Max(1, QualitySettings.antiAliasing);
         RenderTexture newCam, newShown;
         if (camW == shownW && camH == shownH)
@@ -163,22 +192,19 @@ internal static class WorldViewTexture
             newShown.Create();
         camTexture = newCam;
         shownTexture = newShown;
+    }
 
-        foreach (Camera cam in Cameras(cm))
-        {
-            if (cam == null)
-                continue;
-            if (backgroundAlpha < 0f)
-                backgroundAlpha = cam.backgroundColor.a;
-            Color background = cam.backgroundColor;
-            background.a = 1f;
-            cam.backgroundColor = background;
-            cam.targetTexture = newCam;
-            if (cam.GetComponent<TextureResolve>() == null)
-                cam.gameObject.AddComponent<TextureResolve>();
-        }
-        Free(oldCam, oldShown);
-        ModLog.Debug($"desktop mode: World View texture {shownW}x{shownH}" + (newCam != newShown ? $" (cameras draw {camW}x{camH})" : ""));
+    /// <summary>A world camera draws into the texture, with an opaque background (its own alpha is kept for the way back).</summary>
+    private static void DrawInto(Camera cam, RenderTexture texture)
+    {
+        if (backgroundAlpha < 0f)
+            backgroundAlpha = cam.backgroundColor.a;
+        Color background = cam.backgroundColor;
+        background.a = 1f;
+        cam.backgroundColor = background;
+        cam.targetTexture = texture;
+        if (cam.GetComponent<TextureResolve>() == null)
+            cam.gameObject.AddComponent<TextureResolve>();
     }
 
     /// <summary>Back to the game's own drawing (desktop mode off, mission over).</summary>

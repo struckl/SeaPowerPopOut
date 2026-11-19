@@ -245,22 +245,8 @@ internal static class UnitStatusReference
 
     private static void Step(Place place, GameWindow window)
     {
-        if (!place.View.TryGetTargetOrNull(out UnitStatusView view) || VisualTreeHelper.GetParent(view) == null)
-        {
-            if (Time.unscaledTime < place.Next)
-                return;
-            place.Next = Time.unscaledTime + RetryEvery;
-            view = VisualSearch.First<UnitStatusView>(window, budget: SearchBudget);
-            if (view == null)
-            {
-                if (++place.Tries > MaxTries)
-                    place.Failed = true;
-                return;
-            }
-            place.View = new WeakReference<UnitStatusView>(view);
-            place.Tries = 0;
-        }
-        if (!(view.DataContext is UnitStatusViewModel vm) || !States.TryGetValue(vm, out State state))
+        UnitStatusView view = FindView(place, window);
+        if (view == null || !(view.DataContext is UnitStatusViewModel vm) || !States.TryGetValue(vm, out State state))
             return;
 
         UIElement page = state.View;
@@ -277,23 +263,27 @@ internal static class UnitStatusReference
                 return;
             }
         }
-        Border host = place.Host;
-        if (show)
+        StatusTabHost.Show(place.Host, page, show);
+    }
+
+    /// <summary>The window's Unit Status view; looked for a few times a second until it is there (or given up).</summary>
+    private static UnitStatusView FindView(Place place, GameWindow window)
+    {
+        if (place.View.TryGetTargetOrNull(out UnitStatusView view) && VisualTreeHelper.GetParent(view) != null)
+            return view;
+        if (Time.unscaledTime < place.Next)
+            return null;
+        place.Next = Time.unscaledTime + RetryEvery;
+        view = VisualSearch.First<UnitStatusView>(window, budget: SearchBudget);
+        if (view == null)
         {
-            if (host.Child != page)
-            {
-                if (VisualTreeHelper.GetParent(page) is Border old && old != host)
-                    old.Child = null;
-                host.Child = page;
-            }
-            host.Visibility = Visibility.Visible;
+            if (++place.Tries > MaxTries)
+                place.Failed = true;
+            return null;
         }
-        else
-        {
-            host.Visibility = Visibility.Collapsed;
-            if (page == null && host.Child != null)
-                host.Child = null;
-        }
+        place.View = new WeakReference<UnitStatusView>(view);
+        place.Tries = 0;
+        return view;
     }
 
     private static Border MakeHost(UnitStatusView view, UnitStatusViewModel vm)

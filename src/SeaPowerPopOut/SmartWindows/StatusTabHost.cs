@@ -75,6 +75,26 @@ internal static class StatusTabHost
         return host;
     }
 
+    /// <summary>Shows <paramref name="page"/> in the host, or hides the host (and lets go of a page that is gone).</summary>
+    public static void Show(Border host, UIElement page, bool show)
+    {
+        if (show)
+        {
+            if (host.Child != page)
+            {
+                if (VisualTreeHelper.GetParent(page) is Border old && old != host)
+                    old.Child = null;
+                host.Child = page;
+            }
+            host.Visibility = Visibility.Visible;
+            return;
+        }
+        if (host.Visibility != Visibility.Collapsed)
+            host.Visibility = Visibility.Collapsed;
+        if (page == null && host.Child != null)
+            host.Child = null;
+    }
+
     /// <summary>The element that shows one of the game tabs' content (a content control with that content, outside the tab strip).</summary>
     private static FrameworkElement FindByContent(DependencyObject root, UnitStatusViewModel status)
     {

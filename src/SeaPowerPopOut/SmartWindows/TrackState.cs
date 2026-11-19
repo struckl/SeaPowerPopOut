@@ -176,30 +176,21 @@ internal static class TrackState
         if (state.HostFailed || VisualTreeHelper.GetParent(view) == null)
             return;
         bool wanted = state.Tab.IsSelected && state.Tab.IsAvailable && state.Vehicle != null;
-        if (state.Host == null || VisualTreeHelper.GetParent(state.Host) == null)
-        {
-            if (!wanted)
-                return;
-            state.Host = StatusTabHost.Create(view, status, bindingFirst: false, out _);
-            if (state.Host == null)
-            {
-                state.HostFailed = true;
-                ModLog.Warn("Unit Status: no place for the Track State tab found (game updated?) - the tab stays empty.");
-                return;
-            }
-        }
+        if ((state.Host == null || VisualTreeHelper.GetParent(state.Host) == null) && (!wanted || !MakeHost(view, status, state)))
+            return;
         if (wanted && state.Info == null && !state.Failed)
             Build(status, state);
-        if (wanted && state.Body != null)
-        {
-            if (state.Host.Child != state.Body)
-                state.Host.Child = state.Body;
-            state.Host.Visibility = Visibility.Visible;
-        }
-        else if (state.Host.Visibility != Visibility.Collapsed)
-        {
-            state.Host.Visibility = Visibility.Collapsed;
-        }
+        StatusTabHost.Show(state.Host, state.Body, wanted && state.Body != null);
+    }
+
+    private static bool MakeHost(UnitStatusView view, UnitStatusViewModel status, State state)
+    {
+        state.Host = StatusTabHost.Create(view, status, bindingFirst: false, out _);
+        if (state.Host != null)
+            return true;
+        state.HostFailed = true;
+        ModLog.Warn("Unit Status: no place for the Track State tab found (game updated?) - the tab stays empty.");
+        return false;
     }
 
     private static void Build(UnitStatusViewModel status, State state)

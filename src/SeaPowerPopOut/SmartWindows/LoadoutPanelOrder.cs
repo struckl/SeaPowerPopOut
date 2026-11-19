@@ -77,30 +77,30 @@ internal static class LoadoutPanelOrder
         var item = tab?.SelectedUnit?.Item;
         if (item == null || tab.Options == null || tab.VersionOptions == null || tab.VersionOptions.Count == 0)
             return;
-
         ItemsControl loadouts = FindItems(window, tab.Options);
-        ItemsControl versions = FindItems(window, tab.VersionOptions);
-        if (loadouts == null || versions == null || !(VisualTreeHelper.GetParent(loadouts) is Panel panel))
-            return;
-
-        // The versions list may sit deeper than the loadouts list: take its ancestor that is a child of the same panel.
-        DependencyObject versionsBlock = versions;
-        while (versionsBlock != null && VisualTreeHelper.GetParent(versionsBlock) != panel)
-            versionsBlock = VisualTreeHelper.GetParent(versionsBlock);
-        if (!(versionsBlock is UIElement versionsElement))
+        if (loadouts == null || !(VisualTreeHelper.GetParent(loadouts) is Panel panel) || !(BlockIn(panel, FindItems(window, tab.VersionOptions)) is UIElement versions))
             return;
 
         int at = panel.Children.IndexOf(loadouts);
-        int versionsAt = panel.Children.IndexOf(versionsElement);
+        int versionsAt = panel.Children.IndexOf(versions);
         if (at < 0 || versionsAt < 0)
             return;
-
         bool ownFirst = OwnVersionFirst(tab, item.UnitFolder, item.UnitType);
         if (ownFirst == at < versionsAt)
             return;
         panel.Children.RemoveAt(at);
         panel.Children.Insert(versionsAt, loadouts);
         ModLog.Debug(ownFirst ? "loadouts: own versions shown first" : "loadouts: other versions shown first");
+    }
+
+    /// <summary>
+    /// The versions list may sit deeper than the loadouts list: its ancestor that is a child of the same panel, or null.
+    /// </summary>
+    private static DependencyObject BlockIn(Panel panel, DependencyObject element)
+    {
+        while (element != null && VisualTreeHelper.GetParent(element) != panel)
+            element = VisualTreeHelper.GetParent(element);
+        return element;
     }
 
     /// <summary>True when no other version of the class is older than the selected unit (those without a year do not count).</summary>
