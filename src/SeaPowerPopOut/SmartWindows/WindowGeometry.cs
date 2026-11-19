@@ -170,31 +170,3 @@ internal static class WindowGeometry
 
     private static float Clamp(float v, float min, float max) => v < min ? min : v > max ? max : v;
 }
-
-/// <summary>
-/// Double-click maximize. Remembers the rectangle before maximizing so a second double-click restores it. Holds no
-/// game objects: the caller applies the rectangle this returns.
-/// </summary>
-internal sealed class MaximizeToggle
-{
-    private WinRect? restore;
-
-    public bool IsMaximized => restore.HasValue;
-
-    /// <summary>Returns the rectangle to show after the toggle.</summary>
-    public WinRect Toggle(WinRect current, WinRect screen)
-    {
-        if (restore.HasValue)
-        {
-            WinRect back = restore.Value;
-            restore = null;
-            return back;
-        }
-
-        restore = current;
-        return screen;
-    }
-
-    /// <summary>Forgets the maximized state, e.g. when the window is resized by hand.</summary>
-    public void Forget() => restore = null;
-}

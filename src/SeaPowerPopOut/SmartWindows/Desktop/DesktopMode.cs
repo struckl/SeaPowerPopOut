@@ -56,7 +56,6 @@ internal static class DesktopMode
             ModLog.Info("Desktop mode is on: the 3D world is drawn into the World View window.");
     }
 
-    /// <summary>A game window finished loading.</summary>
     public static void WindowLoaded(GameWindow window)
     {
         if (!On)
@@ -83,7 +82,6 @@ internal static class DesktopMode
         }
     }
 
-    /// <summary>Every frame.</summary>
     public static void Update()
     {
         if (!On)

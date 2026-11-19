@@ -77,7 +77,7 @@ internal static class Native
         return found;
     }
 
-    public static bool IsOwn(IntPtr hwnd)
+    private static bool IsOwn(IntPtr hwnd)
     {
         GetWindowThreadProcessId(hwnd, out uint pid);
         return pid == Pid;
@@ -119,7 +119,6 @@ internal static class Native
         return false;
     }
 
-    /// <summary>The whole window shows again.</summary>
     public static void ClearShape(IntPtr hwnd) => SetWindowRgn(hwnd, IntPtr.Zero, true);
 
     public static void SetTopmost(IntPtr hwnd, bool topmost) =>

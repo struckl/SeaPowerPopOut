@@ -61,8 +61,6 @@ internal static class DesktopPatches
         harmony.Patch(target, prefix: prefix == null ? null : Hook(prefix), postfix: postfix == null ? null : Hook(postfix));
     }
 
-    // ---- hooks ----------------------------------------------------------------------------------------------------
-
     /// <summary>The map is a window, not fullscreen: the world view still counts as shown while it is open.</summary>
     private static void ShowPipPostfix(MainGameViewModel __instance, ref bool __result)
     {

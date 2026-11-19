@@ -13,8 +13,6 @@ internal sealed class DesktopSet
     public SavedLayouts Layouts = new SavedLayouts();
     public bool? WorldViewOpen;
 
-    public bool IsEmpty => !WorldViewOpen.HasValue && !HasLayouts;
-
     private bool HasLayouts
     {
         get

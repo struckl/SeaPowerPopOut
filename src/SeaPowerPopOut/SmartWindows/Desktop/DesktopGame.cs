@@ -3,7 +3,6 @@ using SeapowerUI.ViewModels;
 
 namespace SeaPowerPopOut.SmartWindows;
 
-/// <summary>The few game objects desktop mode keeps asking for.</summary>
 internal static class DesktopGame
 {
     public static MainGameViewModel Vm => Globals._mainGameViewModel;

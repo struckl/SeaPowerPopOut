@@ -90,9 +90,7 @@ internal static class ArmedFilter
     }
 
     /// <summary>True for a unit with at least one weapon, and for everything that is not a unit.</summary>
-    internal static bool IsArmedEntry(MuseumEntry entry) => IsArmed(entry);
-
-    private static bool IsArmed(MuseumEntry entry)
+    internal static bool IsArmed(MuseumEntry entry)
     {
         if (!(entry is MuseumObjectEntry unit))
             return true;                      // weapons, sensors and the like are not units

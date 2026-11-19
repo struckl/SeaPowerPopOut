@@ -58,7 +58,7 @@ internal static class WorldViewKey
     }
 
     /// <summary>What the game uses the key for, or null when it is free.</summary>
-    public static string Conflict(InputHandler input, KeyCode key)
+    private static string Conflict(InputHandler input, KeyCode key)
     {
         if (System.Array.IndexOf(DirectKeys, key) >= 0)
             return "a key the game reads directly";

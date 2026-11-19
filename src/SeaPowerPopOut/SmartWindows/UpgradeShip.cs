@@ -39,14 +39,12 @@ internal static class UpgradeShip
         enabled = true;
     }
 
-    /// <summary>Called when a game window has loaded.</summary>
     public static void WindowLoaded(GameWindow window)
     {
         if (enabled)
             Windows.Add(new WeakReference<GameWindow>(window));
     }
 
-    /// <summary>Called every frame.</summary>
     public static void Update()
     {
         if (!enabled)

@@ -10,7 +10,7 @@ internal static class StableOrder
     /// The items in the order <paramref name="compare"/> gives; items that compare equal keep their current order.
     /// Returns the old index of each item in its new place.
     /// </summary>
-    public static List<int> NewOrder<T>(IList<T> items, Comparison<T> compare)
+    private static List<int> NewOrder<T>(IList<T> items, Comparison<T> compare)
     {
         var order = new List<int>(items.Count);
         for (int i = 0; i < items.Count; i++)

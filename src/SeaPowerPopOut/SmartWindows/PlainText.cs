@@ -41,8 +41,4 @@ internal static class PlainText
         }
         return sb.ToString();
     }
-
-    /// <summary>True if <paramref name="markup"/>'s visible text contains <paramref name="needleLower"/> (already lower case).</summary>
-    public static bool Contains(string markup, string needleLower) =>
-        StripMarkup(markup).IndexOf(needleLower, StringComparison.OrdinalIgnoreCase) >= 0;
 }

@@ -48,7 +48,6 @@ internal static class WindowLook
             LookMenu.AddButton(window, pattern);
     }
 
-    /// <summary>Called every frame.</summary>
     public static void Update()
     {
         if (Windows.Count == 0)

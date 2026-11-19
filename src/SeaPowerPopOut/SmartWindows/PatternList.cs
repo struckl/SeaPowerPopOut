@@ -22,8 +22,6 @@ internal sealed class PatternList
         }
     }
 
-    public int Count => patterns.Count;
-
     /// <summary>The first pattern matching one of <paramref name="names"/>, or null. The pattern text is the key
     /// under which the layout of all windows matching it is shared.</summary>
     public string Match(params string[] names)

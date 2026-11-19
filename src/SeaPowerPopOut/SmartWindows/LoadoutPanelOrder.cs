@@ -41,8 +41,6 @@ internal static class LoadoutPanelOrder
         Enabled = true;
     }
 
-    private static int YearOf(string folder, string type) => yearOf(folder, type);
-
     public static void WindowLoaded(GameWindow window)
     {
         if (Enabled)
@@ -107,13 +105,13 @@ internal static class LoadoutPanelOrder
     /// <summary>True when no other version of the class is older than the selected unit (those without a year do not count).</summary>
     private static bool OwnVersionFirst(LinearCampaignTaskForceLoadoutsViewModel tab, string folder, string type)
     {
-        int own = YearOf(folder, type);
+        int own = yearOf(folder, type);
         if (own <= 0)
             return false;
         int oldestOther = int.MaxValue;
         foreach (var row in tab.VersionOptions)
         {
-            int year = YearOf(folder, row.UnitType);
+            int year = yearOf(folder, row.UnitType);
             if (!string.Equals(row.UnitType, type, StringComparison.OrdinalIgnoreCase) && year > 0 && year < oldestOther)
                 oldestOther = year;
         }

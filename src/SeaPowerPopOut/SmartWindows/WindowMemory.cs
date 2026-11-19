@@ -45,7 +45,6 @@ internal static class WindowMemory
         layouts = SavedLayouts.Parse(SmartSettings.Layouts.Value);
     }
 
-    /// <summary>Called when a game window has loaded.</summary>
     public static void WindowLoaded(GameWindow window)
     {
         if (!Active || window == null)

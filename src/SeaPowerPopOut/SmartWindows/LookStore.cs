@@ -72,7 +72,6 @@ internal sealed class LookStore
             looks[key] = values;
     }
 
-    /// <summary>-1 below the other windows, 0 normal, 1 above them.</summary>
     public int LevelOf(string pattern) =>
         pattern != null && levels.TryGetValue(Normalize(pattern), out int level) ? level : 0;
 

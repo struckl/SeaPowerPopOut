@@ -51,7 +51,6 @@ internal static class ColorIniFiles
         return true;
     }
 
-    /// <summary>Called when a game window has loaded.</summary>
     public static void WindowLoaded(GameWindow window)
     {
         if (pickerContext == null || window == null)
@@ -59,7 +58,6 @@ internal static class ColorIniFiles
         All.Add(new Tracked { Window = new WeakReference<GameWindow>(window), Born = Time.unscaledTime });
     }
 
-    /// <summary>Called every frame.</summary>
     public static void Update()
     {
         if (pickerContext == null || All.Count == 0)

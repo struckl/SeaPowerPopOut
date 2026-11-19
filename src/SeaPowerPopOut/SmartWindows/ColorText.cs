@@ -23,6 +23,4 @@ internal static class ColorText
         b = (byte)value;
         return true;
     }
-
-    public static string Format(byte a, byte r, byte g, byte b) => $"#{a:X2}{r:X2}{g:X2}{b:X2}";
 }

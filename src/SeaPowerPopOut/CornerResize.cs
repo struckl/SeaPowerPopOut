@@ -17,7 +17,7 @@ internal static class CornerResize
 {
     private const float Reach = 20f;          // window units along an edge, from its end, that resize the corner
 
-    // ResizeSides: Top 1, Left 2, Bottom 4, Right 8.
+    // The game's ResizeSides flags.
     private const int Top = 1, Left = 2, Bottom = 4, Right = 8;
 
     private static readonly Type ThumbType = AccessTools.TypeByName("SeapowerUI.ResizeThumb");

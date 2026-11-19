@@ -82,8 +82,6 @@ internal sealed class PopOutScreen : MonoBehaviour
     </Grid>
 </local:ScalableUserControl>";
 
-    // Box with an arrow leaving it (pop out) or coming back into it (pop in), 12×12.
-
     internal static bool DisplayAvailable => Display.displays.Length > 1;
 
     /// <summary>
@@ -917,7 +915,8 @@ internal sealed class PopOutScreen : MonoBehaviour
         try
         {
             if (overlay == null || root == null)
-                return;            UIElement target = overlay is ToolTip tip ? tip.PlacementTarget
+                return;
+            UIElement target = overlay is ToolTip tip ? tip.PlacementTarget
                 : overlay is ContextMenu menu ? menu.PlacementTarget : null;
             if (target != null ? root.IsAncestorOf(target) : ReferenceEquals(overlay.View, root.View))
                 TrackOverlay(overlay);
@@ -1111,33 +1110,5 @@ internal sealed class PopOutScreen : MonoBehaviour
                 return false;
         }
         return true;
-    }
-
-    /// <summary>
-    /// The panel holding the title bar buttons (the close button), from the window's <c>ButtonsTemplate</c>.
-    /// Breadth first and without descending into nested windows, so the header is found before the content.
-    /// </summary>
-    private static Panel FindButtonsPanel(GameWindow window)
-    {
-        DataTemplate template = window.ButtonsTemplate;
-        var queue = new Queue<Visual>();
-        queue.Enqueue(window);
-        while (queue.Count > 0)
-        {
-            Visual v = queue.Dequeue();
-            if (v is ContentPresenter presenter && template != null && Equals(presenter.ContentTemplate, template)
-                && VisualTreeHelper.GetChildrenCount(presenter) > 0
-                && VisualTreeHelper.GetChild(presenter, 0) is Panel templated)
-                return templated;
-            if (v is Button button && button.Name == "CloseButton" && VisualTreeHelper.GetParent(button) is Panel named)
-                return named;
-            int n = VisualTreeHelper.GetChildrenCount(v);
-            for (int i = 0; i < n; i++)
-            {
-                if (VisualTreeHelper.GetChild(v, i) is Visual child && !(child is GameWindow))
-                    queue.Enqueue(child);
-            }
-        }
-        return null;
     }
 }

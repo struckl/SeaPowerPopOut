@@ -81,7 +81,7 @@ internal static class CountryList
                 continue;                                  // a folder
             if (browser.FilterByDate && !ServiceCovers(entry, year))
                 continue;
-            if ((text.Length == 0 || MatchesText(browser, entry, text)) && (!SmartSettings.ArmedOnly.Value || ArmedFilter.IsArmedEntry(entry)))
+            if ((text.Length == 0 || MatchesText(browser, entry, text)) && (!SmartSettings.ArmedOnly.Value || ArmedFilter.IsArmed(entry)))
                 AddNations(entry, present);
         }
     }
