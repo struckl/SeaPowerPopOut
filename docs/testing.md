@@ -3,7 +3,7 @@
 Log: `<Sea Power>\BepInEx\LogOutput.log` (overwritten on every game start). Config:
 `<Sea Power>\BepInEx\config\dev.sewerlabs.seapowerpopout.cfg`. Installed mod (local build):
 `<Sea Power>\Sea Power_Data\StreamingAssets\SeaPowerPopOut\`. Needs a second monitor connected before the game
-starts. Anchor Chain loads the mod whether or not it is ticked; the mod itself checks `usersettings.ini` (LocalLow\Triassic Games\Sea Power) and logs `Unticked in the Mod Manager - inactive.` – verify by unticking and restarting.
+starts. Anchor Chain loads the mod whether or not it is ticked; the mod itself checks `usersettings.ini` (LocalLow\Triassic Games\Sea Power) and logs `Unticked in the Mod Manager - inactive.` - verify by unticking and restarting.
 
 ## Both game versions (0.8.7 and the 3D-globe build 26223125) - one DLL
 
@@ -24,24 +24,24 @@ Log only: `Sea Power Pop-Out Windows 1.0.2 loaded.`, `Monitor 1: 3840x2160 (game
 Pop-out monitor: 2.`, no `not found (game updated?)` / `fix not applied` line, no error. **Not run:** popping a window out (needs
 clicks on the title-bar button; no mouse use without his OK), and 0.8.7.
 
-## Pop-Out Windows – free-floating windows on another monitor (0.2.0)
+## Pop-Out Windows - free-floating windows on another monitor (0.2.0)
 
 Monitor numbers below are an example: game on monitor 1, the game's detached world view on monitor 2, monitor 3
 free.
 
 1. **Start Sea Power**. In the log once the main menu is up: `Sea Power Pop-Out Windows 0.2.0 loaded`, the
-   monitor list (`Monitor 1: 3840x2160 (game)`, `Monitor 2: …`) and `Window hooks in place. Pop-out monitor: 3` – a
+   monitor list (`Monitor 1: 3840x2160 (game)`, `Monitor 2: …`) and `Window hooks in place. Pop-out monitor: 3` - a
    monitor that shows the game's world view or second-screen map is skipped. No `Pointer fix not applied` warning.
 2. Start any mission. Every window opened from the bottom bar (formation manager, message log, camera controls,
    unit status) and the sensor / doctrine windows have a new button left of the **X** in their title bar (a box
-   with an arrow). The map has none – it stays on the main screen.
+   with an arrow). The map has none - it stays on the main screen.
 3. Click it on the **formation manager**:
    - The other monitor does **not** turn black: only the formation manager shows there, with a thin frame around
      it; the desktop (or whatever program is on that monitor) shows everywhere else, and clicks there go to it.
    - Log: `Window of monitor 3: … at …`, `Pop-out screen open on monitor 3 (…)`, `FormationManagerViewModel
      popped out to monitor 3`; on a monitor of another height than the game's also `Pointer on monitor 3 shifted
-     by … px`.
-   - Hover the window's edges: the resize cursor appears right at the frame. Resize from every edge – it follows
+     by ... px`.
+   - Hover the window's edges: the resize cursor appears right at the frame. Resize from every edge - it follows
      the mouse without jumping, also beyond the game's usual maximum size. Near the ends of an edge the cursor
      turns diagonal and both sides resize at once.
    - Drag it by the title bar: no jump when you grab it.
@@ -59,7 +59,7 @@ free.
 7. Click into another program, then back into the game: while in the game the popped-out windows stay above other
    programs on that monitor; while in the other program they are normal windows (it can cover them).
 8. On the **main screen**, resize any window from near a corner along an edge: diagonal cursor, both sides resize.
-9. The button in a popped-out window's title bar points back in: click it – the window returns to the main screen.
+9. The button in a popped-out window's title bar points back in: click it - the window returns to the main screen.
 10. Leave two windows popped out, **restart the mission** (or load another): they open on the other monitor again,
     where you left them. Back in the main menu, the other monitor shows nothing of the game.
 11. Close the game normally. No `[Error :SeaPowerPopOut]` lines in the log.
@@ -70,7 +70,7 @@ button, the game losing keyboard focus oddly or pausing/muting after a click on 
 that look different over there (config `UI scale`). Config `See-through`, `Always on top`, `Snap windows` and
 `Wide resize corners` switch the newer parts off.
 
-## 1.0.0 – release check (2026-10-24)
+## 1.0.0 - release check (2026-10-24)
 
 Same build as 0.2.0 apart from the version and the remembered size of self-sizing windows (the formation manager
 came back at its automatic width). Run during the screenshot session on Sea Power 0.8.7: 1.0.0 loaded, four windows
@@ -78,7 +78,7 @@ popped out, arranged, back in and out again twice, no errors.
 
 1. Log: `Sea Power Pop-Out Windows 1.0.0 loaded.`, the monitor list and `Window hooks in place. Pop-out monitor: …`.
 2. In any mission pop out the formation manager and the message log, arrange them, pop one back in: steps 3, 4 and 9
-   of the 0.2.0 check above – no `[Error :SeaPowerPopOut]` lines.
+   of the 0.2.0 check above - no `[Error :SeaPowerPopOut]` lines.
 
 ## Unit menu and formation manager tabs (1.0.2)
 
@@ -98,5 +98,5 @@ Needs a mission with surface ships and aircraft but **no submarines** (so the "S
 
 Run 2026-10-27 on the Sea Power beta (Steam build 26223125), mission *Caron at Grenada 1983* (NATO: one ship, an
 air formation, two helicopters, no submarines), driven through the shot-director (`rclick`, `dclick`, `point`,
-`expand`, `tabs`, `menus`): steps 1–5 pass on both screens; "Damage Control" from the pop-out menu opened the unit
+`expand`, `tabs`, `menus`): steps 1-5 pass on both screens; "Damage Control" from the pop-out menu opened the unit
 status window.

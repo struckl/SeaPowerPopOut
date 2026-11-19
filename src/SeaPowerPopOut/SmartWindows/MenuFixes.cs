@@ -10,10 +10,8 @@ namespace SeaPowerPopOut.SmartWindows;
 
 /// <summary>
 /// Two small menu fixes:
-/// <list type="bullet">
-/// <item>the editor's default file "_Custom Mission" is left out of the SCENARIOS list of the main menu;</item>
-/// <item>the mission editor's file picker for opening a mission starts in the folder of the mission opened last.</item>
-/// </list>
+/// - the editor's default file "_Custom Mission" is left out of the SCENARIOS list of the main menu;
+/// - the mission editor's file picker for opening a mission starts in the folder of the mission opened last.
 /// </summary>
 internal static class MenuFixes
 {

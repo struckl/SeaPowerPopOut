@@ -1,6 +1,6 @@
 # Releasing on the Steam Workshop
 
-The game uploads Workshop items itself: **Main menu → Mods → Create Mod**, signed in with the Steam account that
+The game uploads Workshop items itself: **Main menu > Mods > Create Mod**, signed in with the Steam account that
 owns the item. No SteamCMD needed.
 
 ## Before a release
@@ -35,34 +35,34 @@ change shows on the item's Change Notes page. (1.0.1 went out this way, 2026-10-
 ## Upload in the game
 
 
-Start Sea Power → Mods → Create Mod:
+Start Sea Power > Mods > Create Mod:
 
 | Field | Value |
 | --- | --- |
-| Existing item | pick *Sea Power: Rats Pop-Out Windows* – Workshop item [3826396311](https://steamcommunity.com/sharedfiles/filedetails/?id=3826396311), first uploaded 2026-10-24 as 1.0.0 |
+| Existing item | pick *Sea Power: Rats Pop-Out Windows* - Workshop item [3826396311](https://steamcommunity.com/sharedfiles/filedetails/?id=3826396311), first uploaded 2026-10-24 as 1.0.0 |
 | Folder | `StreamingAssets\SeaPowerPopOut` (the folder `package.ps1 -Install` filled) |
 | Name | Sea Power: Rats Pop-Out Windows (the naming of "Sea Power: Rats Topographic Map") |
 | Description | [workshop/description.bbcode](../workshop/description.bbcode) |
 | Preview image | `StreamingAssets\SeaPowerPopOut\preview.jpg` (put there by `package.ps1`: the picker only browses StreamingAssets and only takes .jpg; Steam wants it under 1 MB) |
 | Tags | Scripting |
-| Dependencies | `3380210757` (Anchor Chain) – shows as a required item on the Workshop page |
+| Dependencies | `3380210757` (Anchor Chain) - shows as a required item on the Workshop page |
 | Visibility | first upload **Hidden** (or Friends only); Public once the subscribed copy is tested |
 | Change log | the CHANGELOG entry |
 
 Posts for Reddit, the Steam forum and Discord are in the private workspace (post texts and pictures are not kept in this repo). Add the screenshots from [workshop/screenshots/](../workshop/screenshots) on the Workshop page itself:
-open the item while signed in as its owner (Steam client or browser) → right column **Owner Controls** →
-**Add/edit images & videos** → choose the files, then drag them into this order: 01 (both monitors), 04 and 05
+open the item while signed in as its owner (Steam client or browser) -> right column **Owner Controls** ->
+**Add/edit images & videos** -> choose the files, then drag them into this order: 01 (both monitors), 04 and 05
 (before / after), 02 (the arranged windows), 03 (the button).
 
 ## Remaking the screenshots
 
 [tools/shot-director](../tools/shot-director) holds a dev-only Anchor Chain plugin (never shipped) that takes commands
-from `<Sea Power>\BepInEx\shotdirector.cmd` – load a mission, centre the map, open a window like its bottom-bar
-button, pop it out or back in, place it, hover a pop-out button – and logs to `shotdirector.log`; the full command
+from `<Sea Power>\BepInEx\shotdirector.cmd` - load a mission, centre the map, open a window like its bottom-bar
+button, pop it out or back in, place it, hover a pop-out button - and logs to `shotdirector.log`; the full command
 list is at the top of `Director.cs`. Next to it:
 
 - `grab.ps1` grabs a monitor without its taskbar (`-Screen N`, 0 = leftmost) or the game monitor (`-Game`) at full
-  resolution – the game's own ScreenCapture fails while the pop-out monitor is active.
+  resolution - the game's own ScreenCapture fails while the pop-out monitor is active.
 - `backdrop.ps1 -Screen N` fills the pop-out monitor with a neutral stand-in desktop above other programs and keeps
   the game's window there above it, so no real desktop shows through the see-through monitor.
 - `make_images.py RAW_DIR` turns the raw grabs into `workshop/screenshots/*.jpg` and `workshop/preview.jpg`.

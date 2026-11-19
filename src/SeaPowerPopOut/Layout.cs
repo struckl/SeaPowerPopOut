@@ -8,7 +8,7 @@ namespace SeaPowerPopOut;
 /// <summary>
 /// Which kinds of window open on the pop-out monitor, and where each sits there. Keyed by the window content's view
 /// model type ("FormationManagerViewModel"), so every sensor window or every unit status window shares one entry.
-/// Kept in memory and written to the config at most every few seconds – a window drag changes it every frame.
+/// Kept in memory and written to the config at most every few seconds - a window drag changes it every frame.
 /// </summary>
 internal static class Layout
 {

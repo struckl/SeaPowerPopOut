@@ -12,23 +12,21 @@ namespace SeaPowerPopOut;
 /// <summary>
 /// Every game method the mod hooks. All targets are resolved before anything is patched: if a game update renamed
 /// one, the mod stays out of the way entirely instead of half-working.
-/// <list type="bullet">
-/// <item><c>WindowHost.OpenNewWindow / CanCloseWindow / CloseWindow</c> — the main screen's window host learns that
+/// - <c>WindowHost.OpenNewWindow / CanCloseWindow / CloseWindow</c> - the main screen's window host learns that
 /// a window living on the pop-out screen is open there (the bottom-bar toggles stay lit and close it), and windows
-/// remembered as popped out open over there straight away.</item>
-/// <item><c>Window.OnInitialized</c> — runs on every window's Loaded: adds the pop-out / pop-in button to the title
-/// bar and puts popped-out windows where they were last time.</item>
-/// <item><c>MouseControlState.OnUpdate</c> — while the mouse is on the pop-out monitor it counts as "over the UI",
-/// so a click there doesn't also select, deselect or order something in the world.</item>
-/// <item><c>NoesisView.MousePosition</c> — puts the pointer of views on other monitors where the mouse really is (see
-/// <see cref="PointerHooks"/>). Optional: if it's missing, everything else still runs.</item>
-/// <item><c>MainGameViewModel.OnStart</c> / <c>GameMain.OnDestroy</c> — mission ready / mission unloading.</item>
-/// <item><c>FormationManagerViewModel.SelectedTabIndex</c> — counts every tab, as the TabControl does (see
-/// <see cref="FormationTabs"/>). Optional.</item>
-/// </list>
+/// remembered as popped out open over there straight away.
+/// - <c>Window.OnInitialized</c> - runs on every window's Loaded: adds the pop-out / pop-in button to the title
+/// bar and puts popped-out windows where they were last time.
+/// - <c>MouseControlState.OnUpdate</c> - while the mouse is on the pop-out monitor it counts as "over the UI",
+/// so a click there doesn't also select, deselect or order something in the world.
+/// - <c>NoesisView.MousePosition</c> - puts the pointer of views on other monitors where the mouse really is (see
+/// <see cref="PointerHooks"/>). Optional: if it's missing, everything else still runs.
+/// - <c>MainGameViewModel.OnStart</c> / <c>GameMain.OnDestroy</c> - mission ready / mission unloading.
+/// - <c>FormationManagerViewModel.SelectedTabIndex</c> - counts every tab, as the TabControl does (see
+/// <see cref="FormationTabs"/>). Optional.
 /// <para>Two stages. The window hooks must wait until NoesisGUI runs: patching a method JIT-compiles it, which runs
 /// its class's static constructor, and <c>WindowHost</c> / <c>Window</c> register Noesis dependency properties
-/// there – before Noesis is initialised that is a native crash on startup. <see cref="PopOutScreen"/> applies them
+/// there - before Noesis is initialised that is a native crash on startup. <see cref="PopOutScreen"/> applies them
 /// once the first game window host exists (the main menu has one).</para>
 /// </summary>
 internal static class Patches
@@ -56,7 +54,7 @@ internal static class Patches
 
     // NoesisView flips the mouse position of another monitor with its camera's pixelHeight, which is not that
     // monitor's height when it differs from the game window's (or Windows scales it differently): the pointer sits
-    // off – no resize cursor at the edges, drags jump, tooltips far from the cursor. Clicks go another way and land
+    // off - no resize cursor at the edges, drags jump, tooltips far from the cursor. Clicks go another way and land
     // right. Fixed for every view on another monitor (pop-out screen and the game's own second-monitor map). Without
     // this hook everything else still runs.
     private static readonly Hook[] PointerHooks =

@@ -10,7 +10,7 @@ namespace SeaPowerPopOut;
 /// <summary>
 /// Diagonal resizing that is easy to hit. The game's window template has a resize corner only in the 10 × 10 square
 /// diagonally outside each corner, so coming along an edge you always get the straight resize. Here the last stretch
-/// of every edge resizes the corner too, with the diagonal cursor – like the edges of an operating system window.
+/// of every edge resizes the corner too, with the diagonal cursor - like the edges of an operating system window.
 /// Works on every game window, on both screens.
 /// </summary>
 internal static class CornerResize

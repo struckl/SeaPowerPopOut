@@ -6,7 +6,7 @@ namespace SeaPowerPopOut;
 
 /// <summary>
 /// The window Unity shows an activated display in: borderless, covering the whole monitor. A window region cut to
-/// the game windows on it (and their open tooltips, menus and drop-downs) makes the rest of it see-through – the
+/// the game windows on it (and their open tooltips, menus and drop-downs) makes the rest of it see-through - the
 /// desktop and other programs show there and take the clicks, so the popped-out windows float on the monitor like
 /// windows of their own instead of sitting on a black screen.
 /// </summary>
@@ -62,7 +62,7 @@ internal sealed class MonitorWindow
 
     /// <summary>
     /// Looks for the display's window until found: the new game window of the monitor's size that appeared with the
-    /// display, or else – a display the game activated earlier – the game window under the mouse on that monitor.
+    /// display, or else - a display the game activated earlier - the game window under the mouse on that monitor.
     /// </summary>
     public void Search(Display screen)
     {

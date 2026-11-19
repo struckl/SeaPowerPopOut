@@ -46,7 +46,7 @@ namespace ShotDirector;
 /// expand KIND TEXT                       expand the tree row holding that text
 /// tabs                                   formation manager: shown tab, its view model's tab and category, selection
 /// menus                                  the unit menu on each screen: open, where, entries
-/// get PATH | set PATH VALUE | call PATH ARGS…   reflection, e.g. SeaPower.Globals._mainGameViewModel.MapVisible
+/// get PATH | set PATH VALUE | call PATH ARGS...   reflection, e.g. SeaPower.Globals._mainGameViewModel.MapVisible
 /// quit
 /// </code>
 /// </summary>

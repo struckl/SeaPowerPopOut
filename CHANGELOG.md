@@ -10,24 +10,24 @@
   - Windows of other authors' mods now keep their title bar as their author made it (no Pop-Out menu); the game's windows and R.A.T.S. windows keep it
 - The mod folder carries this CHANGELOG.md, so R.A.T.S. Keel's What's new can show what changed when there are no Workshop notes (a local copy, the GitHub zip).
 
-## 1.2.3 – 2026-11-12 – in-game name R.A.T.S. Pop-Out Windows
+## 1.2.3 - 2026-11-12 - in-game name R.A.T.S. Pop-Out Windows
 
 Run in the game on 0.9.1 (build 261112) on 2026-11-12: the new name shows in Keel's list, the mod works in Red Sea Breakout.
 
 - **Shows as just "R.A.T.S. Pop-Out Windows" in the game.** The game's mod list and the mod loader's list (Keel or Anchor Chain) now both say R.A.T.S. Pop-Out Windows, without "Sea Power".
 
-## 1.2.2 – 2026-11-11 – declared for game 0.9.0
+## 1.2.2 - 2026-11-11 - declared for game 0.9.0
 
 - **Declared for game 0.9.0.** The mod's `_info.ini` now says it fits 0.8.7 up to every 0.9.x, so the game no longer lists it as "not declared to be compatible", and Steam hands this and later updates to 0.9.0 players (the game skips Workshop updates whose declaration does not fit its version). Checked offline against 0.9.0 (build 261111): every game type, member, Harmony target and by-name lookup the mod uses is there; not run in the game on 0.9.0 yet.
 
-## 1.2.1 – 2026-11-09
+## 1.2.1 - 2026-11-09
 
 Run in the game on the globe beta (build 261107) on 2026-11-09: the R.A.T.S. Sensor Views Radar scope showed on the pop-out monitor, and a right-click on a unit in the popped-out formation manager opened its menu. Board and Sonar use the same path and were not opened in that run. Not run on 0.8.7.
 
 - **Fixed: windows of other mods stayed invisible on the pop-out monitor.** A window remembered as popped out opens the pop-out screen while the mission is still loading, before other mods add their window templates, so for example the Sensor Views Board, Radar scope and Sonar counted as open but drew nothing. New templates now come along whenever a window opens there or pops out.
 - A right-click menu reported missing on the pop-out monitor opened normally in this version; what caused the report was not pinned down.
 
-## 1.2.0 – 2026-11-09 – one menu button
+## 1.2.0 - 2026-11-09 - one menu button
 
 Run in the game on the globe beta (build 261107) on 2026-11-09: the menu button in a map title bar opens its list (Pop out to monitor, Window look, Pop-Out Windows settings). Not run in the game: popping a window out from the new menu, the Back rows of the look and settings panels, the clickable-messages fix; 0.8.7.
 
@@ -35,7 +35,7 @@ Run in the game on the globe beta (build 261107) on 2026-11-09: the menu button 
 - **Clickable messages fixed:** clicking a message in the corner log to jump to its unit did nothing, because the 'Messages do not block clicks' feature made the whole list ignore the mouse. The setting is off by default now (links work as in the game); switch it on to let clicks pass through the messages to the map at the cost of the links.
 - The game's version label (Steam beta branch) is no longer hidden by this mod: that moved to its own mod, R.A.T.S. Clean Screen.
 
-## 1.1.3 – 2026-11-02
+## 1.1.3 - 2026-11-02
 
 - Fixed: a popped-out window lost its gear and look buttons, so its opacity, scale, outline and level could not be set
   there. They now come along to the pop-out monitor, and the look you chose is applied there too.
@@ -43,13 +43,13 @@ Run in the game on the globe beta (build 261107) on 2026-11-09: the menu button 
   snap distance is now 6 px by default, on both screens. Hold Shift while dragging to move a window freely.
   An existing config keeps its old snap distance (10); set it in the gear panel or in "3. Placement".
 
-## 1.1.2 – 2026-11-02
+## 1.1.2 - 2026-11-02
 
-- Fixed: the thin window frame (setting "4. Window border") sat about 15–20 px outside the window, to the right and
+- Fixed: the thin window frame (setting "4. Window border") sat about 15-20 px outside the window, to the right and
   below, instead of on its edge. Cause: the frame spanned the game's whole window template, which includes the
   invisible resize-handle bands around the window. It now sits on the visible header and body only.
 
-## 1.1.1 – 2026-10-31
+## 1.1.1 - 2026-10-31
 
 - Fixed: a player reported that the World View window disappeared after the map was switched between fullscreen and
   windowed. Tested in the game on 0.8.7 (several switches, also after moving the window); the globe build was not run.
@@ -58,7 +58,7 @@ Run in the game on the globe beta (build 261107) on 2026-11-09: the menu button 
   that place again. A remembered place is now final: the mod releases those anchors when it puts a window there. The
   Tactical Display had the same problem. A window already lost this way comes back onto the screen by itself.
 
-## 1.1.0 – 2026-10-30
+## 1.1.0 - 2026-10-30
 
 Fixes after a report from a 3440x1440 main monitor with a 1080p second monitor (not yet tested in the game).
 
@@ -121,14 +121,14 @@ desktops).
 - The map on the whole screen is never remembered as a window layout; windows reporting no size are not remembered;
   the window area is never larger than the visible screen.
 
-## 1.0.2 – 2026-10-27
+## 1.0.2 - 2026-10-27
 
 - Right-clicking a unit in the formation manager on the other monitor opens its menu there (it opened on the main
   screen). A click on one monitor closes a unit menu open on the other.
 - Formation manager tabs (a game bug, on both screens): with a category missing, e.g. no submarines, a tab stood for
   the category after it, and double-clicking a plane in the "Air" tab jumped the list to "All". Now it stays.
 
-## 1.0.1 – 2026-10-25
+## 1.0.1 - 2026-10-25
 
 Fixes after a bug report (clicks on the main screen went to the desktop, also with the mod unticked).
 
@@ -137,7 +137,7 @@ Fixes after a bug report (clicks on the main screen went to the desktop, also wi
 - Safeguard: the game's own main window is never cut to the see-through shape, even if it is mistaken for the
   pop-out monitor's window (a bug report: clicks on the main screen went to the desktop).
 
-## 1.0.0 – 2026-10-24 (first Workshop release)
+## 1.0.0 - 2026-10-24 (first Workshop release)
 
 Tested on Sea Power 0.8.7.
 

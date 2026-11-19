@@ -7,34 +7,34 @@
 A mod for [Sea Power: Naval Combat in the Missile Age](https://store.steampowered.com/app/1286220/) that puts the
 game's windows on another monitor, so the main screen stays free for the world view and the map.
 
-**[Get it on the Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3826396311)** – needs a mod loader, either one: [R.A.T.S. Keel](https://steamcommunity.com/sharedfiles/filedetails/?id=3835527459) or [Anchor Chain](https://steamcommunity.com/sharedfiles/filedetails/?id=3380210757).
+**[Get it on the Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3826396311)** - needs a mod loader, either one: [R.A.T.S. Keel](https://steamcommunity.com/sharedfiles/filedetails/?id=3835527459) or [Anchor Chain](https://steamcommunity.com/sharedfiles/filedetails/?id=3380210757).
 
 ![The map on the main screen, the game's windows on the second monitor](workshop/screenshots/01-two-monitors.jpg)
 
-- **Pop-out button** next to the X of every window – formation manager, message log, camera controls, unit status,
-  sensor and doctrine windows – moves it to the other monitor; the same button there sends it back. Windows of other
+- **Pop-out button** next to the X of every window - formation manager, message log, camera controls, unit status,
+  sensor and doctrine windows - moves it to the other monitor; the same button there sends it back. Windows of other
   authors' mods keep their title bar as it is (no button).
 - **Free-floating windows**: only the popped-out windows show on that monitor, each with a thin frame that is its
   resize border. Around them your desktop and other programs show through and take the clicks.
-- **Arrange them as you like**: pop out several, drag them around – a dragged window snaps to the others and to the
+- **Arrange them as you like**: pop out several, drag them around - a dragged window snaps to the others and to the
   monitor's edges (hold Shift to move it freely). Over there a window can be made larger than the game normally allows.
 - **Always in reach**: while you're in the game the popped-out windows stay above other programs on that monitor;
   switch to another program and they become normal windows again.
 - **Remembered**: windows you popped out open on the other monitor in the next mission too, where you left them.
 - **Wide resize corners** on every window, on both screens: the last stretch of each edge resizes diagonally (the
   game's own corner handle is a tiny square just outside the corner).
-- It is the game's own window over there – same look, dragging, resizing and clicks. Clicks on the other monitor
+- It is the game's own window over there - same look, dragging, resizing and clicks. Clicks on the other monitor
   never reach the world or the map behind them, and the bottom-bar buttons keep working (they close and reopen the
   window over there). Right-clicking a unit in the formation manager opens its menu right there, on that monitor.
 - **Formation manager tabs fixed** (a game bug, on both screens): with a category missing, e.g. no submarines, the
-  "Air" tab really is Air – double-clicking a plane there no longer jumps the list to "All".
+  "Air" tab really is Air - double-clicking a plane there no longer jumps the list to "All".
 
 | | |
 | --- | --- |
 | ![Before: the windows cover the map](workshop/screenshots/04-before.jpg) | ![After: the same map, free](workshop/screenshots/05-after.jpg) |
 | ![The pop-out button and its tooltip](workshop/screenshots/03-pop-out-button.jpg) | ![Four windows arranged on a portrait monitor](workshop/screenshots/02-floating-windows.jpg) |
 
-The map stays on the main screen – the game has its own options for putting the map or the world view on another
+The map stays on the main screen - the game has its own options for putting the map or the world view on another
 monitor. A monitor the game uses for those is skipped; the windows go to the first free one (and only float over
 the game's view when there is none).
 
@@ -52,7 +52,7 @@ Manual install instead of the Workshop: put `SeaPowerPopOut.dll` and `_info.ini`
 `<Sea Power>\Sea Power_Data\StreamingAssets\SeaPowerPopOut\`.
 
 Good to know: the first time a window pops out, the game takes over the other monitor (that is how Unity uses a
-second display) and keeps it until it closes – with nothing popped out, nothing of the game shows there.
+second display) and keeps it until it closes - with nothing popped out, nothing of the game shows there.
 
 ## Settings
 
@@ -60,7 +60,7 @@ second display) and keeps it until it closes – with nothing popped out, nothin
 
 | Setting | What it does |
 | --- | --- |
-| Monitor | 0 = automatic (the first monitor the game doesn't use itself); 2 = the next monitor after the game's, 3 the one after – the log lists them with their resolutions |
+| Monitor | 0 = automatic (the first monitor the game doesn't use itself); 2 = the next monitor after the game's, 3 the one after - the log lists them with their resolutions |
 | UI scale | Size of the windows on the other monitor, relative to the game's UI scale |
 | Unlimited window size | Over there a window can be resized beyond the game's maximum, up to the whole monitor |
 | See-through | Only the windows show on that monitor; off = the whole monitor turns dark while windows are popped out |
@@ -105,7 +105,7 @@ was not run); `modtool compat` passes for the globe build, which has not been ru
 ## Compatibility
 
 - Sea Power 0.8.x on Windows. The game updates often; if an update moves something the mod hooks into, the mod
-  stays out of the way and the log says why – the game itself keeps running.
+  stays out of the way and the log says why - the game itself keeps running.
 - Needs a second monitor. Works next to the game's own second-monitor map and detached world view (those monitors
   are skipped).
 - Exclusive fullscreen: with a second monitor in use the world view can freeze (Unity; music and menus keep
@@ -171,7 +171,7 @@ too, while the game's `FormationManagerViewModel.SelectedTabIndex` counts only t
 property's getter and setter counts every tab.
 
 Pointer fix: `NoesisView` flips the mouse of another display with its camera's `pixelHeight`, which is not that
-display's height when it differs from the game window's (or Windows scales it differently) – the pointer sits off by
+display's height when it differs from the game window's (or Windows scales it differently) - the pointer sits off by
 the difference (400 px on a 2560 px portrait monitor next to a 2160 px game window): no resize cursor at the edges,
 drags that jump, tooltips far from the cursor. A Harmony postfix on `NoesisView.MousePosition` corrects it for every
 view on another monitor (the pop-out screen and the game's own second-monitor map / world view), reading the flip

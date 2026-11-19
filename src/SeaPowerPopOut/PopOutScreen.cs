@@ -18,7 +18,7 @@ namespace SeaPowerPopOut;
 /// The pop-out monitor: a second Noesis view on another Unity display, built the way the game builds its own
 /// second-monitor map (<c>SecondDisplayMapHandler</c>: a camera with <c>targetDisplay</c> plus a NoesisView).
 /// <para>Its root carries a second instance of the game's own <see cref="WindowHost"/> and the main game view's
-/// resources, so a window's content (FormationManagerViewModel, EventLogViewModel, UnitStatusViewModel …) renders
+/// resources, so a window's content (FormationManagerViewModel, EventLogViewModel, UnitStatusViewModel ...) renders
 /// over there with the game's own templates, title bar, dragging and resizing. Popping a window out only moves its
 /// content object from the main host's <c>Windows</c> to ours; its close button routes to our host and the main
 /// host is patched to know about it (see <see cref="Patches"/>).</para>
@@ -88,7 +88,7 @@ internal sealed class PopOutScreen : MonoBehaviour
 
     /// <summary>
     /// The monitor windows pop out to (Unity display index, -1 = none): the configured one, unless the game draws its
-    /// world view or second-screen map there – then, as with "automatic", the first monitor the game leaves alone.
+    /// world view or second-screen map there - then, as with "automatic", the first monitor the game leaves alone.
     /// Only when every other monitor is taken do the windows float over the game's own view.
     /// </summary>
     private static int ChooseDisplay()
@@ -169,7 +169,7 @@ internal sealed class PopOutScreen : MonoBehaviour
         {
             nextHookCheck = Time.unscaledTime + 0.5f;
             // A WindowHost registers itself with WindowHostManager when it is built, which only happens while
-            // NoesisGUI runs (the main menu view has one) – from then on Noesis types are safe to touch.
+            // NoesisGUI runs (the main menu view has one) - from then on Noesis types are safe to touch.
             if (Singleton<WindowHostManager>.InstanceExists())
                 ApplyWindowHooks();
         }
@@ -675,7 +675,7 @@ internal sealed class PopOutScreen : MonoBehaviour
 
     /// <summary>
     /// The game opens its unit menu (right-click on a unit in the formation manager) from the context menu of a
-    /// canvas of the main game view, <c>MainGameView.ContextMenuCanvas</c> – so on the main screen, wherever the
+    /// canvas of the main game view, <c>MainGameView.ContextMenuCanvas</c> - so on the main screen, wherever the
     /// click was. This screen gets a copy of that menu, on a canvas in the scaled layer of the windows so it comes
     /// out at their size.
     /// </summary>
@@ -1004,12 +1004,12 @@ internal sealed class PopOutScreen : MonoBehaviour
 
     /// <summary>
     /// <c>NoesisView.MousePosition</c> just returned the mouse position relative to the monitor it is on, bottom up,
-    /// in the monitor's own pixels. NoesisView then flips it with its camera's <c>pixelHeight</c> – which for a camera
+    /// in the monitor's own pixels. NoesisView then flips it with its camera's <c>pixelHeight</c> - which for a camera
     /// on another display is not that display's height, so on a monitor of another height (or a Windows scaling
     /// other than the game's) the pointer sat off by the difference: no resize cursor at the edges, drags that jump,
     /// tooltips far from the cursor, right-clicks landing on the wrong thing. Clicks take another way and land right.
-    /// <para>Corrected for every view on another monitor – the pop-out screen and the game's own second-monitor map /
-    /// world view – so that the flip comes out at the monitor's real height. What the flip uses is read from the
+    /// <para>Corrected for every view on another monitor - the pop-out screen and the game's own second-monitor map /
+    /// world view - so that the flip comes out at the monitor's real height. What the flip uses is read from the
     /// camera right here, so the correction is zero wherever the game already gets it right.</para>
     /// </summary>
     internal void FixPointer(NoesisView view, ref Vector3 position)

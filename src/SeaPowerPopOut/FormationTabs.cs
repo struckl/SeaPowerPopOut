@@ -6,7 +6,7 @@ namespace SeaPowerPopOut;
 
 /// <summary>
 /// A fix of the game's formation manager tabs (All, Surface, Subs, Air, Helos, Ground), on both screens. Its
-/// TabControl always holds all six tabs, an empty category's collapsed, so the selected index counts those too –
+/// TabControl always holds all six tabs, an empty category's collapsed, so the selected index counts those too -
 /// <c>FormationManagerViewModel.SelectedTabIndex</c> counts only the visible ones. With a tab missing in front of it
 /// (no submarines), "Air" stood for the category after it, and double-clicking a plane jumped the list to "All": the
 /// game shows "All" unless the selected category is the plane's own. Here the index counts every tab, as the
