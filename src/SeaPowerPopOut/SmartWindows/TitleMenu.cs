@@ -33,6 +33,8 @@ internal static class TitleMenu
     /// <summary>Adds or updates one entry of the window's menu; the button is made on the first call. Lower order is higher up.</summary>
     public static void Set(GameWindow window, string id, int order, string label, string icon, Action<UIElement> run)
     {
+        if (!Ours(window))
+            return;
         Panel panel = TitleBar.FindButtonsPanel(window);
         if (panel == null)
             return;
@@ -76,6 +78,35 @@ internal static class TitleMenu
         entry.Icon = icon;
         entry.Run = run;
         list.Sort((a, b) => a.Order.CompareTo(b.Order));
+    }
+
+    // Our own R.A.T.S. mods: their windows are built like the game's, so they pop out and take a look like the game's.
+    private static readonly HashSet<string> OwnMods = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "SeaPowerSensorViews", "SeaPowerSensorViewsFlat", "SeaPowerRadio", "SeaPowerRadioFlat", "SeaPowerTopo", "SeaPowerTopoFlat",
+        "SeaPowerBorders", "SeaPowerBordersFlat", "SeaPowerCommandTools", "SeaPowerCommandToolsFlat", "SeaPowerKeel", "SeaPowerPopOut",
+    };
+    private static readonly HashSet<string> LeftAlone = new HashSet<string>();
+
+    /// <summary>
+    /// A window of the game or of one of our mods. Other authors' windows keep their title bar as their author made it: one of
+    /// them (Acoustic ID) has its own menu there, so a click on our button opened theirs (board post #1), and a window built
+    /// from another mod's resources may not draw on the pop-out monitor at all.
+    /// </summary>
+    private static bool Ours(GameWindow window)
+    {
+        Type type = window.DataContext?.GetType();
+        if (type == null)
+            return true;
+        System.Reflection.Assembly assembly = type.Assembly;
+        if (assembly == typeof(GameWindow).Assembly || assembly == typeof(SeaPower.GameMain).Assembly)
+            return true;
+        string name = assembly.GetName().Name ?? "";
+        if (OwnMods.Contains(name))
+            return true;
+        if (LeftAlone.Add(type.FullName ?? type.Name))
+            ModLog.Info($"{type.Name} ({name}) is another mod's window: its title bar is left as it is (no pop-out menu).");
+        return false;
     }
 
     /// <summary>Opens the menu again under the button (the Back row of a sub menu).</summary>

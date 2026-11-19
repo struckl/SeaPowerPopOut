@@ -217,10 +217,30 @@ internal sealed class PopOutScreen : MonoBehaviour
         }
     }
 
+    /// <summary>True from the moment the game starts to close: nothing touches Noesis after that.</summary>
+    internal static bool Quitting { get; private set; }
+
+    /// <summary>
+    /// The game closes: the pop-out screen goes now, while every Noesis view is still alive. Unity calls this before any
+    /// OnDestroy; the game's GameMain.OnDestroy (our mission-end hook) used to tear the screen down later, in the middle of
+    /// the shutdown, when Noesis was being taken apart already - an access violation in Noesis.dll on quit (Keel report #6).
+    /// </summary>
     private void OnApplicationQuit()
     {
         Layout.Save();
         SmartWindows.WindowMemory.Save();
+        Quitting = true;
+        try
+        {
+            if (host != null)
+                Teardown();
+        }
+        catch (Exception ex)
+        {
+            ModLog.Debug($"teardown on quit: {ex.Message}");
+        }
+        mainView = null;
+        mainHost = null;
     }
 
     private void ApplyWindowHooks()
@@ -277,6 +297,8 @@ internal sealed class PopOutScreen : MonoBehaviour
 
     internal void MissionEnded()
     {
+        if (Quitting)
+            return;                                   // torn down in OnApplicationQuit; Noesis is going away now
         try
         {
             Layout.Save();
@@ -486,6 +508,8 @@ internal sealed class PopOutScreen : MonoBehaviour
     {
         if (host != null)
             return true;
+        if (Quitting)
+            return false;
         int index = ChooseDisplay();
         if (index < 1 || MainHost == null)
             return false;

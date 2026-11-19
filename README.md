@@ -12,7 +12,8 @@ game's windows on another monitor, so the main screen stays free for the world v
 ![The map on the main screen, the game's windows on the second monitor](workshop/screenshots/01-two-monitors.jpg)
 
 - **Pop-out button** next to the X of every window – formation manager, message log, camera controls, unit status,
-  sensor and doctrine windows – moves it to the other monitor; the same button there sends it back.
+  sensor and doctrine windows – moves it to the other monitor; the same button there sends it back. Windows of other
+  authors' mods keep their title bar as it is (no button).
 - **Free-floating windows**: only the popped-out windows show on that monitor, each with a thin frame that is its
   resize border. Around them your desktop and other programs show through and take the clicks.
 - **Arrange them as you like**: pop out several, drag them around – a dragged window snaps to the others and to the

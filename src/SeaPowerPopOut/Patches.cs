@@ -123,20 +123,23 @@ internal static class Patches
         return true;
     }
 
+    // From the moment the game closes nothing here touches Noesis (see PopOutScreen.Quitting): the game's own code runs as without the mod.
     private static bool OpenNewWindow(WindowHost __instance, ExecutedCustomCommandArgs args) =>
-        PopOutScreen.Instance?.HostOpening(__instance, args.Parameter) ?? true;
+        PopOutScreen.Quitting || (PopOutScreen.Instance?.HostOpening(__instance, args.Parameter) ?? true);
 
     private static void CanCloseWindow(WindowHost __instance, CanExecuteCustomCommandArgs args, ref bool __result)
     {
-        if (!__result && PopOutScreen.Instance != null && PopOutScreen.Instance.HoldsFor(__instance, args.Parameter))
+        if (!__result && !PopOutScreen.Quitting && PopOutScreen.Instance != null && PopOutScreen.Instance.HoldsFor(__instance, args.Parameter))
             __result = true;
     }
 
     private static bool CloseWindow(WindowHost __instance, ExecutedCustomCommandArgs args) =>
-        PopOutScreen.Instance?.HostClosing(__instance, args.Parameter) ?? true;
+        PopOutScreen.Quitting || (PopOutScreen.Instance?.HostClosing(__instance, args.Parameter) ?? true);
 
     private static void WindowLoaded(GameWindow __instance)
     {
+        if (PopOutScreen.Quitting)
+            return;
         PopOutScreen.Instance?.Decorate(__instance);
         if (PopOutScreen.Instance == null || PopOutScreen.Instance.OnMainScreen(__instance))
             SmartWindows.WindowMemory.WindowLoaded(__instance);
@@ -146,8 +149,11 @@ internal static class Patches
 
     private static void MouseUpdated(MouseControlState __instance) => PopOutScreen.Instance?.ClaimMouse(__instance);
 
-    private static void MousePosition(NoesisView __instance, ref Vector3 __result) =>
-        PopOutScreen.Instance?.FixPointer(__instance, ref __result);
+    private static void MousePosition(NoesisView __instance, ref Vector3 __result)
+    {
+        if (!PopOutScreen.Quitting)
+            PopOutScreen.Instance?.FixPointer(__instance, ref __result);
+    }
 
     private static bool GetTabIndex(object __instance, ref int __result) => FormationTabs.Get(__instance, ref __result);
 

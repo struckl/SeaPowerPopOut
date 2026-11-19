@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **Fixed: a crash in Noesis.dll when closing the game** (Keel report #6)
+  - Cause: the pop-out screen was taken down in the middle of the game's shutdown, when the UI engine was being taken apart already
+  - Now it goes first, when the game starts to close; from then on the mod leaves every window to the game
+- **Fixed: Pop-Out's button on other mods' windows** (Acoustic ID, board post #1)
+  - Its title bar has a menu of its own: a click on our button opened theirs
+  - Windows of other authors' mods now keep their title bar as their author made it (no Pop-Out menu); the game's windows and R.A.T.S. windows keep it
 - The mod folder carries this CHANGELOG.md, so R.A.T.S. Keel's What's new can show what changed when there are no Workshop notes (a local copy, the GitHub zip).
 
 ## 1.2.3 – 2026-11-12 – in-game name R.A.T.S. Pop-Out Windows
