@@ -15,31 +15,45 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class MenuFixes
 {
+    public static readonly Feature HideCustomMission = new Feature
+    {
+        Switch = () => SmartSettings.HideCustomMission.Value,
+        Hook = HideCustom,
+    };
+
+    public static readonly Feature RememberMissionFolder = new Feature
+    {
+        Switch = () => SmartSettings.RememberMissionFolder.Value,
+        Hook = RememberFolder,
+    };
+
     private static MethodInfo pickerMode;
 
-    public static void Apply(Harmony harmony)
+    private static bool HideCustom(Harmony harmony)
     {
-        if (SmartSettings.HideCustomMission.Value)
+        MethodInfo getMissions = AccessTools.Method(typeof(ScenarioMenuViewModel), nameof(ScenarioMenuViewModel.GetMissions));
+        if (getMissions == null)
         {
-            MethodInfo getMissions = AccessTools.Method(typeof(ScenarioMenuViewModel), nameof(ScenarioMenuViewModel.GetMissions));
-            if (getMissions != null)
-                harmony.Patch(getMissions, postfix: new HarmonyMethod(typeof(MenuFixes), nameof(MissionsListed)));
-            else
-                ModLog.Warn("ScenarioMenuViewModel.GetMissions not found (game updated?) - '_Custom Mission' stays in the list.");
+            ModLog.Warn("ScenarioMenuViewModel.GetMissions not found (game updated?) - '_Custom Mission' stays in the list.");
+            return false;
         }
+        harmony.Patch(getMissions, postfix: new HarmonyMethod(typeof(MenuFixes), nameof(MissionsListed)));
+        return true;
+    }
 
-        if (!SmartSettings.RememberMissionFolder.Value)
-            return;
+    private static bool RememberFolder(Harmony harmony)
+    {
         pickerMode = AccessTools.PropertyGetter(typeof(FilePickerViewModel), "FilePickerModeSetting");
         MethodInfo initialise = AccessTools.Method(typeof(FilePickerViewModel), nameof(FilePickerViewModel.Initialise), Type.EmptyTypes);
         MethodInfo load = AccessTools.Method(typeof(MissionEditorViewModel), nameof(MissionEditorViewModel.LoadMission));
         if (pickerMode == null || initialise == null || load == null)
         {
             ModLog.Warn("Mission editor file picker members not found (game updated?) - its folder is not remembered.");
-            return;
+            return false;
         }
         harmony.Patch(load, prefix: new HarmonyMethod(typeof(MenuFixes), nameof(MissionOpened)));
         harmony.Patch(initialise, postfix: new HarmonyMethod(typeof(MenuFixes), nameof(PickerOpened)));
+        return true;
     }
 
     private static void MissionsListed(ObservableCollection<IMissionTreeViewItem> __result)

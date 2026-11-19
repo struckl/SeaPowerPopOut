@@ -15,6 +15,12 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class TimePanelDrag
 {
+    public static readonly Feature Feature = new Feature
+    {
+        LiveSwitch = () => SmartSettings.DragTimePanel.Value,
+        Update = Update,
+    };
+
     private const float CheckInterval = 0.5f;
     private const float RetryInterval = 5f;
     private const int SearchBudget = 6000;
@@ -24,10 +30,10 @@ internal static class TimePanelDrag
     private static float nextCheck;
     private static bool dragging;
 
-    /// <summary>Called every frame (cheap): finds the panel in a new mission view and keeps it where it was saved.</summary>
-    public static void Update()
+    /// <summary>Cheap: finds the panel in a new mission view and keeps it where it was saved.</summary>
+    private static void Update()
     {
-        if (!SmartSettings.DragTimePanel.Value || UnityEngine.Time.unscaledTime < nextCheck)
+        if (UnityEngine.Time.unscaledTime < nextCheck)
             return;
         nextCheck = UnityEngine.Time.unscaledTime + CheckInterval;
         try

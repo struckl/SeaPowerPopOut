@@ -15,10 +15,17 @@ using static PopupFrame;
 /// </summary>
 internal static class SettingsPanel
 {
-
-    public static void AddGear(GameWindow window)
+    // Not on fixed-size dialogs (Confirm Exit, Confirm Task Force ...).
+    public static readonly Feature Feature = new Feature
     {
-        if (!SmartSettings.SettingsButton.Value)
+        LiveSwitch = () => SmartSettings.SettingsButton.Value,
+        WindowLoaded = AddGear,
+        PoppedWindowLoaded = AddGear,
+    };
+
+    private static void AddGear(GameWindow window)
+    {
+        if (!window.CanResize)
             return;
         Loc.Reload();                                   // the game's language is known by now
         TitleMenu.Set(window, "settings", 2, Loc.Get("gear_tip"),

@@ -11,7 +11,14 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class CampaignLoadouts
 {
-    public static bool Apply(Harmony harmony)
+    public static readonly Feature Feature = new Feature
+    {
+        Switch = () => SmartSettings.SortLoadouts.Value,
+        Hook = Apply,
+        Hooked = "campaign loadouts sorted by date",
+    };
+
+    private static bool Apply(Harmony harmony)
     {
         MethodInfo rebuild = AccessTools.Method(typeof(LinearCampaignTaskForceLoadoutsViewModel), "RebuildOptions");
         if (rebuild == null)
@@ -39,7 +46,6 @@ internal static class CampaignLoadouts
 
     private static int YearOf(LinearCampaignTaskForceLoadoutsViewModel.LoadoutOptionRow row)
     {
-        int year = row?.Option?.ServiceEntryYear ?? 0;
-        return year > 0 ? year : int.MaxValue;
+        return ServiceYear.SortKey(row?.Option?.ServiceEntryYear ?? 0);
     }
 }

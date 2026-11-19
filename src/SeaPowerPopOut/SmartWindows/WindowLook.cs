@@ -14,6 +14,13 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class WindowLook
 {
+    public static readonly Feature Feature = new Feature
+    {
+        WindowLoaded = Loaded,
+        PoppedWindowLoaded = Loaded,
+        Update = Update,
+    };
+
     /// <summary>Elements whose name starts like this (the menu, the settings popup) are never dimmed or scaled.</summary>
     public const string SkipPrefix = "SmartWindows";
     private const float RecheckSeconds = 1f;
@@ -39,8 +46,9 @@ internal static class WindowLook
         return pattern == null ? 0 : Store.LevelOf(pattern);
     }
 
-    public static void WindowLoaded(GameWindow window, string pattern)
+    private static void Loaded(GameWindow window)
     {
+        string pattern = WindowMemory.PatternOf(window);
         if (pattern == null)
             return;
         Windows.Add(new State { Window = new WeakReference<GameWindow>(window), Pattern = pattern, Next = Time.unscaledTime + 0.2f });
@@ -48,7 +56,7 @@ internal static class WindowLook
             LookMenu.AddButton(window, pattern);
     }
 
-    public static void Update()
+    private static void Update()
     {
         if (Windows.Count == 0)
             return;

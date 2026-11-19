@@ -19,37 +19,38 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class LoadoutPanelOrder
 {
+    public static readonly Feature Feature = new Feature
+    {
+        Switch = () => SmartSettings.LoadoutPanelOrder.Value,
+        Hook = _ => Apply(),
+        Hooked = "campaign loadout panel order",
+        WindowLoaded = window => Windows.Add(new WeakReference<GameWindow>(window)),
+        Update = Update,
+    };
+
     private const float Every = 0.4f;
 
     private static readonly List<WeakReference<GameWindow>> Windows = new List<WeakReference<GameWindow>>();
     private static float next;
 
-    public static bool Enabled { get; private set; }
-
     private static Func<string, string, int> yearOf;
 
-    public static void Apply()
+    private static bool Apply()
     {
         // LinearCampaignTaskForceUnitLookup is internal to the game assembly.
         var method = AccessTools.Method("SeapowerUI.ViewModels.LinearCampaignTaskForceUnitLookup:GetAuthoredClassServiceYear");
         if (method == null)
         {
             ModLog.Warn("Task Force Builder year lookup not found (game updated?) - the loadout panel keeps the game's order.");
-            return;
+            return false;
         }
         yearOf = (Func<string, string, int>)Delegate.CreateDelegate(typeof(Func<string, string, int>), method);
-        Enabled = true;
+        return true;
     }
 
-    public static void WindowLoaded(GameWindow window)
+    private static void Update()
     {
-        if (Enabled)
-            Windows.Add(new WeakReference<GameWindow>(window));
-    }
-
-    public static void Update()
-    {
-        if (!Enabled || Windows.Count == 0 || Time.unscaledTime < next)
+        if (Windows.Count == 0 || Time.unscaledTime < next)
             return;
         next = Time.unscaledTime + Every;
         for (int i = Windows.Count - 1; i >= 0; i--)

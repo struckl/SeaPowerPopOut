@@ -162,7 +162,7 @@ internal sealed class PopOutScreen : MonoBehaviour
 
     private void Update()
     {
-        SmartWindows.WindowMemory.Update();
+        SmartWindows.SmartFeatures.Update();
         if (windowHooks == WindowHooks.Waiting && Time.unscaledTime >= nextHookCheck)
         {
             nextHookCheck = Time.unscaledTime + 0.5f;
@@ -226,7 +226,7 @@ internal sealed class PopOutScreen : MonoBehaviour
     private void OnApplicationQuit()
     {
         Layout.Save();
-        SmartWindows.WindowMemory.Save();
+        SmartWindows.SmartFeatures.Save();
         Quitting = true;
         try
         {

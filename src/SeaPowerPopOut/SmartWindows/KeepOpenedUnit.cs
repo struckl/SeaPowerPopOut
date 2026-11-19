@@ -22,10 +22,17 @@ internal static class KeepOpenedUnit
     /// <summary>True while the game builds an information view model for one given unit.</summary>
     private static bool openingForUnit;
 
-    public static bool Apply(Harmony harmony)
+    public static readonly Feature Feature = new Feature
+    {
+        Switch = () => SmartSettings.KeepOpenedUnit.Value,
+        Hook = harmony => Encyclopedia.Feature.Active && Apply(harmony),
+        Hooked = "Unit Reference keeps the opened unit in the tree",
+    };
+
+    private static bool Apply(Harmony harmony)
     {
         MethodInfo reveal = AccessTools.Method(typeof(UnitTreeBrowserViewModel), nameof(UnitTreeBrowserViewModel.RevealEntry));
-        MethodInfo update = AccessTools.Method(typeof(UnitTreeBrowserViewModel), "UpdateFilteredMuseumEntries", Type.EmptyTypes);
+        MethodInfo update = Encyclopedia.UpdateFiltered;
         ConstructorInfo opening = AccessTools.FirstConstructor(typeof(ObjectInformationViewModel),
             c => c.GetParameters().Length >= 2 && c.GetParameters()[1].Name == "initialIniRef");
         if (reveal == null || update == null || opening == null)
@@ -48,7 +55,7 @@ internal static class KeepOpenedUnit
 
     private static void Revealed(UnitTreeBrowserViewModel __instance, MuseumEntry __result)
     {
-        if (!openingForUnit || __result == null || !SmartSettings.KeepOpenedUnit.Value || !BrowserMemory.IsEncyclopedia(__instance))
+        if (!openingForUnit || __result == null || !SmartSettings.KeepOpenedUnit.Value || !Encyclopedia.Is(__instance))
             return;
         try
         {
@@ -64,7 +71,7 @@ internal static class KeepOpenedUnit
 
     private static void Updated(UnitTreeBrowserViewModel __instance)
     {
-        if (!SmartSettings.KeepOpenedUnit.Value || BrowserMemory.IsInitializing(__instance))
+        if (!SmartSettings.KeepOpenedUnit.Value || Encyclopedia.IsInitializing(__instance))
             return;
         try
         {

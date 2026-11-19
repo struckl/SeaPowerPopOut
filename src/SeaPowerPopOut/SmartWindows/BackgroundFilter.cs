@@ -14,9 +14,15 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class BackgroundFilter
 {
+    public static readonly Feature Feature = new Feature
+    {
+        Switch = () => SmartSettings.ModBackgroundsOnly.Value,
+        Hook = Apply,
+    };
+
     private static FieldInfo loadScreenImages;
 
-    public static void Apply(Harmony harmony)
+    private static bool Apply(Harmony harmony)
     {
         MethodInfo getAllFiles = AccessTools.Method(typeof(FileManager), nameof(FileManager.GetAllFiles));
         MethodInfo change = AccessTools.Method(typeof(LoadScreen), "ChangeBackground");
@@ -24,11 +30,12 @@ internal static class BackgroundFilter
         if (getAllFiles == null)
         {
             ModLog.Warn("FileManager.GetAllFiles not found (game updated?) - mod backgrounds do not replace the game's.");
-            return;
+            return false;
         }
         harmony.Patch(getAllFiles, postfix: new HarmonyMethod(typeof(BackgroundFilter), nameof(FilesListed)));
         if (change != null && loadScreenImages != null)
             harmony.Patch(change, prefix: new HarmonyMethod(typeof(BackgroundFilter), nameof(LoadScreenPicking)));
+        return true;
     }
 
     // 'path' is a parameter of GetAllFiles in both game builds (the globe build has one more, optional, parameter).

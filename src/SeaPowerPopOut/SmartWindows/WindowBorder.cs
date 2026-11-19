@@ -9,12 +9,16 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class WindowBorder
 {
+    public static readonly Feature Feature = new Feature
+    {
+        LiveSwitch = () => SmartSettings.BorderEnabled.Value,
+        WindowLoaded = Apply,
+    };
+
     private const string FrameName = "SmartWindowsFrame";
 
-    public static void Apply(GameWindow window)
+    private static void Apply(GameWindow window)
     {
-        if (!SmartSettings.BorderEnabled.Value)
-            return;
         if (!ColorText.TryParse(SmartSettings.BorderColor.Value, out byte a, out byte r, out byte g, out byte b))
         {
             ModLog.Warn($"Window border colour '{SmartSettings.BorderColor.Value}' is not #RRGGBB or #AARRGGBB.");

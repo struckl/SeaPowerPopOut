@@ -12,10 +12,17 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class UnitStatusNames
 {
+    public static readonly Feature Feature = new Feature
+    {
+        Switch = () => SmartSettings.FullUnitName.Value,
+        Hook = Apply,
+        Hooked = "Unit Status shows full unit names",
+    };
+
     private static FieldInfo unitField;
     private static MethodInfo setName;
 
-    public static bool Apply(Harmony harmony)
+    private static bool Apply(Harmony harmony)
     {
         MethodInfo switchUnit = AccessTools.Method(typeof(UnitStatusViewModel), "SwitchUnit");
         unitField = AccessTools.Field(typeof(UnitStatusViewModel), "_unit");

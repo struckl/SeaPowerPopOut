@@ -12,7 +12,14 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class EarliestVariant
 {
-    public static bool Apply(Harmony harmony)
+    public static readonly Feature Feature = new Feature
+    {
+        Switch = () => SmartSettings.EarliestVariantOnClick.Value,
+        Hook = harmony => Encyclopedia.Feature.Active && Apply(harmony),
+        Hooked = "Unit Reference selects the earliest variant of a class",
+    };
+
+    private static bool Apply(Harmony harmony)
     {
         MethodInfo pick = AccessTools.Method(typeof(UnitTreeBrowserViewModel), "SelectBestGroupEntry");
         if (pick == null)
@@ -26,7 +33,7 @@ internal static class EarliestVariant
 
     private static void Picked(UnitTreeBrowserViewModel __instance, MuseumEntry group, ref MuseumEntry __result)
     {
-        if (group?.MuseumEntries == null || !BrowserMemory.IsEncyclopedia(__instance))
+        if (group?.MuseumEntries == null || !Encyclopedia.Is(__instance))
             return;
         MuseumEntry earliest = Earliest(group.MuseumEntries);
         if (earliest != null)

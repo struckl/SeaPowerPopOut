@@ -90,7 +90,7 @@ internal static class Patches
             return false;
         if (!Apply(PointerHooks, optional: true))
             ModLog.Warn("Pointer fix not applied - on a monitor of another height than the game's the mouse sits off.");
-        SmartWindows.SmartHooks.Apply(harmony);
+        SmartWindows.SmartFeatures.Apply(harmony);
         return true;
     }
 
@@ -139,10 +139,7 @@ internal static class Patches
         if (PopOutScreen.Quitting)
             return;
         PopOutScreen.Instance?.Decorate(__instance);
-        if (PopOutScreen.Instance == null || PopOutScreen.Instance.OnMainScreen(__instance))
-            SmartWindows.WindowMemory.WindowLoaded(__instance);
-        else
-            SmartWindows.WindowMemory.PoppedWindowLoaded(__instance);
+        SmartWindows.SmartFeatures.WindowLoaded(__instance, PopOutScreen.Instance == null || PopOutScreen.Instance.OnMainScreen(__instance));
     }
 
     private static void MouseUpdated(MouseControlState __instance) => PopOutScreen.Instance?.ClaimMouse(__instance);

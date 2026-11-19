@@ -15,6 +15,8 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal sealed class TreeScroller
 {
+    public static readonly Feature Feature = new Feature { Update = Update };
+
     private const float Every = 0.1f;
     private const int MaxTries = 60;
 
@@ -38,7 +40,7 @@ internal sealed class TreeScroller
 
     public static void Track(UnitTreeBrowserView view, ObjectInformationViewModel vm) => All.Add(new TreeScroller(view, vm));
 
-    public static void Update()
+    private static void Update()
     {
         for (int i = All.Count - 1; i >= 0; i--)
         {

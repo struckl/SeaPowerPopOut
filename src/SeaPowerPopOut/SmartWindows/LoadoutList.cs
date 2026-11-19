@@ -17,7 +17,14 @@ internal static class LoadoutList
     private static readonly HashSet<object> completed = new HashSet<object>();
     private static MethodInfo managerInstance;
 
-    public static bool Apply(Harmony harmony)
+    public static readonly Feature Feature = new Feature
+    {
+        Switch = () => SmartSettings.LoadoutList.Value,
+        Hook = harmony => Encyclopedia.Feature.Active && Apply(harmony),
+        Hooked = "Unit Reference lists loadouts for all units",
+    };
+
+    private static bool Apply(Harmony harmony)
     {
         MethodInfo getter = AccessTools.PropertyGetter(typeof(ObjectInformationViewModel), nameof(ObjectInformationViewModel.HasMultipleLoadouts));
         if (getter == null)

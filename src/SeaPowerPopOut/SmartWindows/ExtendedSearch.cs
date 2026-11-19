@@ -16,10 +16,16 @@ internal static class ExtendedSearch
 {
     private static readonly ConditionalWeakTable<MuseumEntry, string> Plain = new ConditionalWeakTable<MuseumEntry, string>();
 
-    public static bool Apply(Harmony harmony)
+    public static readonly Feature Feature = new Feature
     {
-        var matcher = AccessTools.Method(typeof(UnitTreeBrowserViewModel), "MatchesTextSearch",
-            new[] { typeof(MuseumObjectEntry), typeof(string), typeof(bool) });
+        Switch = () => SmartSettings.ExtendedSearch.Value,
+        Hook = Apply,
+        Hooked = "Unit Reference search also reads ids and descriptions",
+    };
+
+    private static bool Apply(Harmony harmony)
+    {
+        var matcher = Encyclopedia.MatchesText;
         if (matcher == null)
         {
             ModLog.Warn("Unit Reference text match not found (game updated?) - search stays as the game has it.");

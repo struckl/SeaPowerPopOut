@@ -17,10 +17,17 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class CampaignSwapPrice
 {
+    public static readonly Feature Feature = new Feature
+    {
+        Switch = () => SmartSettings.FixSwapPrice.Value,
+        Hook = Apply,
+        Hooked = "hull swap priced from the campaign roster",
+    };
+
     private static MethodInfo rosterCost, copyEmptyState, capHeadroom, formatText;
     private static FieldInfo capPoints, availablePoints;
 
-    public static bool Apply(Harmony harmony)
+    private static bool Apply(Harmony harmony)
     {
         Type status = CampaignGame.Status;
         Type item = CampaignGame.Item;

@@ -19,6 +19,14 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class DamageControlLayout
 {
+    public static readonly Feature Feature = new Feature
+    {
+        Switch = () => SmartSettings.SectionsMinHeight.Value > 0f,
+        Hook = Apply,
+        Hooked = "Damage Control tab minimum height set",
+        Update = Update,
+    };
+
     private const int SectionRow = 2;
     private const float RetryEvery = 0.1f;
     private const int MaxTries = 30;
@@ -43,7 +51,7 @@ internal static class DamageControlLayout
     private static readonly List<WeakReference<DamageControlView>> Views = new List<WeakReference<DamageControlView>>();
     private static readonly ConditionalWeakTable<DamageControlView, Setup> Done = new ConditionalWeakTable<DamageControlView, Setup>();
 
-    public static bool Apply(Harmony harmony)
+    private static bool Apply(Harmony harmony)
     {
         var constructors = AccessTools.GetDeclaredConstructors(typeof(DamageControlView));
         if (constructors.Count == 0)
@@ -64,7 +72,7 @@ internal static class DamageControlLayout
     }
 
     /// <summary>Called every frame: tries the views that were created but whose template is not built yet.</summary>
-    public static void Update()
+    private static void Update()
     {
         for (int i = Pending.Count - 1; i >= 0; i--)
         {

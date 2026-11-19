@@ -15,6 +15,14 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class TreeDump
 {
+    public static readonly Feature Feature = new Feature
+    {
+        Switch = () => !string.IsNullOrWhiteSpace(SmartSettings.DumpWindows.Value),
+        Start = Init,
+        WindowLoaded = WindowLoaded,
+        Update = Update,
+    };
+
     private const float Delay = 1.5f;     // the template needs a moment to be applied
     private const int MaxDepth = 40;
 
@@ -29,20 +37,15 @@ internal static class TreeDump
         public string Label;
     }
 
-    public static void Init()
+    private static void Init()
     {
-        string setting = SmartSettings.DumpWindows.Value;
-        if (string.IsNullOrWhiteSpace(setting))
-            return;
-        patterns = new PatternList(setting);
+        patterns = new PatternList(SmartSettings.DumpWindows.Value);
         file = System.IO.Path.Combine(Paths.BepInExRootPath, "SmartWindows.tree.txt");
         File.WriteAllText(file, $"Window trees, {DateTime.Now:yyyy-MM-dd HH:mm:ss}\r\n");
     }
 
-    public static void WindowLoaded(GameWindow window)
+    private static void WindowLoaded(GameWindow window)
     {
-        if (patterns == null)
-            return;
         string type = window.DataContext?.GetType().Name;
         string match = patterns.Match(WindowNames.Of(window));
         if (match == null)
@@ -50,7 +53,7 @@ internal static class TreeDump
         Queue.Add(new Pending { Window = new WeakReference<GameWindow>(window), Due = Time.unscaledTime + Delay, Label = type ?? window.Name });
     }
 
-    public static void Update()
+    private static void Update()
     {
         for (int i = Queue.Count - 1; i >= 0; i--)
         {

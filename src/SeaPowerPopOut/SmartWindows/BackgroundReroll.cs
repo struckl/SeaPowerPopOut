@@ -12,29 +12,31 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class BackgroundReroll
 {
+    public static readonly Feature Feature = new Feature
+    {
+        Switch = () => SmartSettings.ModBackgroundsOnly.Value,
+        Hook = _ => Resolve(),
+        Update = Update,
+    };
+
     private const int MaxTries = 600;
 
     private static MethodInfo changeBackground;
-    private static bool armed;
     private static bool done;
     private static int tries;
 
-    /// <summary>Called after <see cref="BackgroundFilter.Apply"/>; arms the one-time reroll.</summary>
-    public static void Apply()
+    private static bool Resolve()
     {
         changeBackground = AccessTools.Method(typeof(LoadScreen), "ChangeBackground");
         if (changeBackground == null)
-        {
             ModLog.Warn("LoadScreen.ChangeBackground not found (game updated?) - the first background is not rerolled.");
-            return;
-        }
-        armed = true;
+        return changeBackground != null;
     }
 
-    /// <summary>Called every frame until it has run once (or given up).</summary>
-    public static void Update()
+    // Every frame until it has run once (or given up).
+    private static void Update()
     {
-        if (!armed || done)
+        if (done)
             return;
         if (++tries > MaxTries)
         {

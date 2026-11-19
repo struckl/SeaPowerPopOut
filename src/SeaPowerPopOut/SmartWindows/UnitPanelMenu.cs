@@ -12,20 +12,22 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class UnitPanelMenu
 {
+    public static readonly Feature Feature = new Feature
+    {
+        Switch = () => SmartSettings.UnitPanelMenu.Value,
+        Hook = _ => true,
+        Update = Update,
+    };
+
     private const string FlagBinding = "ObjectNation.Value";
     private const string NameBinding = "ObjectName.Value";
     private const int ParentsToCheck = 4;
 
-    private static bool enabled;
     private static WeakReference<MainGameView> hooked = new WeakReference<MainGameView>(null);
 
-    public static void Register() => enabled = true;
-
-    /// <summary>Called every frame: hooks each new mission view (Noesis does not take a class handler for it).</summary>
-    public static void Update()
+    /// <summary>Hooks each new mission view (Noesis does not take a class handler for it).</summary>
+    private static void Update()
     {
-        if (!enabled)
-            return;
         MainGameView view = MainGameView.Instance;
         if (view == null || (hooked.TryGetTarget(out MainGameView done) && ReferenceEquals(done, view)))
             return;
@@ -37,7 +39,7 @@ internal static class UnitPanelMenu
         }
         catch (Exception ex)
         {
-            enabled = false;
+            Feature.Stop();
             ModLog.Warn($"Unit panel menu not available: {ex.Message}");
         }
     }

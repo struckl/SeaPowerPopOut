@@ -19,6 +19,13 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class StrictLoadouts
 {
+    public static readonly Feature Feature = new Feature
+    {
+        Switch = () => SmartSettings.StrictLoadouts.Value,
+        Hook = Apply,
+        Hooked = "campaign Strict loadouts option available",
+    };
+
     /// <summary>Same key as the original Smart Windows, so its saves keep working.</summary>
     public const string DataKey = "SmartWindows_StrictLoadouts";
 
@@ -32,7 +39,7 @@ internal static class StrictLoadouts
     private static PropertyInfo campaignInstance, persistentData;
     private static readonly ConditionalWeakTable<Panel, CheckBox> Boxes = new ConditionalWeakTable<Panel, CheckBox>();
 
-    public static bool Apply(Harmony harmony)
+    private static bool Apply(Harmony harmony)
     {
         Type vm = typeof(LinearCampaignTaskForceBuilderViewModel);
         MethodInfo load = AccessTools.Method(vm, "LoadCampaignTaskForceData");

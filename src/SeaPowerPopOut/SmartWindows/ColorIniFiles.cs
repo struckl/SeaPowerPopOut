@@ -16,6 +16,15 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class ColorIniFiles
 {
+    public static readonly Feature Feature = new Feature
+    {
+        Switch = () => SmartSettings.ColorIniFiles.Value,
+        Hook = _ => Register(),
+        Hooked = "ini files coloured in the mission editor pickers",
+        WindowLoaded = window => All.Add(new Tracked { Window = new WeakReference<GameWindow>(window), Born = Time.unscaledTime }),
+        Update = Update,
+    };
+
     private const float PickerCheckEvery = 0.4f;
     private const float PickerGiveUpAfter = 5f;
     private const float WalkEvery = 0.1f;
@@ -38,7 +47,7 @@ internal static class ColorIniFiles
         public bool Picker;
     }
 
-    public static bool Register()
+    private static bool Register()
     {
         pickerContext = AccessTools.PropertyGetter(typeof(FilePickerViewModel), "Context");
         if (pickerContext == null)
@@ -51,16 +60,9 @@ internal static class ColorIniFiles
         return true;
     }
 
-    public static void WindowLoaded(GameWindow window)
+    private static void Update()
     {
-        if (pickerContext == null || window == null)
-            return;
-        All.Add(new Tracked { Window = new WeakReference<GameWindow>(window), Born = Time.unscaledTime });
-    }
-
-    public static void Update()
-    {
-        if (pickerContext == null || All.Count == 0)
+        if (All.Count == 0)
             return;
         float now = Time.unscaledTime;
         for (int i = All.Count - 1; i >= 0; i--)

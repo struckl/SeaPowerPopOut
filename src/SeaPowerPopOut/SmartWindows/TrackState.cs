@@ -19,6 +19,14 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class TrackState
 {
+    public static readonly Feature Feature = new Feature
+    {
+        Switch = () => SmartSettings.TrackState.Value,
+        Hook = Apply,
+        Hooked = "Unit Status shows the Track State of a selected contact",
+        Update = Update,
+    };
+
     // A kind the game's UnitStatusTab enum does not have: its EnsureContent switch ignores it.
     private const UnitStatusTab TrackKind = (UnitStatusTab)7;
 
@@ -52,7 +60,7 @@ internal static class TrackState
     private static MethodInfo setUnitName;
     private static MethodInfo selectFirstTab;
 
-    public static bool Apply(Harmony harmony)
+    private static bool Apply(Harmony harmony)
     {
         var constructors = AccessTools.GetDeclaredConstructors(typeof(UnitStatusView));
         unitField = AccessTools.Field(typeof(UnitStatusViewModel), "_unit");
@@ -72,8 +80,8 @@ internal static class TrackState
     private static void ViewCreated(UnitStatusView __instance) =>
         Views.Add(new WeakReference<UnitStatusView>(__instance));
 
-    /// <summary>Called every frame (cheap when no Unit Status window is open).</summary>
-    public static void Update()
+    // Cheap when no Unit Status window is open.
+    private static void Update()
     {
         for (int i = Views.Count - 1; i >= 0; i--)
         {

@@ -10,17 +10,25 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class ToolTipFrame
 {
+    public static readonly Feature Feature = new Feature
+    {
+        Switch = () => SmartSettings.TooltipFrame.Value && SmartSettings.BorderEnabled.Value,
+        Hook = _ => Register(),
+    };
+
     private static readonly ConditionalWeakTable<Border, object> Ours = new ConditionalWeakTable<Border, object>();
 
-    public static void Register()
+    private static bool Register()
     {
         try
         {
             EventManager.RegisterClassHandler(typeof(ToolTip), ToolTip.OpenedEvent, new RoutedEventHandler(Opened));
+            return true;
         }
         catch (Exception ex)
         {
             ModLog.Warn($"Tooltip frames not available: {ex.Message}");
+            return false;
         }
     }
 

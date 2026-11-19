@@ -12,6 +12,12 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal sealed class SnapController
 {
+    public static readonly Feature Feature = new Feature
+    {
+        LiveSwitch = () => SmartSettings.SnapEnabled.Value,
+        WindowLoaded = window => new SnapController(window),
+    };
+
     private const float Epsilon = 0.5f;
 
     private readonly GameWindow window;
@@ -28,12 +34,6 @@ internal sealed class SnapController
 
     /// <summary>Shift held: the window moves freely, nothing snaps (both screens).</summary>
     public static bool Suspended => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-
-    public static void Attach(GameWindow window)
-    {
-        if (SmartSettings.SnapEnabled.Value)
-            new SnapController(window);
-    }
 
     private void Changed()
     {

@@ -22,6 +22,16 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class UnitStatusReference
 {
+    public static readonly Feature Feature = new Feature
+    {
+        Switch = () => SmartSettings.StatusReference.Value,
+        LiveSwitch = () => SmartSettings.StatusReference.Value,
+        Hook = Apply,
+        Hooked = "Unit Status has a Reference tab",
+        WindowLoaded = WindowLoaded,
+        Update = Update,
+    };
+
     private const UnitStatusTab ReferenceKind = (UnitStatusTab)5;
     private const int SearchBudget = 30000;
     private const float RetryEvery = 0.25f;
@@ -53,7 +63,7 @@ internal static class UnitStatusReference
     private static MethodInfo selectFirstTab;
     private static MethodInfo ensureInnerTab;
 
-    public static bool Apply(Harmony harmony)
+    private static bool Apply(Harmony harmony)
     {
         unitField = AccessTools.Field(typeof(UnitStatusViewModel), "_unit");
         selectFirstTab = AccessTools.Method(typeof(UnitStatusViewModel), "SelectFirstAvailableTab");
@@ -204,8 +214,8 @@ internal static class UnitStatusReference
 
     // ---- window side ------------------------------------------------------------------------------------------
 
-    /// <summary>Called when a game window has loaded: remembers the Unit Status windows.</summary>
-    public static void WindowLoaded(GameWindow window)
+    /// <summary>Remembers the Unit Status windows.</summary>
+    private static void WindowLoaded(GameWindow window)
     {
         if (!IsUnitStatus(window))
             return;
@@ -215,8 +225,8 @@ internal static class UnitStatusReference
     private static bool IsUnitStatus(GameWindow window) =>
         WindowNames.Of(window).Any(n => n.Replace(" ", "").StartsWith("UnitStatus", StringComparison.OrdinalIgnoreCase));
 
-    /// <summary>Called every frame: puts the page of the selected Reference tab into its window.</summary>
-    public static void Update()
+    /// <summary>Puts the page of the selected Reference tab into its window.</summary>
+    private static void Update()
     {
         for (int i = Places.Count - 1; i >= 0; i--)
         {

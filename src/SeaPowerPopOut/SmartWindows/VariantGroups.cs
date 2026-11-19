@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Reflection;
-using HarmonyLib;
 using SeaPower;
 using SeapowerUI.ViewModels;
 
@@ -16,8 +14,6 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class VariantGroups
 {
-    private static readonly string[] UnitCategories = { "Vessels", "Submarines", "Aircrafts", "Helicopters", "LandUnits", "Biologic" };
-
     /// <summary>One unit (one .ini) in a class: its plain entry, if shown, and its loadout entries.</summary>
     private sealed class UnitRows
     {
@@ -29,57 +25,21 @@ internal static class VariantGroups
         public int Date = int.MaxValue;
     }
 
-    public static bool Apply(Harmony harmony)
+    public static void ArrangeAll(UnitTreeBrowserViewModel browser)
     {
-        var setter = AccessTools.PropertySetter(typeof(UnitTreeBrowserViewModel), nameof(UnitTreeBrowserViewModel.MuseumEntries));
-        ConstructorInfo constructor = AccessTools.FirstConstructor(typeof(UnitTreeBrowserViewModel),
-            c => c.GetParameters().Length > 0 && c.GetParameters()[0].ParameterType == typeof(string));
-        if (setter == null || constructor == null)
-        {
-            ModLog.Warn("Unit Reference tree entries not found (game updated?) - loadout variants stay as the game labels them.");
-            return false;
-        }
-        harmony.Patch(constructor, postfix: new HarmonyMethod(typeof(VariantGroups), nameof(Constructed)));
-        harmony.Patch(setter, postfix: new HarmonyMethod(typeof(VariantGroups), nameof(EntriesSet)));
-        return true;
-    }
-
-    private static void Constructed(UnitTreeBrowserViewModel __instance, string stateKey)
-    {
-        if (stateKey == BrowserMemory.EncyclopediaKey)
-            ArrangeAll(__instance);
-    }
-
-    private static void EntriesSet(UnitTreeBrowserViewModel __instance)
-    {
-        if (BrowserMemory.IsEncyclopedia(__instance))
-            ArrangeAll(__instance);
-    }
-
-    private static void ArrangeAll(UnitTreeBrowserViewModel browser)
-    {
-        if (browser.MuseumEntries == null)
-            return;
         try
         {
             Dictionary<string, Dictionary<string, Loadout>> loadoutsByIni = null;
             int arranged = 0;
-            foreach (MuseumEntry category in browser.MuseumEntries)
+            foreach (MuseumEntry folder in Encyclopedia.UnitFolders(browser))
             {
-                if (Array.IndexOf(UnitCategories, category?.CategoryKey) < 0 || category.MuseumEntries == null)
-                    continue;
-                foreach (MuseumEntry folder in category.MuseumEntries)
+                foreach (MuseumEntry group in folder.MuseumEntries)
                 {
-                    if (folder == null || folder.GetType() != typeof(MuseumEntry) || folder.MuseumEntries == null)
-                        continue;
-                    foreach (MuseumEntry group in folder.MuseumEntries)
+                    if (group != null && group.IsGroupNode && HasLoadoutUnit(group.MuseumEntries))
                     {
-                        if (group != null && group.IsGroupNode && HasLoadoutUnit(group.MuseumEntries))
-                        {
-                            loadoutsByIni ??= LoadoutsByIni();
-                            if (Arrange(group, loadoutsByIni))
-                                arranged++;
-                        }
+                        loadoutsByIni ??= LoadoutsByIni();
+                        if (Arrange(group, loadoutsByIni))
+                            arranged++;
                     }
                 }
             }
@@ -216,7 +176,7 @@ internal static class VariantGroups
         }
     }
 
-    private static int DateKey(MuseumEntry entry) => entry.ServiceEntryDate > 0 ? entry.ServiceEntryDate : int.MaxValue;
+    private static int DateKey(MuseumEntry entry) => ServiceYear.SortKey(entry.ServiceEntryDate);
 
     private static bool IsEarly(MuseumEntry entry) =>
         string.Equals(VariantOf(entry), "Early", StringComparison.OrdinalIgnoreCase);

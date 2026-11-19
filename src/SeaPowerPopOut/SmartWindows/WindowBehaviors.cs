@@ -9,7 +9,12 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class WindowBehaviors
 {
-    public static void Attach(GameWindow window)
+    public static readonly Feature Feature = new Feature
+    {
+        WindowLoaded = Attach,
+    };
+
+    private static void Attach(GameWindow window)
     {
         window.PreviewMouseLeftButtonDown += (s, e) => ZOrder.Raise(window);
 

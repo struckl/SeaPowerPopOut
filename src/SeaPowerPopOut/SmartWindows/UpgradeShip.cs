@@ -17,6 +17,14 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class UpgradeShip
 {
+    public static readonly Feature Feature = new Feature
+    {
+        Switch = () => SmartSettings.UpgradeShip.Value,
+        Hook = _ => UpgradeGame.Available,
+        WindowLoaded = window => Windows.Add(new WeakReference<GameWindow>(window)),
+        Update = Update,
+    };
+
     private const float Every = 0.4f;
     private const float SearchEvery = 1f;
 
@@ -30,25 +38,10 @@ internal static class UpgradeShip
 
     private static readonly List<WeakReference<GameWindow>> Windows = new List<WeakReference<GameWindow>>();
     private static readonly ConditionalWeakTable<GameWindow, State> States = new ConditionalWeakTable<GameWindow, State>();
-    private static bool enabled, warned;
+    private static bool warned;
 
-    public static void Register()
+    private static void Update()
     {
-        if (!UpgradeGame.Available)
-            return;
-        enabled = true;
-    }
-
-    public static void WindowLoaded(GameWindow window)
-    {
-        if (enabled)
-            Windows.Add(new WeakReference<GameWindow>(window));
-    }
-
-    public static void Update()
-    {
-        if (!enabled)
-            return;
         for (int i = Windows.Count - 1; i >= 0; i--)
         {
             if (!Windows[i].TryGetTarget(out GameWindow window) || !window.IsLoaded)

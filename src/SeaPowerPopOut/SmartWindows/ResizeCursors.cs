@@ -16,15 +16,21 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class ResizeCursors
 {
+    public static readonly Feature Feature = new Feature
+    {
+        LiveSwitch = () => SmartSettings.FixResizeCursors.Value,
+        Update = Update,
+    };
+
     private const float CheckEvery = 1f;
 
     private static Dictionary<string, CursorInfo> cursors;
     private static float next;
     private static bool loggedInstalled;
 
-    public static void Update()
+    private static void Update()
     {
-        if (!SmartSettings.FixResizeCursors.Value || Time.unscaledTime < next)
+        if (Time.unscaledTime < next)
             return;
         next = Time.unscaledTime + CheckEvery;
         try

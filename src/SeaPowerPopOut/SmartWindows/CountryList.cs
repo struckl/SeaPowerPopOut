@@ -22,10 +22,16 @@ internal static class CountryList
 
     private static MethodInfo matchUnit, matchWeapon, matchSensor;
 
-    public static bool Apply(Harmony harmony)
+    public static readonly Feature Feature = new Feature
+    {
+        Switch = () => SmartSettings.HideEmptyCountries.Value,
+        Hook = harmony => Encyclopedia.Feature.Active && Apply(harmony),
+    };
+
+    private static bool Apply(Harmony harmony)
     {
         MethodInfo setup = AccessTools.Method(typeof(UnitTreeBrowserViewModel), "SetupNations");
-        matchUnit = AccessTools.Method(typeof(UnitTreeBrowserViewModel), "MatchesTextSearch", new[] { typeof(MuseumObjectEntry), typeof(string), typeof(bool) });
+        matchUnit = Encyclopedia.MatchesText;
         matchWeapon = AccessTools.Method(typeof(UnitTreeBrowserViewModel), "MatchesWeaponTextSearch", new[] { typeof(MuseumWeaponEntry), typeof(string) });
         matchSensor = AccessTools.Method(typeof(UnitTreeBrowserViewModel), "MatchesSensorTextSearch", new[] { typeof(MuseumSensorEntry), typeof(string) });
         if (setup == null || matchUnit == null || matchWeapon == null || matchSensor == null)

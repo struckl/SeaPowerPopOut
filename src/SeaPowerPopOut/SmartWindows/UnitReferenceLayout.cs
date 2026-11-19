@@ -17,6 +17,14 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class UnitReferenceLayout
 {
+    // Applies to windows opened afterwards; a window already set up keeps its splitter.
+    public static readonly Feature Feature = new Feature
+    {
+        LiveSwitch = () => SmartSettings.ImprovedReference.Value,
+        WindowLoaded = WindowLoaded,
+        Update = Update,
+    };
+
     private const float MinTree = 100f;
     private const float MinInfo = 150f;           // the unit information next to the tree never gets narrower than this
     private const float ExtraWidth = 35f;         // the tree starts this much wider than the game makes it
@@ -47,14 +55,14 @@ internal static class UnitReferenceLayout
     public static float HiddenTreeOffset(GameWindow window) =>
         Collapses.TryGetValue(window, out TreeCollapse collapse) ? collapse.Offset : 0f;
 
-    public static void WindowLoaded(GameWindow window)
+    private static void WindowLoaded(GameWindow window)
     {
-        if (!SmartSettings.ImprovedReference.Value || InfoViewModel(window) == null)
+        if (InfoViewModel(window) == null)
             return;
         Pending.Add(new Attempt { Window = new WeakReference<GameWindow>(window), Next = 0f });
     }
 
-    public static void Update()
+    private static void Update()
     {
         for (int i = Pending.Count - 1; i >= 0; i--)
         {

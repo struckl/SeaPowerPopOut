@@ -1,4 +1,3 @@
-using System;
 using System.Reflection;
 using HarmonyLib;
 using SeapowerUI.ViewModels;
@@ -11,9 +10,15 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class BrowserFilters
 {
-    public static bool Apply(Harmony harmony)
+    public static readonly Feature Feature = new Feature
     {
-        MethodInfo update = AccessTools.Method(typeof(UnitTreeBrowserViewModel), "UpdateFilteredMuseumEntries", Type.EmptyTypes);
+        Hook = harmony => Encyclopedia.Feature.Active && Apply(harmony),
+        Hooked = "Unit Reference filters ('Armed only', country list) active",
+    };
+
+    private static bool Apply(Harmony harmony)
+    {
+        MethodInfo update = Encyclopedia.UpdateFiltered;
         if (update == null || !ArmedFilter.Resolve())
         {
             ModLog.Warn("Unit Reference filter update not found (game updated?) - 'Armed only' and the country list stay as the game has them.");
@@ -25,11 +30,11 @@ internal static class BrowserFilters
 
     private static void Updated(UnitTreeBrowserViewModel __instance)
     {
-        if (BrowserMemory.IsInitializing(__instance) || !BrowserMemory.IsEncyclopedia(__instance))
+        if (Encyclopedia.IsInitializing(__instance) || !Encyclopedia.Is(__instance))
             return;
         if (SmartSettings.ArmedOnly.Value)
             ArmedFilter.Filter(__instance);
-        if (SmartSettings.HideEmptyCountries.Value)
+        if (SmartSettings.HideEmptyCountries.Value && CountryList.Feature.Active)
             CountryList.Sync(__instance);
     }
 }

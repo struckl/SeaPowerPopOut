@@ -19,19 +19,14 @@ internal static class ArmedFilter
 
     private static MethodInfo updateFiltered, saveExpansion, isSearching, setFiltered;
 
-    /// <summary>Looks up the game members used; false if one is missing (the shared hook is then not installed).</summary>
+    /// <summary>Looks up the game members used; false if one is missing (the shared hook is then not installed and says so).</summary>
     public static bool Resolve()
     {
-        updateFiltered = AccessTools.Method(typeof(UnitTreeBrowserViewModel), "UpdateFilteredMuseumEntries", Type.EmptyTypes);
+        updateFiltered = Encyclopedia.UpdateFiltered;
         saveExpansion = AccessTools.Method(typeof(UnitTreeBrowserViewModel), "SaveExpansionState");
         isSearching = AccessTools.PropertyGetter(typeof(UnitTreeBrowserViewModel), "IsSearching");
         setFiltered = AccessTools.PropertySetter(typeof(UnitTreeBrowserViewModel), nameof(UnitTreeBrowserViewModel.FilteredMuseumEntries));
-        if (updateFiltered == null || isSearching == null || setFiltered == null)
-        {
-            ModLog.Warn("Unit Reference filter update not found (game updated?) - 'Armed only' is not available.");
-            return false;
-        }
-        return true;
+        return updateFiltered != null && isSearching != null && setFiltered != null;
     }
 
     /// <summary>Switches the filter and refreshes the tree of every open Unit Reference window.</summary>
@@ -40,7 +35,7 @@ internal static class ArmedFilter
         SmartSettings.ArmedOnly.Value = on;
         if (updateFiltered == null)
             return;
-        foreach (UnitTreeBrowserViewModel browser in BrowserMemory.LiveBrowsers())
+        foreach (UnitTreeBrowserViewModel browser in Encyclopedia.LiveBrowsers())
         {
             try
             {

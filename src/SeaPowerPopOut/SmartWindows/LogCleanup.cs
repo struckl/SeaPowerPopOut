@@ -13,12 +13,16 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class LogCleanup
 {
+    public static readonly Feature Feature = new Feature
+    {
+        Switch = () => SmartSettings.DeleteOldLogs.Value,
+        Start = Run,
+    };
+
     private static readonly string[] CurrentLogProperties = { "CurrentLogFileName", "CurrentEventLogFileName" };
 
-    public static void Run()
+    private static void Run()
     {
-        if (!SmartSettings.DeleteOldLogs.Value)
-            return;
         try
         {
             string folder = Path.Combine(Application.dataPath, "Logs");

@@ -12,6 +12,12 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class LinkHelp
 {
+    public static readonly Feature Feature = new Feature
+    {
+        Switch = () => SmartSettings.LinkHelp.Value,
+        Hook = _ => Register(),
+    };
+
     private const int MaxLength = 480;
     private const int MinCut = 200;
     private const float MaxWidth = 380f;
@@ -24,16 +30,18 @@ internal static class LinkHelp
     /// <summary>The entry each button was last given a tip for.</summary>
     private static readonly ConditionalWeakTable<Button, object> Tipped = new ConditionalWeakTable<Button, object>();
 
-    public static void Register()
+    private static bool Register()
     {
         try
         {
             EventManager.RegisterClassHandler(typeof(Button), FrameworkElement.LoadedEvent, new RoutedEventHandler(Check));
             EventManager.RegisterClassHandler(typeof(Button), UIElement.MouseEnterEvent, new MouseEventHandler(Check));
+            return true;
         }
         catch (Exception ex)
         {
             ModLog.Warn($"Link tooltips not available: {ex.Message}");
+            return false;
         }
     }
 

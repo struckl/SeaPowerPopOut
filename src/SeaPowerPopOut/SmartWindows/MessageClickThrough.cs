@@ -11,19 +11,27 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class MessageClickThrough
 {
+    public static readonly Feature Feature = new Feature
+    {
+        Switch = () => SmartSettings.MessagesClickThrough.Value,
+        Hook = _ => Register(),
+    };
+
     private const string AlertsBinding = "TopAlerts";
 
     private static readonly ConditionalWeakTable<ItemsControl, object> Done = new ConditionalWeakTable<ItemsControl, object>();
 
-    public static void Register()
+    private static bool Register()
     {
         try
         {
             EventManager.RegisterClassHandler(typeof(ItemsControl), FrameworkElement.LoadedEvent, new RoutedEventHandler(Loaded));
+            return true;
         }
         catch (Exception ex)
         {
             ModLog.Warn($"Message click-through not available: {ex.Message}");
+            return false;
         }
     }
 

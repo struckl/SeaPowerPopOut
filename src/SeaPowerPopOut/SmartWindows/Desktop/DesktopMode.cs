@@ -20,12 +20,20 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class DesktopMode
 {
+    public static readonly Feature Feature = new Feature
+    {
+        Switch = () => SmartSettings.DesktopMode.Value,
+        LiveSwitch = () => SmartSettings.DesktopMode.Value,
+        Hook = Apply,
+        WindowLoaded = WindowLoaded,
+        Update = Update,
+    };
+
     private const float FindInterval = 0.25f;
     private const float SettleSeconds = 10f;
 
     private static readonly MethodInfo NotifyPip = AccessTools.Method(typeof(MainGameViewModel), "NotifyPipChanged");
 
-    private static bool hooked;
     private static MainGameViewModel missionVm;
     private static bool mapKnown;
     private static WeakReference<GameWindow> worldWindow;
@@ -35,15 +43,14 @@ internal static class DesktopMode
     private static float startedAt;
 
     /// <summary>Desktop mode is switched on and its hooks are in place.</summary>
-    public static bool On => hooked && SmartSettings.DesktopMode.Value;
+    public static bool On => Feature.Live;
 
     /// <summary>The desktops were started in this mission (the map window is there).</summary>
     public static bool Started { get; private set; }
 
-    public static void Apply(Harmony harmony)
+    private static bool Apply(Harmony harmony)
     {
-        if (!SmartSettings.DesktopMode.Value)
-            return;
+        bool hooked = false;
         try
         {
             hooked = DesktopPatches.Apply(harmony);
@@ -54,12 +61,11 @@ internal static class DesktopMode
         }
         if (hooked)
             ModLog.Info("Desktop mode is on: the 3D world is drawn into the World View window.");
+        return hooked;
     }
 
-    public static void WindowLoaded(GameWindow window)
+    private static void WindowLoaded(GameWindow window)
     {
-        if (!On)
-            return;
         try
         {
             if (IsMap(window))
@@ -82,10 +88,8 @@ internal static class DesktopMode
         }
     }
 
-    public static void Update()
+    private static void Update()
     {
-        if (!On)
-            return;
         try
         {
             MainGameViewModel vm = DesktopGame.Vm;

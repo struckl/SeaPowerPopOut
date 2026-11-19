@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using SeapowerUI.ViewModels;
 using FrameworkElement = Noesis.FrameworkElement;
 using UnityEngine;
@@ -15,6 +14,14 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class WindowMemory
 {
+    public static readonly Feature Feature = new Feature
+    {
+        Start = Start,
+        WindowLoaded = WindowLoaded,
+        Update = SaveWhenDue,
+        Save = Save,
+    };
+
     private const float TitleBarHeight = 30f;
     private const float SaveDelay = 1f;
 
@@ -34,39 +41,20 @@ internal static class WindowMemory
     /// <summary>The remembered-window pattern of a window (the key of its layout and look), or null.</summary>
     public static string PatternOf(GameWindow window) => Active ? patterns.Match(WindowNames.Of(window)) : null;
 
-    public static void Init()
+    /// <summary>Plugin's call at load: starts every Smart Windows feature, this one among them.</summary>
+    public static void Init() => SmartFeatures.Init();
+
+    private static void Start()
     {
-        if (!SmartSettings.Enabled.Value)
-            return;
-        Loc.Init(Path.GetDirectoryName(typeof(WindowMemory).Assembly.Location));
-        LogCleanup.Run();
-        TreeDump.Init();
         patterns = new PatternList(SmartSettings.WindowPatterns.Value);
         layouts = SavedLayouts.Parse(SmartSettings.Layouts.Value);
     }
 
-    public static void WindowLoaded(GameWindow window)
+    private static void WindowLoaded(GameWindow window)
     {
-        if (!Active || window == null)
-            return;
-        TreeDump.WindowLoaded(window);
-        DesktopMode.WindowLoaded(window);
-        UnitReferenceLayout.WindowLoaded(window);
-        LoadoutPanelOrder.WindowLoaded(window);
-        if (SmartSettings.StatusReference.Value)
-            UnitStatusReference.WindowLoaded(window);
-        SnapController.Attach(window);
-        WindowBehaviors.Attach(window);
-        WindowBorder.Apply(window);
-        if (window.CanResize)
-            SettingsPanel.AddGear(window);      // not on fixed-size dialogs (Confirm Exit, Confirm Task Force ...)
-        UpgradeShip.WindowLoaded(window);
-        ColorIniFiles.WindowLoaded(window);
-
         string[] names = WindowNames.Of(window);
         string pattern = patterns.Match(names);
         ModLog.Debug($"window loaded: {string.Join(" / ", names)} -> {pattern ?? "not remembered"}");
-        WindowLook.WindowLoaded(window, pattern);
         if (pattern == null)
             return;
 
@@ -85,49 +73,15 @@ internal static class WindowMemory
         window.WindowUnmaximized += (s, e) => { if (primary && !FullscreenMap(window)) RememberMaximized(pattern, false); };
     }
 
-    /// <summary>
-    /// Called when a window has loaded on the pop-out monitor. Place, size and snapping there belong to <see cref="Layout"/>
-    /// and the pop-out screen; only the title bar buttons (settings, look) and the look itself come along.
-    /// </summary>
-    public static void PoppedWindowLoaded(GameWindow window)
+    /// <summary>Writes the layouts to the config a moment after the last change.</summary>
+    private static void SaveWhenDue()
     {
-        if (!Active || window == null)
-            return;
-        if (window.CanResize)
-            SettingsPanel.AddGear(window);
-        WindowLook.WindowLoaded(window, PatternOf(window));
-    }
-
-    /// <summary>Called every frame: writes the layouts to the config a moment after the last change.</summary>
-    public static void Update()
-    {
-        if (!Active)
-            return;
-        SmartSettings.Flush();
-        WindowLook.Update();
-        TreeDump.Update();
-        UnitReferenceLayout.Update();
-        TreeScroller.Update();
-        DamageControlLayout.Update();
-        TrackState.Update();
-        if (SmartSettings.StatusReference.Value)
-            UnitStatusReference.Update();
-        UnitPanelMenu.Update();
-        LoadoutPanelOrder.Update();
-        UpgradeShip.Update();
-        BackgroundReroll.Update();
-        ColorIniFiles.Update();
-        ResizeCursors.Update();
-        TimePanelDrag.Update();
-        DesktopMode.Update();
         if (dirtySince >= 0f && Time.unscaledTime - dirtySince >= SaveDelay)
             Save();
     }
 
-    public static void Save()
+    private static void Save()
     {
-        if (!Active)
-            return;
         if (!layouts.Dirty)
         {
             dirtySince = -1f;

@@ -11,9 +11,16 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class CampaignDismiss
 {
+    public static readonly Feature Feature = new Feature
+    {
+        Switch = () => SmartSettings.DismissDamaged.Value,
+        Hook = Apply,
+        Hooked = "damaged ships can be dismissed",
+    };
+
     private static MethodInfo repairEvaluation, logisticsState;
 
-    public static bool Apply(Harmony harmony)
+    private static bool Apply(Harmony harmony)
     {
         Type status = CampaignGame.Status;
         Type item = CampaignGame.Item;
