@@ -116,7 +116,7 @@ internal sealed class TreeScroller
             tree.UpdateLayout();
             return;
         }
-        ScrollViewer scroller = Ancestor<ScrollViewer>(row, tree) ?? FindDescendant<ScrollViewer>(tree);
+        ScrollViewer scroller = Ancestor<ScrollViewer>(row, tree) ?? VisualSearch.First<ScrollViewer>(tree);
         if (scroller == null || scroller.ViewportHeight <= 0f)
             return;
 
@@ -198,22 +198,7 @@ internal sealed class TreeScroller
         return false;
     }
 
-    private static TreeView FindTree(DependencyObject root) => FindDescendant<TreeView>(root);
-
-    private static T FindDescendant<T>(DependencyObject root) where T : class
-    {
-        var stack = new Stack<DependencyObject>();
-        stack.Push(root);
-        for (int budget = 20000; stack.Count > 0 && budget > 0; budget--)
-        {
-            DependencyObject node = stack.Pop();
-            if (node != root && node is T found)
-                return found;
-            for (int i = VisualTreeHelper.GetChildrenCount(node) - 1; i >= 0; i--)
-                stack.Push(VisualTreeHelper.GetChild(node, i));
-        }
-        return null;
-    }
+    private static TreeView FindTree(DependencyObject root) => VisualSearch.First<TreeView>(root);
 
     private static T Ancestor<T>(DependencyObject element, DependencyObject stop) where T : class
     {

@@ -64,8 +64,8 @@ internal static class UnitPanelMenu
         var seen = new System.Text.StringBuilder();
         for (int i = 0; hit != null && i < ParentsToCheck; i++, hit = VisualTreeHelper.GetParent(hit))
         {
-            string path = hit is Image ? BindingPath(hit, Image.SourceProperty)
-                : hit is TextBlock ? BindingPath(hit, TextBlock.TextProperty) : null;
+            string path = hit is Image ? Bindings.PathOf(hit, Image.SourceProperty)
+                : hit is TextBlock ? Bindings.PathOf(hit, TextBlock.TextProperty) : null;
             seen.Append(hit.GetType().Name).Append(path == null ? "" : $"[{path}]").Append(" < ");
             if ((hit is Image && path == FlagBinding) || (hit is TextBlock && path == NameBinding))
                 return true;
@@ -129,17 +129,5 @@ internal static class UnitPanelMenu
                 return marker;
         }
         return null;
-    }
-
-    private static string BindingPath(DependencyObject element, DependencyProperty property)
-    {
-        try
-        {
-            return BindingOperations.GetBindingExpression(element, property)?.ParentBinding?.Path?.Path;
-        }
-        catch (Exception)
-        {
-            return null;
-        }
     }
 }

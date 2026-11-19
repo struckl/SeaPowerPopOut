@@ -354,20 +354,17 @@ internal static class WindowLook
             return null;
         ContentPresenter best = null;
         float height = 0f;
-        var stack = new Stack<DependencyObject>();
-        stack.Push(window);
-        int budget = 3000;
-        while (stack.Count > 0 && --budget > 0)
+        VisualSearch.Walk(window, 3000, e =>
         {
-            DependencyObject e = stack.Pop();
+            if (Skipped(e))
+                return VisualSearch.Step.Over;
             if (e is ContentPresenter p && ReferenceEquals(p.Content, content) && p.ActualHeight > height)
             {
                 best = p;
                 height = p.ActualHeight;
             }
-            foreach (DependencyObject child in Children(e))
-                stack.Push(child);
-        }
+            return VisualSearch.Step.Into;
+        });
         return best;
     }
 }

@@ -73,18 +73,5 @@ internal static class TreeWheelGuard
         return true;
     }
 
-    private static TreeView FindTree(DependencyObject root)
-    {
-        var stack = new Stack<DependencyObject>();
-        stack.Push(root);
-        for (int budget = 3000; stack.Count > 0 && budget > 0; budget--)
-        {
-            DependencyObject node = stack.Pop();
-            if (node is TreeView tree)
-                return tree;
-            for (int i = VisualTreeHelper.GetChildrenCount(node) - 1; i >= 0; i--)
-                stack.Push(VisualTreeHelper.GetChild(node, i));
-        }
-        return null;
-    }
+    private static TreeView FindTree(DependencyObject root) => VisualSearch.First<TreeView>(root, budget: 3000);
 }

@@ -126,46 +126,23 @@ internal static class ColorIniFiles
             ?? (content as FrameworkElement)?.DataContext as FilePickerViewModel;
     }
 
-    private static ListView FindList(DependencyObject root)
-    {
-        var stack = new Stack<DependencyObject>();
-        stack.Push(root);
-        for (int budget = 20000; stack.Count > 0 && budget > 0; budget--)
-        {
-            DependencyObject node = stack.Pop();
-            if (node is ListView found)
-                return found;
-            for (int i = VisualTreeHelper.GetChildrenCount(node) - 1; i >= 0; i--)
-                stack.Push(VisualTreeHelper.GetChild(node, i));
-        }
-        return null;
-    }
+    private static ListView FindList(DependencyObject root) => VisualSearch.First<ListView>(root);
 
     private static void Colour(ListView list)
     {
         brush ??= new SolidColorBrush(Noesis.Color.FromArgb(brushA, brushR, brushG, brushB));
-        var stack = new Stack<DependencyObject>();
-        stack.Push(list);
-        for (int budget = WalkBudget; stack.Count > 0 && budget > 0; budget--)
+        VisualSearch.Walk(list, WalkBudget, node =>
         {
-            DependencyObject node = stack.Pop();
-            if (node is TextBlock text)
-            {
-                bool ini = text.Text != null && text.Text.EndsWith(Extension, StringComparison.OrdinalIgnoreCase);
-                bool ours = IsOurs(text.Foreground);
-                if (ini && !ours)
-                    text.Foreground = brush;
-                else if (!ini && ours)        // the row was recycled for another file
-                    text.ClearValue(TextBlock.ForegroundProperty);
-                continue;
-            }
-            for (int i = VisualTreeHelper.GetChildrenCount(node) - 1; i >= 0; i--)
-            {
-                DependencyObject child = VisualTreeHelper.GetChild(node, i);
-                if (child != null)
-                    stack.Push(child);
-            }
-        }
+            if (!(node is TextBlock text))
+                return VisualSearch.Step.Into;
+            bool ini = text.Text != null && text.Text.EndsWith(Extension, StringComparison.OrdinalIgnoreCase);
+            bool ours = IsOurs(text.Foreground);
+            if (ini && !ours)
+                text.Foreground = brush;
+            else if (!ini && ours)        // the row was recycled for another file
+                text.ClearValue(TextBlock.ForegroundProperty);
+            return VisualSearch.Step.Over;
+        });
     }
 
     private static bool IsOurs(Brush foreground)

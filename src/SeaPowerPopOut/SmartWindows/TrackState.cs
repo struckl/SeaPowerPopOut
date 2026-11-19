@@ -14,8 +14,8 @@ namespace SeaPowerPopOut.SmartWindows;
 /// Unit Status window: while a contact of another side (a track, not your own unit) is selected, the window gets a
 /// "Track" tab that shows the contact's Track State (the game's own Vehicle Info content: status, confidence,
 /// detections, signatures) instead of staying empty. Selecting one of your units goes back to the normal tabs.
-/// <para>The game has five tabs; this one is a sixth, with a kind the game does not know (so it never builds content
-/// for it), shown through a host element next to the other tabs' content (<see cref="StatusTabHost"/>).</para>
+/// <para>A tab of a kind the game does not know (so it never builds content for it), shown through a host element next
+/// to the other tabs' content (<see cref="StatusTabHost"/>).</para>
 /// </summary>
 internal static class TrackState
 {
@@ -26,9 +26,6 @@ internal static class TrackState
         Hooked = "Unit Status shows the Track State of a selected contact",
         Update = Update,
     };
-
-    // A kind the game's UnitStatusTab enum does not have: its EnsureContent switch ignores it.
-    private const UnitStatusTab TrackKind = (UnitStatusTab)7;
 
     private const string BodyXaml =
         "<Grid xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\" Margin=\"6\">" +
@@ -55,19 +52,14 @@ internal static class TrackState
     private static readonly ConditionalWeakTable<UnitStatusViewModel, State> States = new ConditionalWeakTable<UnitStatusViewModel, State>();
     private static readonly List<WeakReference<UnitStatusView>> Views = new List<WeakReference<UnitStatusView>>();
 
-    private static FieldInfo unitField;
     private static MethodInfo setHasUnit;
-    private static MethodInfo setUnitName;
-    private static MethodInfo selectFirstTab;
 
     private static bool Apply(Harmony harmony)
     {
         var constructors = AccessTools.GetDeclaredConstructors(typeof(UnitStatusView));
-        unitField = AccessTools.Field(typeof(UnitStatusViewModel), "_unit");
         setHasUnit = AccessTools.PropertySetter(typeof(UnitStatusViewModel), nameof(UnitStatusViewModel.HasUnit));
-        setUnitName = AccessTools.PropertySetter(typeof(UnitStatusViewModel), nameof(UnitStatusViewModel.UnitName));
-        selectFirstTab = AccessTools.Method(typeof(UnitStatusViewModel), "SelectFirstAvailableTab");
-        if (constructors.Count == 0 || unitField == null || setHasUnit == null || setUnitName == null || selectFirstTab == null)
+        if (constructors.Count == 0 || StatusTabHost.UnitField == null || setHasUnit == null || StatusTabHost.SetUnitName == null
+            || StatusTabHost.SelectFirstTab == null)
         {
             ModLog.Warn("Unit Status members not found (game updated?) - no Track State tab.");
             return false;
@@ -107,7 +99,7 @@ internal static class TrackState
 
     private static State AddTab(UnitStatusViewModel status)
     {
-        var tab = new UnitStatusTabViewModel(status, TrackKind, Loc.Get("tab_track")) { IsAvailable = false };
+        var tab = new UnitStatusTabViewModel(status, StatusTabHost.TrackKind, Loc.Get("tab_track")) { IsAvailable = false };
         status.Tabs.Add(tab);
         return new State { Tab = tab };
     }
@@ -123,7 +115,7 @@ internal static class TrackState
 
     private static void Switch(UnitStatusViewModel status, State state)
     {
-        bool noUnit = unitField.GetValue(status) == null;
+        bool noUnit = !StatusTabHost.HasUnit(status);
         Vehicle contact = noUnit && SmartSettings.TrackState.Value ? SelectedContact() : null;
         if (contact != null)
         {
@@ -166,14 +158,14 @@ internal static class TrackState
             if (noUnit)
             {
                 setHasUnit.Invoke(status, new object[] { false });
-                setUnitName.Invoke(status, new object[] { "" });
+                StatusTabHost.SetUnitName.Invoke(status, new object[] { "" });
                 status.EngagementTab.IsAvailable = true;
                 status.EngagementTab.IsSelected = true;
             }
         }
         else if (wasSelected)
         {
-            selectFirstTab.Invoke(status, null);
+            StatusTabHost.SelectFirstTab.Invoke(status, null);
         }
     }
 
@@ -188,7 +180,7 @@ internal static class TrackState
         {
             if (!wanted)
                 return;
-            state.Host = StatusTabHost.Create(view, status);
+            state.Host = StatusTabHost.Create(view, status, bindingFirst: false, out _);
             if (state.Host == null)
             {
                 state.HostFailed = true;
@@ -223,7 +215,7 @@ internal static class TrackState
             state.Info = info;
             state.Body = body;
             if (state.TookOver && !string.IsNullOrEmpty(info.Name))
-                setUnitName.Invoke(status, new object[] { info.Name });
+                StatusTabHost.SetUnitName.Invoke(status, new object[] { info.Name });
             ModLog.Debug($"track state: {info.Name} shown in Unit Status");
         }
         catch (Exception ex)

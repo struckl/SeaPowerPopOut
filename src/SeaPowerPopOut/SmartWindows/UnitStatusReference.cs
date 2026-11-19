@@ -16,9 +16,8 @@ namespace SeaPowerPopOut.SmartWindows;
 /// <summary>
 /// Unit Status window: an extra "Reference" tab that shows the Unit Reference page (<see cref="ObjectInformationView"/>)
 /// of the selected unit, on its own variant and loadout.
-/// <para>The game's tab list is bound to <c>UnitStatusViewModel.Tabs</c>, so a fifth tab model (kind 5, which the game's
-/// enum does not have) gets a header by itself. The view has no place for its content though: a host border is put into
-/// the same panel as another tab's content, and shown while the Reference tab is selected.</para>
+/// <para>A tab of a kind the game does not know, with its page in a host next to the other tabs' content
+/// (<see cref="StatusTabHost"/>), shown while the Reference tab is selected.</para>
 /// </summary>
 internal static class UnitStatusReference
 {
@@ -32,7 +31,6 @@ internal static class UnitStatusReference
         Update = Update,
     };
 
-    private const UnitStatusTab ReferenceKind = (UnitStatusTab)5;
     private const int SearchBudget = 30000;
     private const float RetryEvery = 0.25f;
     private const int MaxTries = 40;
@@ -59,20 +57,16 @@ internal static class UnitStatusReference
 
     private static readonly ConditionalWeakTable<UnitStatusViewModel, State> States = new ConditionalWeakTable<UnitStatusViewModel, State>();
     private static readonly List<Place> Places = new List<Place>();
-    private static FieldInfo unitField;
-    private static MethodInfo selectFirstTab;
     private static MethodInfo ensureInnerTab;
 
     private static bool Apply(Harmony harmony)
     {
-        unitField = AccessTools.Field(typeof(UnitStatusViewModel), "_unit");
-        selectFirstTab = AccessTools.Method(typeof(UnitStatusViewModel), "SelectFirstAvailableTab");
         ensureInnerTab = AccessTools.Method(typeof(ObjectInformationViewModel), "EnsureSelectedTabAvailable");
         MethodInfo switchUnit = AccessTools.Method(typeof(UnitStatusViewModel), "SwitchUnit");
         MethodInfo ensureContent = AccessTools.Method(typeof(UnitStatusViewModel), "EnsureContent");
         MethodInfo disposeContent = AccessTools.Method(typeof(UnitStatusViewModel), "DisposeOwnedContent");
         var constructors = AccessTools.GetDeclaredConstructors(typeof(UnitStatusViewModel));
-        if (unitField == null || switchUnit == null || ensureContent == null || disposeContent == null || constructors.Count == 0)
+        if (StatusTabHost.UnitField == null || switchUnit == null || ensureContent == null || disposeContent == null || constructors.Count == 0)
         {
             ModLog.Warn("Unit Status members not found (game updated?) - the Reference tab is not available.");
             return false;
@@ -91,7 +85,7 @@ internal static class UnitStatusReference
     {
         try
         {
-            var tab = new UnitStatusTabViewModel(__instance, ReferenceKind, Loc.Get("ref_tab"));
+            var tab = new UnitStatusTabViewModel(__instance, StatusTabHost.ReferenceKind, Loc.Get("ref_tab"));
             __instance.Tabs.Add(tab);
             States.Add(__instance, new State { Tab = tab });
             UpdateAvailability(__instance);
@@ -149,12 +143,12 @@ internal static class UnitStatusReference
     {
         if (!States.TryGetValue(vm, out State state))
             return;
-        bool available = HasReference(unitField.GetValue(vm) as ObjectBase);
+        bool available = HasReference(StatusTabHost.UnitOf(vm));
         state.Tab.IsAvailable = available;
         if (!available && state.Tab.IsSelected)
         {
             state.Tab.IsSelected = false;
-            selectFirstTab?.Invoke(vm, null);
+            StatusTabHost.SelectFirstTab?.Invoke(vm, null);
         }
     }
 
@@ -163,7 +157,7 @@ internal static class UnitStatusReference
         UnitStatusTabViewModel tab = state.Tab;
         if (!tab.IsAvailable || tab.HasContentError || tab.Content != null)
             return;
-        ObjectBase unit = unitField.GetValue(vm) as ObjectBase;
+        ObjectBase unit = StatusTabHost.UnitOf(vm);
         if (!HasReference(unit))
             return;
         try
@@ -257,7 +251,7 @@ internal static class UnitStatusReference
             if (Time.unscaledTime < place.Next)
                 return;
             place.Next = Time.unscaledTime + RetryEvery;
-            view = FindFirst<UnitStatusView>(window);
+            view = VisualSearch.First<UnitStatusView>(window, budget: SearchBudget);
             if (view == null)
             {
                 if (++place.Tries > MaxTries)
@@ -303,93 +297,16 @@ internal static class UnitStatusReference
         }
     }
 
-    /// <summary>A border next to the content of another tab (same panel, same grid cell), to hold the Reference page.</summary>
     private static Border MakeHost(UnitStatusView view, UnitStatusViewModel vm)
     {
-        FrameworkElement anchor = FindTabContent(view, vm);
+        Border host = StatusTabHost.Create(view, vm, bindingFirst: true, out FrameworkElement anchor);
         if (anchor == null)
-        {
             ModLog.Warn("Reference tab: no place of another tab's content found in the Unit Status window (list 'Unit Status*' under Dump window trees to see its layout).");
-            return null;
-        }
-        DependencyObject parent = VisualTreeHelper.GetParent(anchor);
-        while (parent != null && !(parent is Panel) && parent != view)
-        {
-            if (!(parent is FrameworkElement up))
-                break;
-            anchor = up;
-            parent = VisualTreeHelper.GetParent(up);
-        }
-        if (!(parent is Panel panel))
-        {
+        else if (host == null)
             ModLog.Warn("Reference tab: no panel above another tab's content.");
-            return null;
-        }
-
-        var host = new Border
-        {
-            Visibility = Visibility.Collapsed,
-            Margin = anchor.Margin,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            VerticalAlignment = VerticalAlignment.Stretch,
-        };
-        Grid.SetRow(host, Grid.GetRow(anchor));
-        Grid.SetColumn(host, Grid.GetColumn(anchor));
-        Grid.SetRowSpan(host, Grid.GetRowSpan(anchor));
-        Grid.SetColumnSpan(host, Grid.GetColumnSpan(anchor));
-        int at = panel.Children.IndexOf(anchor);
-        panel.Children.Insert(at < 0 ? panel.Children.Count : at + 1, host);
-        ModLog.Debug($"reference tab: host added next to {anchor.GetType().Name}");
+        else
+            ModLog.Debug($"reference tab: host added next to {anchor.GetType().Name}");
         return host;
-    }
-
-    /// <summary>
-    /// The element that shows another tab's content: the first one whose visibility is bound to a tab's
-    /// <c>IsSelected</c> (e.g. <c>SensorsTab.IsSelected</c>), else the first content control holding another tab's content.
-    /// </summary>
-    private static FrameworkElement FindTabContent(UnitStatusView view, UnitStatusViewModel vm)
-    {
-        var others = new[] { vm.EngagementTab, vm.SensorsTab, vm.DamageControlTab, vm.FlightDeckTab, vm.SeekerTab }
-            .Select(t => t.Content).Where(c => c != null).ToList();
-        return FindFirst<FrameworkElement>(view, e => IsTabVisibilityBinding(e))
-            ?? FindFirst<FrameworkElement>(view, e => !(VisualTreeHelper.GetParent(e) is TabPanel) && others.Contains(ContentOf(e)));
-    }
-
-    private static bool IsTabVisibilityBinding(DependencyObject element)
-    {
-        string path;
-        try
-        {
-            path = BindingOperations.GetBindingExpression(element, UIElement.VisibilityProperty)?.ParentBinding?.Path?.Path;
-        }
-        catch (Exception)
-        {
-            return false;
-        }
-        return path != null && path.EndsWith("Tab.IsSelected", StringComparison.Ordinal) && !path.StartsWith("Reference", StringComparison.Ordinal);
-    }
-
-    private static object ContentOf(DependencyObject element) =>
-        element is ContentControl control ? control.Content : element is ContentPresenter presenter ? presenter.Content : null;
-
-    /// <summary>Depth-first search in the visual tree below <paramref name="root"/> (not the root itself).</summary>
-    private static T FindFirst<T>(DependencyObject root, Func<T, bool> match = null) where T : DependencyObject
-    {
-        var stack = new Stack<DependencyObject>();
-        stack.Push(root);
-        for (int budget = SearchBudget; stack.Count > 0 && budget > 0; budget--)
-        {
-            DependencyObject node = stack.Pop();
-            if (node != root && node is T found && (match == null || match(found)))
-                return found;
-            for (int i = VisualTreeHelper.GetChildrenCount(node) - 1; i >= 0; i--)
-            {
-                DependencyObject child = VisualTreeHelper.GetChild(node, i);
-                if (child != null)
-                    stack.Push(child);
-            }
-        }
-        return null;
     }
 
     private static bool TryGetTargetOrNull<T>(this WeakReference<T> reference, out T target) where T : class

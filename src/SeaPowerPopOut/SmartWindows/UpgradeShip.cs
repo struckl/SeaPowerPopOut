@@ -95,7 +95,8 @@ internal static class UpgradeShip
     /// <summary>Puts the button after the one that opens the Unit Reference (found by its command).</summary>
     private static Button AddButton(GameWindow window, LinearCampaignTaskForceBuilderViewModel vm)
     {
-        Button reference = FindByCommand(window, vm.OpenSelectedUnitReferenceCommand, 0);
+        System.Windows.Input.ICommand command = vm.OpenSelectedUnitReferenceCommand;
+        Button reference = command == null ? null : VisualSearch.First<Button>(window, b => ReferenceEquals(b.Command, command));
         if (reference == null || !(VisualTreeHelper.GetParent(reference) is Panel panel))
             return null;
         Loc.Reload();
@@ -124,18 +125,4 @@ internal static class UpgradeShip
         return button;
     }
 
-    private static Button FindByCommand(DependencyObject node, System.Windows.Input.ICommand command, int depth)
-    {
-        if (command == null || depth > 60)
-            return null;
-        if (node is Button button && ReferenceEquals(button.Command, command))
-            return button;
-        for (int i = 0, n = VisualTreeHelper.GetChildrenCount(node); i < n; i++)
-        {
-            Button found = FindByCommand(VisualTreeHelper.GetChild(node, i), command, depth + 1);
-            if (found != null)
-                return found;
-        }
-        return null;
-    }
 }

@@ -873,7 +873,7 @@ internal sealed class PopOutScreen : MonoBehaviour
     // A drop-down list holds the mouse while open; its popup is part of its template.
     private void OnCapture(object sender, MouseEventArgs e)
     {
-        if (e.Source is ComboBox box && FindPopup(box) is Popup popup)
+        if (e.Source is ComboBox box && SmartWindows.VisualSearch.First<Popup>(box, budget: 200) is Popup popup)
             TrackOverlay(popup);
     }
 
@@ -897,25 +897,6 @@ internal sealed class PopOutScreen : MonoBehaviour
         ContextMenu menu => menu.IsOpen,
         _ => false,
     };
-
-    private static Popup FindPopup(Visual start)
-    {
-        var queue = new Queue<Visual>();
-        queue.Enqueue(start);
-        for (int seen = 0; queue.Count > 0 && seen < 200; seen++)
-        {
-            Visual v = queue.Dequeue();
-            if (v is Popup popup)
-                return popup;
-            int n = VisualTreeHelper.GetChildrenCount(v);
-            for (int i = 0; i < n; i++)
-            {
-                if (VisualTreeHelper.GetChild(v, i) is Visual child)
-                    queue.Enqueue(child);
-            }
-        }
-        return null;
-    }
 
     /// <summary>
     /// A press on the screen released over another program (the pointer ran out of the cut-out faster than the

@@ -19,15 +19,10 @@ internal static class UnitStatusNames
         Hooked = "Unit Status shows full unit names",
     };
 
-    private static FieldInfo unitField;
-    private static MethodInfo setName;
-
     private static bool Apply(Harmony harmony)
     {
         MethodInfo switchUnit = AccessTools.Method(typeof(UnitStatusViewModel), "SwitchUnit");
-        unitField = AccessTools.Field(typeof(UnitStatusViewModel), "_unit");
-        setName = AccessTools.PropertySetter(typeof(UnitStatusViewModel), nameof(UnitStatusViewModel.UnitName));
-        if (switchUnit == null || unitField == null || setName == null)
+        if (switchUnit == null || StatusTabHost.UnitField == null || StatusTabHost.SetUnitName == null)
         {
             ModLog.Warn("Unit Status members not found (game updated?) - the header keeps the short unit name.");
             return false;
@@ -40,10 +35,10 @@ internal static class UnitStatusNames
     {
         try
         {
-            var unit = unitField.GetValue(__instance) as ObjectBase;
+            ObjectBase unit = StatusTabHost.UnitOf(__instance);
             string full = unit == null ? null : unit.DisplayNameFull;
             if (!string.IsNullOrEmpty(full) && !string.Equals(__instance.UnitName, full))
-                setName.Invoke(__instance, new object[] { full });
+                StatusTabHost.SetUnitName.Invoke(__instance, new object[] { full });
         }
         catch (Exception ex)
         {

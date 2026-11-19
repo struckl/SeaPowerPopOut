@@ -124,20 +124,8 @@ internal static class UnitReferenceLayout
     }
 
     /// <summary>The unit tree view of this window (its data context is the view model's browser).</summary>
-    private static UnitTreeBrowserView FindBrowserView(DependencyObject root, ObjectInformationViewModel vm)
-    {
-        var stack = new Stack<DependencyObject>();
-        stack.Push(root);
-        for (int budget = 3000; stack.Count > 0 && budget > 0; budget--)
-        {
-            DependencyObject node = stack.Pop();
-            if (node is UnitTreeBrowserView view && ReferenceEquals(view.DataContext, vm.Browser))
-                return view;
-            for (int i = VisualTreeHelper.GetChildrenCount(node) - 1; i >= 0; i--)
-                stack.Push(VisualTreeHelper.GetChild(node, i));
-        }
-        return null;
-    }
+    private static UnitTreeBrowserView FindBrowserView(DependencyObject root, ObjectInformationViewModel vm) =>
+        VisualSearch.First<UnitTreeBrowserView>(root, view => ReferenceEquals(view.DataContext, vm.Browser), 3000);
 
     /// <summary>
     /// Walks up from the tree view to the first grid that also holds the toggle button: the grid's child on that path

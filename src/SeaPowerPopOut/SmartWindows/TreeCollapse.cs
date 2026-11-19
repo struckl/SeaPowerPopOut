@@ -222,16 +222,7 @@ internal sealed class TreeCollapse
 
     private bool ContainsToggle(DependencyObject root)
     {
-        var stack = new Stack<DependencyObject>();
-        stack.Push(root);
-        for (int budget = 5000; stack.Count > 0 && budget > 0; budget--)
-        {
-            DependencyObject node = stack.Pop();
-            if (node is ButtonBase button && ReferenceEquals(button.Command, vm.ToggleTreeCommand))
-                return true;
-            for (int i = VisualTreeHelper.GetChildrenCount(node) - 1; i >= 0; i--)
-                stack.Push(VisualTreeHelper.GetChild(node, i));
-        }
-        return false;
+        bool IsToggle(ButtonBase button) => ReferenceEquals(button.Command, vm.ToggleTreeCommand);
+        return (root is ButtonBase self && IsToggle(self)) || VisualSearch.First<ButtonBase>(root, IsToggle, 5000) != null;
     }
 }

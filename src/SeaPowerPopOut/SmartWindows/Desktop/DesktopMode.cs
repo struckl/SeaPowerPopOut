@@ -211,23 +211,8 @@ internal static class DesktopMode
             || Time.unscaledTime < nextFind)
             return null;
         nextFind = Time.unscaledTime + FindInterval;
-        pipView = Descendant<Pip3DView>(window, 0);
+        pipView = VisualSearch.First<Pip3DView>(window);
         return pipView;
-    }
-
-    private static T Descendant<T>(DependencyObject node, int depth) where T : class
-    {
-        if (node is T found)
-            return found;
-        if (depth > 40)
-            return null;
-        for (int i = 0, n = VisualTreeHelper.GetChildrenCount(node); i < n; i++)
-        {
-            T hit = Descendant<T>(VisualTreeHelper.GetChild(node, i), depth + 1);
-            if (hit != null)
-                return hit;
-        }
-        return null;
     }
 
     private static bool IsMap(GameWindow window) =>

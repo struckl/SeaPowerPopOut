@@ -64,26 +64,11 @@ internal static class TimePanelDrag
         }
     }
 
-    private static Grid Find(FrameworkElement root)
-    {
-        var stack = new Stack<DependencyObject>();
-        stack.Push(root);
-        int budget = SearchBudget;
-        while (stack.Count > 0 && --budget > 0)
-        {
-            DependencyObject node = stack.Pop();
-            if (node is Canvas canvas && canvas.DataContext is TimeCompressionViewModel && VisualTreeHelper.GetChildrenCount(canvas) > 0
-                && VisualTreeHelper.GetChild(canvas, 0) is Grid grid)
-                return grid;
-            for (int i = VisualTreeHelper.GetChildrenCount(node) - 1; i >= 0; i--)
-            {
-                DependencyObject child = VisualTreeHelper.GetChild(node, i);
-                if (child != null)
-                    stack.Push(child);
-            }
-        }
-        return null;
-    }
+    private static Grid Find(FrameworkElement root) =>
+        VisualSearch.First<Canvas>(root, canvas => canvas.DataContext is TimeCompressionViewModel
+            && VisualTreeHelper.GetChildrenCount(canvas) > 0 && VisualTreeHelper.GetChild(canvas, 0) is Grid, SearchBudget) is Canvas found
+            ? (Grid)VisualTreeHelper.GetChild(found, 0)
+            : null;
 
     private static FrameworkElement Host(Grid grid) => VisualTreeHelper.GetParent(grid) as FrameworkElement;
 

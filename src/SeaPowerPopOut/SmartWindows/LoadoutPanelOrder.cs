@@ -119,18 +119,6 @@ internal static class LoadoutPanelOrder
         return own <= oldestOther;
     }
 
-    private static ItemsControl FindItems(DependencyObject root, object source)
-    {
-        var stack = new Stack<DependencyObject>();
-        stack.Push(root);
-        for (int budget = 20000; stack.Count > 0 && budget > 0; budget--)
-        {
-            DependencyObject node = stack.Pop();
-            if (node is ItemsControl control && control.ItemsSource == source)
-                return control;
-            for (int i = VisualTreeHelper.GetChildrenCount(node) - 1; i >= 0; i--)
-                stack.Push(VisualTreeHelper.GetChild(node, i));
-        }
-        return null;
-    }
+    private static ItemsControl FindItems(DependencyObject root, object source) =>
+        VisualSearch.First<ItemsControl>(root, control => control.ItemsSource == source);
 }
