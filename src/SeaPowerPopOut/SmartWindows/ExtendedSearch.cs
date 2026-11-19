@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using HarmonyLib;
 using SeaPower;
-using SeapowerUI.ViewModels;
 
 namespace SeaPowerPopOut.SmartWindows;
 

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using HarmonyLib;
 using Noesis;
-using SeaPower;
 using SeapowerUI.ViewModels;
 using UnityEngine;
 using GameWindow = SeapowerUI.Window;

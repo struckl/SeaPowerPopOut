@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using SeapowerUI.ViewModels;
-using FrameworkElement = Noesis.FrameworkElement;
 using UnityEngine;
 using GameWindow = SeapowerUI.Window;
 

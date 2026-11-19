@@ -1,8 +1,6 @@
 using System;
 using System.Reflection;
 using HarmonyLib;
-using Noesis;
-using SeaPower;
 using SeapowerUI;
 using SeapowerUI.ViewModels;
 using UnityEngine;

@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using Noesis;
 using SeaPower;
 using SeapowerUI;

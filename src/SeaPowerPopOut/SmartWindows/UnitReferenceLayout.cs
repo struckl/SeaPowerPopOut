@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using Noesis;
 using SeapowerUI;
 using SeapowerUI.ViewModels;
-using UnityEngine;
 using GameWindow = SeapowerUI.Window;
 
 namespace SeaPowerPopOut.SmartWindows;

@@ -106,8 +106,7 @@ internal static class ColorIniFiles
             return true;
         t.NextWalk = now + WalkEvery;
 
-        ListView list = null;
-        if (t.List == null || !t.List.TryGetTarget(out list) || VisualTreeHelper.GetParent(list) == null)
+        if (t.List == null || !t.List.TryGetTarget(out ListView list) || VisualTreeHelper.GetParent(list) == null)
         {
             list = FindList(window);
             t.List = list == null ? null : new WeakReference<ListView>(list);

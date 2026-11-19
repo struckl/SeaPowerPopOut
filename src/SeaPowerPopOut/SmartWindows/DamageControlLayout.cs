@@ -4,7 +4,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using HarmonyLib;
 using Noesis;
-using SeaPower;
 using SeapowerUI;
 using UnityEngine;
 

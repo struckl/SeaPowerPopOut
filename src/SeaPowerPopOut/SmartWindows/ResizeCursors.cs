@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Noesis;
 using SeaPower;
-using SeapowerUI;
 using UnityEngine;
 
 namespace SeaPowerPopOut.SmartWindows;
