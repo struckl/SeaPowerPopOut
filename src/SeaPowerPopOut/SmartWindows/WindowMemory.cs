@@ -22,7 +22,6 @@ internal static class WindowMemory
         Save = Save,
     };
 
-    private const float TitleBarHeight = 30f;
     private const float SaveDelay = 1f;
 
     private static PatternList patterns;
@@ -130,18 +129,15 @@ internal static class WindowMemory
         // the remembered place was turned into "container height - window height - place", usually below the screen, and
         // remembered again. A window the game rebuilds (the World View when the map goes fullscreen <-> windowed) was
         // gone after that. The remembered place is absolute, so the anchor must not act on it.
-        if (window.AnchorBottom || window.AnchorRight)
-        {
-            ModLog.Debug($"smart windows: anchors of {window.Name} released (bottom {window.AnchorBottom}, right {window.AnchorRight})");
-            window.AnchorBottom = false;
-            window.AnchorRight = false;
-        }
+        bool bottom = window.AnchorBottom, right = window.AnchorRight;
+        if (HostArea.ReleaseAnchors(window))
+            ModLog.Debug($"smart windows: anchors of {window.Name} released (bottom {bottom}, right {right})");
         WinRect screen = HostArea.Of(window);
         float width = float.IsNaN(saved.W) ? window.ActualWidth : saved.W;
         var target = new WinRect(saved.X, saved.Y, width, float.IsNaN(saved.H) ? window.ActualHeight : saved.H);
 
         float minVisible = SmartSettings.AllowDragOutside.Value ? SmartSettings.MinVisiblePixels.Value : width;
-        target = WindowGeometry.Cascade(target, alreadyOpen, SmartSettings.CascadeOffset.Value, screen, minVisible, TitleBarHeight);
+        target = WindowGeometry.Cascade(target, alreadyOpen, SmartSettings.CascadeOffset.Value, screen, minVisible, HostArea.TitleBarReach);
 
         if (!float.IsNaN(target.X)) window.X = target.X;
         if (!float.IsNaN(target.Y)) window.Y = target.Y;
@@ -160,9 +156,7 @@ internal static class WindowMemory
 
     private const float MinRememberedSize = 40f;
 
-    private static bool FullscreenMap(GameWindow window) =>
-        (window.DataContext as SceneMapViewModel ?? (window.Content as FrameworkElement)?.DataContext as SceneMapViewModel)
-            ?.IsFullscreen == true;
+    private static bool FullscreenMap(GameWindow window) => GameWindows.MapOf(window)?.IsFullscreen == true;
 
     private static void Remember(GameWindow window, string pattern)
     {

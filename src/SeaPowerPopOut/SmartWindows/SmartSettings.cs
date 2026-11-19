@@ -3,8 +3,43 @@ using System.IO;
 using UnityEngine;
 using BepInEx;
 using BepInEx.Configuration;
+using SeapowerUI.ViewModels;
+using GameWindow = SeapowerUI.Window;
 
 namespace SeaPowerPopOut.SmartWindows;
+
+/// <summary>
+/// The game's windows the mod knows by name. A pattern here must match the window as <see cref="PatternList"/> does
+/// (title or type name, case and spaces ignored), or the feature that uses it silently does nothing; the defaults of
+/// "Window patterns" and "Window levels" are made from the same names.
+/// </summary>
+internal static class GameWindows
+{
+    public const string TacticalDisplay = "Tactical Display";
+    public const string WorldView = "World View";
+    public const string UnitReference = "Unit Reference*";
+    public const string UnitStatus = "Unit Status*";
+    public const string EventLog = "Event Log";
+    public const string FormationManager = "Formation Manager";
+    public const string TaskForceBuilder = "Task Force Builder";
+    public const string WeaponReference = "Weapon Reference";
+
+    public const string DefaultPatterns =
+        TacticalDisplay + "," + WorldView + "," + UnitReference + "," + UnitStatus + "," + EventLog + "," + FormationManager + ","
+        + TaskForceBuilder + "," + WeaponReference;
+
+    /// <summary>View model type names of the map and of the World View window (the pop-out screen leaves both home).</summary>
+    public const string MapViewModel = "MapViewModel";
+    public const string WorldViewModel = "WorldViewWindowViewModel";
+
+    /// <summary>A window matches one of the names above.</summary>
+    public static bool Is(GameWindow window, string pattern) =>
+        new PatternList(pattern).Match(WindowNames.Of(window)) != null;
+
+    /// <summary>The map's view model, when the window is the map (Tactical Display).</summary>
+    public static SceneMapViewModel MapOf(GameWindow window) =>
+        window.DataContext as SceneMapViewModel ?? (window.Content as Noesis.FrameworkElement)?.DataContext as SceneMapViewModel;
+}
 
 /// <summary>
 /// Config of the Smart Windows features, in its own file next to Pop-Out's:
@@ -94,7 +129,7 @@ internal static class SmartSettings
         Enabled = file.Bind("1. General", "Enable window memory", true,
             "Remember the position and size of the windows listed below. Needs a restart.");
         WindowPatterns = file.Bind("2. Remembered windows", "Window patterns",
-            "Tactical Display,World View,Unit Reference*,Unit Status*,Event Log,Formation Manager,Task Force Builder,Weapon Reference",
+            GameWindows.DefaultPatterns,
             "Comma-separated window names to remember. Ignores case and spaces; * matches any text. A pattern must " +
             "match from the start of the name (the window's content type, e.g. UnitStatusViewModel), so use *text* to " +
             "match anywhere. Windows matching the same pattern share one saved layout.");
@@ -245,7 +280,7 @@ internal static class SmartSettings
             "Written by the mod: pattern=x,y,width,height[,max];...");
         WindowLooks = file.Bind("9. Saved by the mod", "Window looks", "",
             "Written by the mod: pattern|opacity|scale|outline;... (opacity 0-1, scale 0.5-2, outline 0/1)");
-        WindowLevels = file.Bind("9. Saved by the mod", "Window levels", "Tactical Display|-1;World View|-1",
+        WindowLevels = file.Bind("9. Saved by the mod", "Window levels", $"{GameWindows.TacticalDisplay}|-1;{GameWindows.WorldView}|-1",
             "Level of the remembered windows: pattern|level;... (-1 below the other windows, 1 above them). " +
             "The Tactical Display and the World View start below the others.");
         DesktopMode = file.Bind("B. Desktop mode", "Enabled", false,

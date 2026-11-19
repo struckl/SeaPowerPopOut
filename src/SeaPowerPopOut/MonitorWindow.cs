@@ -92,8 +92,7 @@ internal sealed class MonitorWindow
         }
         if (candidate == IntPtr.Zero)
         {
-            Vector3 p = Display.RelativeMouseAt(Input.mousePosition);
-            if (p != Vector3.zero && (int)p.z == display)
+            if (GameMouse.OnDisplay(display, out _))
                 candidate = Native.OwnWindowUnderCursor();
         }
         if (candidate == IntPtr.Zero)

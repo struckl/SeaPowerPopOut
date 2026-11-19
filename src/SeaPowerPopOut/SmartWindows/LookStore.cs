@@ -111,8 +111,7 @@ internal sealed class LookStore
         return sb.ToString();
     }
 
-    /// <summary>The same normalisation as <see cref="PatternList"/> applies to its patterns: no spaces, lower case.</summary>
-    internal static string Normalize(string pattern) => (pattern ?? "").Replace(" ", "").Trim().ToLowerInvariant();
+    private static string Normalize(string pattern) => PatternList.Squash(pattern ?? "");
 
     private static bool TryFloat(string text, out float value) =>
         float.TryParse(text.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out value);

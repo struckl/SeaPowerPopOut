@@ -17,9 +17,6 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class DesktopPatches
 {
-    private static readonly AccessTools.FieldRef<MouseControlState, MouseControlState.State> MouseState =
-        AccessTools.FieldRefAccess<MouseControlState, MouseControlState.State>("_currentState");
-
     private static bool Live => DesktopMode.On && DesktopGame.InMission;
 
     public static bool Apply(Harmony harmony)
@@ -28,7 +25,7 @@ internal static class DesktopPatches
         MethodBase paused = AccessTools.Method(typeof(CameraManager), nameof(CameraManager.SetRenderingPaused));
         MethodBase rects = AccessTools.Method(typeof(CameraManager), "SetCameraRects");
         MethodBase render = AccessTools.Method(typeof(Pip3DView), "OnRender");
-        if (showPip == null || paused == null || rects == null || render == null || MouseState == null
+        if (showPip == null || paused == null || rects == null || render == null || !GameMouse.Resolved
             || AccessTools.Method(typeof(CameraManager), nameof(CameraManager.RequestPipFrame)) == null
             || AccessTools.Field(typeof(CameraManager), "_camera") == null)
         {
@@ -119,8 +116,7 @@ internal static class DesktopPatches
         {
             if (WorldViewTexture.MouseHandedToWorld())
                 return;
-            MouseState(__instance) = MouseControlState.State.UI;
-            DesktopGame.Cameras?.setMouseInteractionFlag(false);
+            GameMouse.ClaimForUi(__instance);
         }
         catch (Exception ex)
         {

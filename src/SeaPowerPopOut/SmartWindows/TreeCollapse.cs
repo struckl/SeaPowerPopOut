@@ -18,7 +18,6 @@ internal sealed class TreeCollapse
 {
     private const float MinWindowWidth = 20f;
 
-    private static readonly MethodInfo MarkUserPositioned = AccessTools.Method(typeof(GameWindow), "MarkUserPositioned");
 
     private readonly GameWindow window;
     private readonly UnitTreeBrowserView view;
@@ -93,12 +92,12 @@ internal sealed class TreeCollapse
                 return;
             WinRect wanted = WindowGeometry.KeepReachable(
                 new WinRect(window.X - restore, window.Y, width + restore, window.ActualHeight),
-                HostArea.Of(window), SmartSettings.MinVisiblePixels.Value, 28f);
+                HostArea.Of(window), SmartSettings.MinVisiblePixels.Value, HostArea.TitleBarReach);
             window.Width = wanted.W;
             window.X = wanted.X;
             window.Y = wanted.Y;
         }
-        MarkUserPositioned?.Invoke(window, null);       // keeps windows anchored to a corner from snapping back
+        GameMouse.MarkUserPositioned?.Invoke(window, null);
     }
 
     // ---- search panel -------------------------------------------------------------------------------------------

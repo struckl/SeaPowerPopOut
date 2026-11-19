@@ -200,7 +200,6 @@ internal static class DamageControlLayout
         {
             // fall through to the setting-based value
         }
-        float ui = Singleton<OptionsManager>.InstanceExists() ? Singleton<OptionsManager>.Instance.UIScale : 1f;
-        return Math.Max(0.05f, ui * Screen.height / 1080f);
+        return Math.Max(0.05f, HostArea.UiScale(Screen.height));
     }
 }

@@ -35,18 +35,14 @@ internal sealed class PopOutScreen : MonoBehaviour
 
     // The map and its 3D inset stay on the main screen: they lean on its layout, and the game has its own options
     // to put the map or the world view on another monitor.
-    private static readonly HashSet<string> StayHome = new HashSet<string> { "MapViewModel", "WorldViewWindowViewModel" };
+    private static readonly HashSet<string> StayHome = new HashSet<string> { SmartWindows.GameWindows.MapViewModel, SmartWindows.GameWindows.WorldViewModel };
 
     private const float SaveInterval = 3f;
-    private const float DesignHeight = 1080f;
     private const float FrameWidth = 5f;          // resize border around popped-out windows (window units)
     private const string FrameBrushKey = "Brush.Window.Header";
 
     private static readonly MethodInfo CreateView = AccessTools.Method(typeof(NoesisView), "CreateView", new[] { typeof(FrameworkElement) });
-    private static readonly MethodInfo MarkUserPositioned = AccessTools.Method(typeof(GameWindow), "MarkUserPositioned");
     private static readonly MethodInfo SetCurrentHost = AccessTools.PropertySetter(typeof(WindowHostManager), nameof(WindowHostManager.CurrentHost));
-    private static readonly AccessTools.FieldRef<MouseControlState, MouseControlState.State> MouseState =
-        AccessTools.FieldRefAccess<MouseControlState, MouseControlState.State>("_currentState");
 
     private const string RootXaml = @"
 <local:ScalableUserControl
@@ -412,7 +408,8 @@ internal sealed class PopOutScreen : MonoBehaviour
         }
     }
 
-    private const string OutIcon = "M1,4 L1,11 L8,11 L8,8 M5,7 L11,1 M7,1 L11,1 L11,5";
+    // A box with an arrow leaving it (pop out) or coming back into it (pop in).
+    private const string OutIcon = SmartWindows.TitleMenu.Mark;
     private const string InIcon = "M1,4 L1,11 L8,11 L8,8 M11,1 L5,7 M5,3 L5,7 L9,7";
 
     private void AddButton(GameWindow window, bool popped)
@@ -472,7 +469,7 @@ internal sealed class PopOutScreen : MonoBehaviour
         if (Layout.TryGetPlacement(kind, out SmartWindows.SavedLayout p))
         {
             // Stops windows anchored to the bottom right (unit status) from snapping back to their corner.
-            MarkUserPositioned?.Invoke(window, null);
+            GameMouse.MarkUserPositioned?.Invoke(window, null);
             if (!float.IsNaN(p.X)) window.X = p.X;
             if (!float.IsNaN(p.Y)) window.Y = p.Y;
             // A size is only remembered once it was resized, also for windows that size themselves (formation
@@ -588,11 +585,10 @@ internal sealed class PopOutScreen : MonoBehaviour
 
     private void UpdateScreen(bool force)
     {
-        // The game scales its UI by screen height / 1080. Same here, by the short side, so a portrait monitor gets
+        // The game scales its UI by the screen's height. Same here, by the short side, so a portrait monitor gets
         // the size a landscape one of that resolution would (by its long side the windows would come out huge).
-        float ui = Singleton<OptionsManager>.InstanceExists() ? Singleton<OptionsManager>.Instance.UIScale : 1f;
         int shortSide = Mathf.Max(1, Mathf.Min(screenCamera.pixelWidth, screenCamera.pixelHeight));
-        float s = ui * shortSide / DesignHeight * Settings.Scale.Value;
+        float s = SmartWindows.HostArea.UiScale(shortSide) * Settings.Scale.Value;
         if (force || Mathf.Abs(s - appliedScale) > 0.001f)
         {
             scale.ScaleX = s;
@@ -623,8 +619,7 @@ internal sealed class PopOutScreen : MonoBehaviour
         hint.Visibility = !shared && !seeThrough && host.Windows.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         monitor.KeepOnTop(seeThrough && Settings.OnTop.Value);
 
-        Vector3 p = Display.RelativeMouseAt(UnityEngine.Input.mousePosition);
-        if (p != Vector3.zero && (int)p.z == screenDisplay)
+        if (GameMouse.OnDisplay(screenDisplay, out Vector3 p))
             pointer = new Vector2(p.x, screenCamera.pixelHeight - p.y);
 
         if (mainView != null && !ReferenceEquals(root.DataContext, mainView.DataContext))
@@ -642,24 +637,16 @@ internal sealed class PopOutScreen : MonoBehaviour
         return map || o.WorldViewMonitor == index;
     }
 
-    /// <summary>
-    /// Runs after the game decided where the mouse is. On the pop-out monitor (over one of our windows, when the
-    /// game draws there too) the mouse belongs to the UI, so clicks don't reach the world or the map.
-    /// </summary>
+    /// <summary>On the pop-out monitor (over one of our windows, when the game draws there too) the mouse belongs to the UI.</summary>
     internal void ClaimMouse(MouseControlState state)
     {
         if (screen == null)
             return;
         try
         {
-            Vector3 p = Display.RelativeMouseAt(UnityEngine.Input.mousePosition);
-            if (p == Vector3.zero || (int)p.z != screenDisplay)
+            if (!GameMouse.OnDisplay(screenDisplay, out _) || (shared && !root.IsMouseOver))
                 return;
-            if (shared && !root.IsMouseOver)
-                return;
-            MouseState(state) = MouseControlState.State.UI;
-            if (Singleton<CameraManager>.InstanceExists())
-                Singleton<CameraManager>.Instance.setMouseInteractionFlag(false);
+            GameMouse.ClaimForUi(state);
         }
         catch (Exception ex)
         {
@@ -726,8 +713,7 @@ internal sealed class PopOutScreen : MonoBehaviour
         if (menu == null || !(UnityEngine.Input.GetMouseButtonDown(0) || UnityEngine.Input.GetMouseButtonDown(1)
                               || UnityEngine.Input.GetMouseButtonDown(2)))
             return;
-        Vector3 p = Display.RelativeMouseAt(UnityEngine.Input.mousePosition);
-        ContextMenu other = p != Vector3.zero && (int)p.z == screenDisplay ? homeMenu : menu;
+        ContextMenu other = GameMouse.OnDisplay(screenDisplay, out _) ? homeMenu : menu;
         if (other.IsOpen)
             other.IsOpen = false;
     }

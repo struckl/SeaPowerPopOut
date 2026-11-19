@@ -7,12 +7,12 @@ namespace SeaPowerPopOut.SmartWindows;
 /// </summary>
 internal static class DesktopPresets
 {
-    private const string Map = "Tactical Display";
-    private const string World = "World View";
-    private const string Status = "Unit Status*";
-    private const string Reference = "Unit Reference*";
-    private const string Log = "Event Log";
-    private const string Formation = "Formation Manager";
+    private const string Map = GameWindows.TacticalDisplay;
+    private const string World = GameWindows.WorldView;
+    private const string Status = GameWindows.UnitStatus;
+    private const string Reference = GameWindows.UnitReference;
+    private const string Log = GameWindows.EventLog;
+    private const string Formation = GameWindows.FormationManager;
 
     /// <param name="worldElsewhere">The game shows the World View on another monitor: the map takes its place here.</param>
     public static DesktopSet Build(int index, float screenWidth, float screenHeight, float hostWidth, float hostHeight,

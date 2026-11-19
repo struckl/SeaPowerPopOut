@@ -166,11 +166,9 @@ internal static class DesktopMode
     {
         if (DesktopGame.Vm?.WorldViewDetached ?? false)
             return;
-        if (!window.AnchorBottom && !window.AnchorRight)
-            return;
-        ModLog.Debug($"desktop mode: {what} window anchors (bottom {window.AnchorBottom}, right {window.AnchorRight}) released");
-        window.AnchorBottom = false;
-        window.AnchorRight = false;
+        bool bottom = window.AnchorBottom, right = window.AnchorRight;
+        if (HostArea.ReleaseAnchors(window))
+            ModLog.Debug($"desktop mode: {what} window anchors (bottom {bottom}, right {right}) released");
     }
 
     /// <summary>
@@ -192,8 +190,8 @@ internal static class DesktopMode
             return;
         // Where the active desktop wants it, if that is on the screen; else as far up as it fits.
         WinRect want = now;
-        if (WindowMemory.SnapshotLayouts().TryGet(PatternList.Squash("World View"), out SavedLayout saved)
-            && !float.IsNaN(saved.X) && !float.IsNaN(saved.Y) && saved.Y < screen.Bottom - 30f)
+        if (WindowMemory.SnapshotLayouts().TryGet(PatternList.Squash(GameWindows.WorldView), out SavedLayout saved)
+            && !float.IsNaN(saved.X) && !float.IsNaN(saved.Y) && saved.Y < screen.Bottom - HostArea.TitleBarReach)
             want = new WinRect(saved.X, saved.Y, w, h);
         var fixedRect = new WinRect(
             Math.Max(screen.X, Math.Min(want.X, screen.Right - w)),
@@ -215,16 +213,14 @@ internal static class DesktopMode
         return pipView;
     }
 
-    private static bool IsMap(GameWindow window) =>
-        window.DataContext is SceneMapViewModel || (window.Content as FrameworkElement)?.DataContext is SceneMapViewModel;
+    private static bool IsMap(GameWindow window) => GameWindows.MapOf(window) != null;
 
     private static bool IsWorldView(GameWindow window)
     {
         foreach (string name in WindowNames.Of(window))
         {
-            string squashed = name.Replace(" ", "");
-            if (squashed.Equals("WorldView", StringComparison.OrdinalIgnoreCase)
-                || squashed.Equals("WorldViewWindowViewModel", StringComparison.OrdinalIgnoreCase))
+            string squashed = PatternList.Squash(name);
+            if (squashed == PatternList.Squash(GameWindows.WorldView) || squashed == PatternList.Squash(GameWindows.WorldViewModel))
                 return true;
         }
         return false;

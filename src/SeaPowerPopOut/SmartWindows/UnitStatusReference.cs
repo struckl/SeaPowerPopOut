@@ -216,8 +216,7 @@ internal static class UnitStatusReference
         Places.Add(new Place { Window = new WeakReference<GameWindow>(window) });
     }
 
-    private static bool IsUnitStatus(GameWindow window) =>
-        WindowNames.Of(window).Any(n => n.Replace(" ", "").StartsWith("UnitStatus", StringComparison.OrdinalIgnoreCase));
+    private static bool IsUnitStatus(GameWindow window) => GameWindows.Is(window, GameWindows.UnitStatus);
 
     /// <summary>Puts the page of the selected Reference tab into its window.</summary>
     private static void Update()
