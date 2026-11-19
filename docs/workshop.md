@@ -68,8 +68,8 @@ list is at the top of `Director.cs`. Next to it:
 
 Build the plugin with `dotnet build tools/shot-director -c Release` (deploys to `StreamingAssets\ShotDirector\`,
 game closed), back up `dev.sewerlabs.seapowerpopout.cfg`, start `backdrop.ps1`, start the game. The current set was
-taken in the mission *Trollfjorden* (NATO), map `center 70.25 21.3 9.1`, on a 4K main monitor with a 1440 × 2560
-portrait monitor on the right. Pop-out monitor (window units, 1080 × 1884 above the taskbar): `place formation 20
+taken in the mission *Trollfjorden* (NATO), map `center 70.25 21.3 9.1`, on a 4K main monitor with a 1440 x 2560
+portrait monitor on the right. Pop-out monitor (window units, 1080 x 1884 above the taskbar): `place formation 20
 20 330 800`, `place log 355 20 705 240` (short enough to leave out the game's "Open Modal Window" line),
 `place camera 355 265 300 360`, `place status 20 825 1040 520`. Main screen for the "before" shot: `place formation
 12 60 300 640`, `place log 330 30 640 236`, `place camera 1608 110 300 360`, `place status 930 560 980 470`; the

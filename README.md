@@ -201,7 +201,7 @@ src/SeaPowerPopOut/
   SmartWindows/       the Smart Windows features: each declares its switch, hooks and handlers (Feature.cs),
                       SmartFeatures.cs runs them in order; SnapController.cs snaps on both screens
   mod/_info.ini       Mod Manager entry
-tools/package.ps1     release build → dist/SeaPowerPopOut/
+tools/package.ps1     release build -> dist/SeaPowerPopOut/
 tools/shot-director/  dev-only plugin and scripts that took the Workshop screenshots (docs/workshop.md); keeps the
                       pop-out commands (popout, popin, place, rclick ...) the workspace's tools/perf-director lacks
 workshop/             Workshop description, preview.jpg, screenshots/

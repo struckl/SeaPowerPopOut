@@ -113,7 +113,7 @@ internal sealed class MonitorWindow
     }
 
     /// <summary>
-    /// Keeps only these parts of the window (view pixels of a <paramref name="viewWidth"/> ×
+    /// Keeps only these parts of the window (view pixels of a <paramref name="viewWidth"/> x
     /// <paramref name="viewHeight"/> view); an empty list hides the window entirely. Only touches the window when
     /// the parts changed.
     /// </summary>
