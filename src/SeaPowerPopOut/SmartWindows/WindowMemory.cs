@@ -14,6 +14,7 @@ internal static class WindowMemory
 {
     public static readonly Feature Feature = new Feature
     {
+        Switch = () => SmartSettings.RememberWindows.Value,
         Start = Start,
         WindowLoaded = WindowLoaded,
         Update = SaveWhenDue,
@@ -22,7 +23,7 @@ internal static class WindowMemory
 
     private const float SaveDelay = 1f;
 
-    private static PatternList patterns;
+    private static PatternList patterns;      // which windows are "remembered": the look reads it too, so it does not wait for Start
     private static SavedLayouts layouts;
     private static readonly List<Entry> Open = new List<Entry>();
     private static float dirtySince = -1f;
@@ -33,21 +34,22 @@ internal static class WindowMemory
         public string Pattern;
     }
 
-    public static bool Active => patterns != null;
+    public static bool Active => layouts != null;
+
+    private static PatternList Patterns => patterns ?? (patterns = new PatternList(SmartSettings.WindowPatterns.Value));
 
     /// <summary>The remembered-window pattern of a window (the key of its layout and look), or null.</summary>
-    public static string PatternOf(GameWindow window) => Active ? patterns.Match(WindowNames.Of(window)) : null;
+    public static string PatternOf(GameWindow window) => Patterns.Match(WindowNames.Of(window));
 
     private static void Start()
     {
-        patterns = new PatternList(SmartSettings.WindowPatterns.Value);
         layouts = SavedLayouts.Parse(SmartSettings.Layouts.Value);
     }
 
     private static void WindowLoaded(GameWindow window)
     {
         string[] names = WindowNames.Of(window);
-        string pattern = patterns.Match(names);
+        string pattern = Patterns.Match(names);
         ModLog.Debug($"window loaded: {string.Join(" / ", names)} -> {pattern ?? "not remembered"}");
         if (pattern == null)
             return;

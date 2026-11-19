@@ -11,6 +11,7 @@ internal static class WindowBehaviors
 {
     public static readonly Feature Feature = new Feature
     {
+        Switch = () => SmartSettings.WindowClicks.Value,
         WindowLoaded = Attach,
     };
 

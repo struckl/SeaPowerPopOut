@@ -7,7 +7,9 @@ namespace SeaPowerPopOut.SmartWindows;
 /// <summary>
 /// Campaign Task Force status: a damaged ship that can be repaired may be dismissed, and its refund is reduced by the
 /// repair cost. The game lets a ship go only when it is undamaged. The members involved are internal to the game, so
-/// they are reached by reflection, all resolved once; if any is missing the feature stays off.
+/// they are reached by reflection, all resolved once; if any is missing the feature stays off. The rule itself
+/// (<see cref="AllowsDamaged"/>, <see cref="ReducedRefund"/>) is public: "Upgrade ship" applies it on its own and so
+/// does not depend on this feature's switch.
 /// </summary>
 internal static class CampaignDismiss
 {
@@ -20,15 +22,25 @@ internal static class CampaignDismiss
 
     private static MethodInfo repairEvaluation, logisticsState;
 
+    private static bool resolved;
+
+    /// <summary>Resolves the repair members once; false when the game changed (nothing here works then).</summary>
+    public static bool Resolve()
+    {
+        if (!resolved)
+        {
+            resolved = true;
+            repairEvaluation = AccessTools.Method(CampaignGame.Status, "GetRepairEvaluation", new[] { CampaignGame.Item });
+            logisticsState = AccessTools.Method(CampaignGame.Status, "GetLogisticsState", new[] { CampaignGame.Item });
+        }
+        return repairEvaluation != null && logisticsState != null;
+    }
+
     private static bool Apply(Harmony harmony)
     {
-        Type status = CampaignGame.Status;
-        Type item = CampaignGame.Item;
         MethodInfo canDismiss = CampaignGame.CanDismissMethod;
         MethodInfo refund = CampaignGame.DismissRefundMethod;
-        repairEvaluation = AccessTools.Method(status, "GetRepairEvaluation", new[] { item });
-        logisticsState = AccessTools.Method(status, "GetLogisticsState", new[] { item });
-        if (canDismiss == null || refund == null || repairEvaluation == null || logisticsState == null)
+        if (canDismiss == null || refund == null || !Resolve())
         {
             ModLog.Warn("Task Force dismiss members not found (game updated?) - damaged ships cannot be dismissed.");
             return false;
@@ -41,17 +53,11 @@ internal static class CampaignDismiss
 
     private static void CanDismissed(object __instance, object item, ref bool __result)
     {
-        if (__result || item == null)
+        if (__result || item == null || CampaignGame.PlainRules)
             return;
         try
         {
-            object logistics = logisticsState.Invoke(__instance, new[] { item });
-            if (logistics == null || !Repair(__instance, item, out bool repairable, out _))
-                return;
-            bool historical = CampaignGame.UsesHistoricalReinforcements(__instance);
-            string airbase = Read<string>(item, "CampaignAirbaseId");
-            __result = DismissRules.MayDismissDamaged(Read<bool>(item, "IsAirUnit"), !string.IsNullOrWhiteSpace(airbase),
-                historical, Read<bool>(logistics, "IsDestroyed"), repairable);
+            __result = AllowsDamaged(__instance, item);
         }
         catch (Exception ex)
         {
@@ -61,18 +67,33 @@ internal static class CampaignDismiss
 
     private static void RefundCalculated(object __instance, object item, ref int __result)
     {
-        if (item == null || __result <= 0)
+        if (item == null || __result <= 0 || CampaignGame.PlainRules)
             return;
         try
         {
-            if (Repair(__instance, item, out _, out int cost))
-                __result = DismissRules.RefundAfterRepair(__result, cost);
+            __result = ReducedRefund(__instance, item, __result);
         }
         catch (Exception ex)
         {
             ModLog.Debug($"dismiss damaged (refund): {ex.Message}");
         }
     }
+
+    /// <summary>True when the ship is damaged and the rule lets it go anyway (a ship the game lets go already is not).</summary>
+    public static bool AllowsDamaged(object status, object item)
+    {
+        object logistics = logisticsState.Invoke(status, new[] { item });
+        if (logistics == null || !Repair(status, item, out bool repairable, out _))
+            return false;
+        bool historical = CampaignGame.UsesHistoricalReinforcements(status);
+        string airbase = Read<string>(item, "CampaignAirbaseId");
+        return DismissRules.MayDismissDamaged(Read<bool>(item, "IsAirUnit"), !string.IsNullOrWhiteSpace(airbase),
+            historical, Read<bool>(logistics, "IsDestroyed"), repairable);
+    }
+
+    /// <summary>The game's dismiss refund of a ship, less the repair cost when it is damaged.</summary>
+    public static int ReducedRefund(object status, object item, int refund) =>
+        Repair(status, item, out _, out int cost) ? DismissRules.RefundAfterRepair(refund, cost) : refund;
 
     /// <summary>The repair evaluation of a ship: false if it is no ship or has no damage.</summary>
     private static bool Repair(object status, object item, out bool repairable, out int cost)

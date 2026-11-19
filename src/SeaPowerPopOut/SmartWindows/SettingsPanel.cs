@@ -46,6 +46,8 @@ internal static class SettingsPanel
         body.Children.Add(Field("cascade", SmartSettings.CascadeOffset));
         body.Children.Add(Check("snap", SmartSettings.SnapEnabled));
         body.Children.Add(Field("snap_distance", SmartSettings.SnapDistance));
+        body.Children.Add(Check("window_clicks", SmartSettings.WindowClicks));
+        body.Children.Add(Check("window_looks", SmartSettings.ApplyLooks));
         body.Children.Add(Check("remember_browser", SmartSettings.RememberBrowser));
         body.Children.Add(Check("armed_only", SmartSettings.ArmedOnly, ArmedFilter.SetEnabled));
         body.Children.Add(Check("search_extended", SmartSettings.ExtendedSearch));
@@ -53,6 +55,7 @@ internal static class SettingsPanel
         body.Children.Add(Check("loadout_list", SmartSettings.LoadoutList));
         body.Children.Add(Field("language", SmartSettings.Language, text => true, Loc.Reload));
         body.Children.Add(Label("windows"));
+        body.Children.Add(Check("remember_places", SmartSettings.RememberWindows));
         body.Children.Add(Field(null, SmartSettings.WindowPatterns, text => text.Trim().Length > 0, wide: true));
         body.Children.Add(Label("note", dim: true));
 

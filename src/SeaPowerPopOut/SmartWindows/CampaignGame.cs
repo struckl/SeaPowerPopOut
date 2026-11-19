@@ -9,9 +9,9 @@ namespace SeaPowerPopOut.SmartWindows;
 /// The campaign Task Force members that several features use (hull swap price, dismiss damaged ships, upgrade ship).
 /// The rules class and these members are internal to the game, so they are resolved here once; each feature checks
 /// the ones it needs and stays off when one is missing.
-/// <para>"Upgrade ship" sells the old ship through the game's own <c>CanDismiss</c> and <c>CalculateDismissRefund</c>.
-/// With "Dismiss damaged ships" on, <see cref="CampaignDismiss"/> has widened both (a damaged, repairable ship may go,
-/// for less): the upgrade list then offers such ships at that price. Off, it offers what the game allows.</para>
+/// <para>"Upgrade ship" reads the game's own <c>CanDismiss</c> and <c>CalculateDismissRefund</c> inside
+/// <see cref="Plain"/>, where <see cref="CampaignDismiss"/> does not widen them, and applies the damaged-ship rule
+/// itself, so its list is the same whether "Dismiss damaged ships" is on or off.</para>
 /// </summary>
 internal static class CampaignGame
 {
@@ -27,6 +27,25 @@ internal static class CampaignGame
 
     // Not in every game build: without it no campaign uses historical reinforcements.
     private static readonly PropertyInfo Historical = AccessTools.Property(Status, "UsesHistoricalReinforcements");
+
+    private static int plain;
+
+    /// <summary>True while <see cref="Plain"/> runs: the dismiss patches leave the game's answer as it is.</summary>
+    public static bool PlainRules => plain > 0;
+
+    /// <summary>Reads something from the game's campaign rules as the game itself answers it.</summary>
+    public static T Plain<T>(Func<T> read)
+    {
+        plain++;
+        try
+        {
+            return read();
+        }
+        finally
+        {
+            plain--;
+        }
+    }
 
     public static object OpenIni() => OpenIniMethod.Invoke(null, null);
 

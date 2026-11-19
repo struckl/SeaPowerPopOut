@@ -90,7 +90,8 @@ mod, rewritten in the `SmartWindows/` folder. Thanks to rgreat for the original.
   optionally (setting "Messages do not block clicks", off by default) the corner messages no longer block clicks - then
   their unit links cannot be clicked either.
 - **Campaign Task Force Builder**: loadouts oldest first; "Strict loadouts" option on the start screen; damaged ships can
-  be dismissed; hull-swap price fix; optional "Upgrade ship" (off by default).
+  be dismissed; hull-swap price fix; optional "Upgrade ship" (off by default; it
+  works on its own, whether or not "Dismiss damaged ships" is on).
 - **Menus**: "_Custom Mission" left out of SCENARIOS; the mission editor's file picker starts in the last folder and
   colours `.ini` files; optional mod-only backgrounds and old-log cleanup (off by default).
 - **Desktop mode** (off by default, config only): the game's minimap key (Tab) switches between desktops of window
@@ -98,8 +99,9 @@ mod, rewritten in the `SmartWindows/` folder. Thanks to rgreat for the original.
   windows over it; without that, the 3D world becomes a window of its own (World View) next to the map window over a
   plain backdrop. Both were run in the game.
 
-Settings are in `BepInEx/config/dev.sewerlabs.seapowerpopout.smartwindows.cfg`; each feature has its own switch and
-`Enable window memory = false` turns all of it off. Snapping has two switches: `3. Placement > Snap windows` (with
+Settings are in `BepInEx/config/dev.sewerlabs.seapowerpopout.smartwindows.cfg`; each feature has its own switch (window places:
+`2. Remembered windows > Remember window places`, clicks: `3. Placement > Window clicks`, looks: `5. Settings window > Apply window
+looks`; desktop mode needs the places) and `Enable window memory = false` is the master switch that turns all of it off. Snapping has two switches: `3. Placement > Snap windows` (with
 `Snap distance`) for the main screen, Pop-Out's own `2. Pop-out screen > Snap windows` for the pop-out monitor (fixed
 distance 6, windows one resize frame apart). Tested in the game on 0.8.7 (see `CHANGELOG.md` for what was and
 was not run); `modtool compat` passes for the globe build, which has not been run in the game.

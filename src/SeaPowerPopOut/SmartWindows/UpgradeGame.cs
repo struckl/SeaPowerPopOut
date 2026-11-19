@@ -88,7 +88,7 @@ internal static class UpgradeGame
             CampaignGame.DismissRefundMethod, decommissionRefund,
             dismissTotal, decommissionTotal, dismiss, remove, assign, scarcity, addSelected, confirm, refreshKeys,
             CampaignGame.CountsAgainstCapMethod, fleetCap, scarcityCap, openIni, loadoutCap, minCredits, skillName, crewField, creditsField };
-        if (needed.Any(m => m == null))
+        if (!CampaignDismiss.Resolve() || needed.Any(m => m == null))
         {
             ModLog.Warn("Upgrade ship: a game member was not found (game updated?) - feature off.");
             return;
@@ -149,19 +149,21 @@ internal static class UpgradeGame
         {
             if (ship.IsAirUnit || !string.Equals(ship.Category, selected.Category, StringComparison.OrdinalIgnoreCase))
                 continue;
-            // Through the game's own dismiss rules, and so through CampaignDismiss when that is on (see CampaignGame).
-            bool sold = (bool)CampaignGame.CanDismissMethod.Invoke(status, new object[] { ship });
+            // The game's own dismiss rules plus the damaged-ship rule, whatever "Dismiss damaged ships" says (see CampaignGame).
+            bool sold = CampaignGame.Plain(() => (bool)CampaignGame.CanDismissMethod.Invoke(status, new object[] { ship }))
+                || CampaignDismiss.AllowsDamaged(status, ship);
             bool decommission = !sold && (bool)canDecommission.Invoke(status, new object[] { ship });
             if (!sold && !decommission)
                 continue;
 
             int oldCap = CampaignGame.CountsAgainstCap(ship) ? (int)fleetCap.Invoke(null, new object[] { ship }) : 0;
+            int refundPlain = 0, totalPlain = 0;
             int refundBase = decommission
                 ? (int)decommissionRefund.Invoke(status, new object[] { ship })
-                : (int)CampaignGame.DismissRefundMethod.Invoke(status, new object[] { ship, 1 });
+                : DismissRefund(status, ship, out refundPlain, out totalPlain);
             int refund = decommission
                 ? (int)decommissionTotal.Invoke(status, new object[] { ship })
-                : (int)dismissTotal.Invoke(status, new object[] { ship, 1 });
+                : totalPlain - refundPlain + refundBase;
             int old = (int)ship.CrewSkill;
             var candidate = new UpgradeCandidate
             {
@@ -186,6 +188,14 @@ internal static class UpgradeGame
             list.Add(candidate);
         }
         return list;
+    }
+
+    /// <summary>The dismiss refund with the damaged-ship reduction; also the game's own refund and total, before it.</summary>
+    private static int DismissRefund(LinearCampaignTaskForceStatusViewModel status, Item ship, out int plainRefund, out int plainTotal)
+    {
+        plainRefund = CampaignGame.Plain(() => (int)CampaignGame.DismissRefundMethod.Invoke(status, new object[] { ship, 1 }));
+        plainTotal = CampaignGame.Plain(() => (int)dismissTotal.Invoke(status, new object[] { ship, 1 }));
+        return CampaignDismiss.ReducedRefund(status, ship, plainRefund);
     }
 
     private static bool SameVariant(Item a, Item b) =>

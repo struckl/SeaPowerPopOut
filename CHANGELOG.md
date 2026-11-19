@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **Every Smart Windows feature has its own on/off switch now**: new config entries (all on by default), also in the settings panel
+  - `Remember window places`, `Window clicks` (click raises a window, double-click on the title bar maximizes) and `Apply window looks`
+  - "Enable window memory" is the master switch as before: off turns every Smart Windows feature off
+  - Desktop mode needs `Remember window places` (a desktop is a set of those places)
+  - The three new panel rows are English and German; other languages show the English text until translated
+- **Changed: "Upgrade ship" no longer depends on "Dismiss damaged ships"**: its list is the same whether that setting is on or off
+  - Before: with it off, a damaged ship could only be replaced through decommission
+  - Now damaged ships that can be repaired are offered at the reduced dismiss refund either way (the default behaviour)
+
 - Changed (internal): the mod's start, log, Mod Manager check, config file, hook list, mission start/end hooks and quit guard are the shared R.A.T.S. skeleton, as in the other mods; one DLL for both games as before
   - A mistake in a per-frame update is now logged (the first five only) and the next frame goes on
   - The main config file is written a moment after the last change instead of on every change, and at once when the game closes

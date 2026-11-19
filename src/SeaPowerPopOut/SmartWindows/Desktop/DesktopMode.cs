@@ -20,7 +20,7 @@ internal static class DesktopMode
 {
     public static readonly Feature Feature = new Feature
     {
-        Switch = () => SmartSettings.DesktopMode.Value,
+        Switch = () => SmartSettings.DesktopMode.Value && SmartSettings.RememberWindows.Value,
         LiveSwitch = () => SmartSettings.DesktopMode.Value,
         Hook = Apply,
         WindowLoaded = WindowLoaded,

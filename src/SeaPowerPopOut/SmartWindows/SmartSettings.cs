@@ -49,6 +49,7 @@ internal static class GameWindows
 internal static class SmartSettings
 {
     public static ConfigEntry<bool> Enabled;
+    public static ConfigEntry<bool> RememberWindows;
     public static ConfigEntry<string> WindowPatterns;
     public static ConfigEntry<float> CascadeOffset;
     public static ConfigEntry<bool> AllowDragOutside;
@@ -94,12 +95,14 @@ internal static class SmartSettings
     public static ConfigEntry<bool> BrowserByDate;
     public static ConfigEntry<bool> BrowserNameOnly;
     public static ConfigEntry<string> BrowserSearch;
+    public static ConfigEntry<bool> WindowClicks;
     public static ConfigEntry<bool> SnapEnabled;
     public static ConfigEntry<float> SnapDistance;
     public static ConfigEntry<bool> BorderEnabled;
     public static ConfigEntry<float> BorderThickness;
     public static ConfigEntry<string> BorderColor;
     public static ConfigEntry<bool> SettingsButton;
+    public static ConfigEntry<bool> ApplyLooks;
     public static ConfigEntry<bool> LookButton;
     public static ConfigEntry<bool> DeleteOldLogs;
     public static ConfigEntry<bool> DragTimePanel;
@@ -152,6 +155,9 @@ internal static class SmartSettings
 
     private static void BindRememberedWindows()
     {
+        RememberWindows = file.Bind("2. Remembered windows", "Remember window places", true,
+            "Remember the position, size and maximized state of the windows listed below. Needs a restart. Desktop " +
+            "mode needs it too: a desktop is a set of these places.");
         WindowPatterns = file.Bind("2. Remembered windows", "Window patterns",
             GameWindows.DefaultPatterns,
             "Comma-separated window names to remember. Ignores case and spaces; * matches any text. A pattern must " +
@@ -169,6 +175,9 @@ internal static class SmartSettings
         MinVisiblePixels = file.Bind("3. Placement", "Minimum visible pixels", 25f,
             "With 'Allow dragging outside': at least this many pixels of the window's width stay visible at the left " +
             "and right edge. The title bar always stays on screen at the bottom.");
+        WindowClicks = file.Bind("3. Placement", "Window clicks", true,
+            "A click in a remembered window brings it in front of the others; a double-click on its title bar maximizes " +
+            "or restores it. Needs a restart.");
         SnapEnabled = file.Bind("3. Placement", "Snap windows", true,
             "While a window is dragged or resized with the mouse, its edges snap to the edges of the screen and of " +
             "the other windows next to it when they come closer than the snap distance. Hold Shift to move freely.");
@@ -194,6 +203,9 @@ internal static class SmartSettings
     {
         SettingsButton = file.Bind("5. Settings window", "Gear button", true,
             "Show the gear button in the title bar of remembered windows; it opens the settings panel.");
+        ApplyLooks = file.Bind("5. Settings window", "Apply window looks", true,
+            "Apply the look set with the look button (opacity, scale, text outline, level) to the remembered windows. " +
+            "Off = windows keep the game's look and the look button is not shown. Needs a restart.");
         LookButton = file.Bind("5. Settings window", "Look button", true,
             "Show the look button in the title bar of remembered windows; its menu sets the opacity, scale, text outline " +
             "and level (below / above the other windows) of the window. Needs a restart.");

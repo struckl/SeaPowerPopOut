@@ -16,6 +16,7 @@ internal static class WindowLook
 {
     public static readonly Feature Feature = new Feature
     {
+        Switch = () => SmartSettings.ApplyLooks.Value,
         WindowLoaded = Loaded,
         PoppedWindowLoaded = Loaded,
         Update = Update,
@@ -45,7 +46,7 @@ internal static class WindowLook
 
     public static int LevelOf(GameWindow window)
     {
-        string pattern = WindowMemory.PatternOf(window);
+        string pattern = Feature.Active ? WindowMemory.PatternOf(window) : null;
         return pattern == null ? 0 : Store.LevelOf(pattern);
     }
 
