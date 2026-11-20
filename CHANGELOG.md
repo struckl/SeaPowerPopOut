@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.3.0 - 2026-11-20 - new switches, shared skeleton
 
 - **Every Smart Windows feature has its own on/off switch now**: new config entries (all on by default), also in the settings panel
   - `Remember window places`, `Window clicks` (click raises a window, double-click on the title bar maximizes) and `Apply window looks`
