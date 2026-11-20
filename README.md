@@ -4,7 +4,7 @@ Puts the game's windows on a second monitor, and adds window handling on the mai
 
 | | |
 | --- | --- |
-| Version | `1.2.3` (2026-11-12) |
+| Version | `1.3.0` (2026-11-20) |
 | Game | Sea Power 0.9.1 (build 261112) and 0.8.7 tested in the game; one DLL for both |
 | Needs | a mod loader: [R.A.T.S. Keel](https://steamcommunity.com/sharedfiles/filedetails/?id=3835527459) or [Anchor Chain](https://steamcommunity.com/sharedfiles/filedetails/?id=3380210757), either one |
 | Get it | [Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3826396311) (package about 250 KB) |
