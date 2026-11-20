@@ -4,12 +4,13 @@ Puts the game's windows on a second monitor, and adds window handling on the mai
 
 | | |
 | --- | --- |
+| Questions | [R.A.T.S. Discord](https://discord.gg/CzuHd4f8Yf): help, ideas, talk; the first place to ask |
 | Version | `1.3.0` (2026-11-20) |
 | Game | Sea Power 0.9.1 (build 261112) and 0.8.7 tested in the game; one DLL for both |
 | Needs | a mod loader: [R.A.T.S. Keel](https://steamcommunity.com/sharedfiles/filedetails/?id=3835527459) or [Anchor Chain](https://steamcommunity.com/sharedfiles/filedetails/?id=3380210757), either one |
 | Get it | [Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3826396311) (package about 250 KB) |
 | Settings | the gear button in a window, or `BepInEx\config\dev.sewerlabs.seapowerpopout.cfg` and `...smartwindows.cfg` |
-| Feedback | [R.A.T.S. feedback board](https://hub.sewerlabs.dev/s/popout) |
+| Bug reports | [R.A.T.S. feedback board](https://hub.sewerlabs.dev/s/popout) |
 | Source | R.A.T.S. Source License, see `LICENSE` |
 
 ![The map on the main screen, the game's windows on the second monitor](workshop/screenshots/01-two-monitors.jpg)
