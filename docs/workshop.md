@@ -10,7 +10,7 @@ owns the item. No SteamCMD needed.
 2. Check `src/SeaPowerPopOut/mod/_info.ini`: Mod Manager name and description, and `[Compatibility]`
    (`GreaterThanEqualToVersion` and `LessThanVersion` = the game versions it declares to fit; the game skips
    Workshop updates whose declaration does not fit).
-3. Run the checklist in [testing.md](testing.md) on the current game version.
+3. Run the in-game checklist (kept privately with the test plans) on the current game version.
 4. Close Sea Power, then stage and install the release folder:
 
    ```powershell

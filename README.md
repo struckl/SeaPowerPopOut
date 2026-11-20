@@ -72,7 +72,7 @@ Manual install: put `SeaPowerPopOut.dll` and `_info.ini` into `<Sea Power>\Sea P
 dotnet build src/SeaPowerPopOut/SeaPowerPopOut.csproj -c Release -p:GameDir="C:\Program Files (x86)\Steam\steamapps\common\Sea Power"
 ```
 
-Details, how it works and the source layout: [docs/building.md](docs/building.md). Releases: [docs/workshop.md](docs/workshop.md); tests: [docs/testing.md](docs/testing.md).
+Details, how it works and the source layout: [docs/building.md](docs/building.md). Releases: [docs/workshop.md](docs/workshop.md).
 
 ## Credits and license
 

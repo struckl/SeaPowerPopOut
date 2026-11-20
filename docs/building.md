@@ -15,7 +15,7 @@ dotnet build src/SeaPowerPopOut/SeaPowerPopOut.csproj -c Release -p:GameDir="C:\
 
 - The build copies the mod into `<Sea Power>\Sea Power_Data\StreamingAssets\SeaPowerPopOut\`; `-p:Deploy=false` skips that.
 - `GameDir` can also be an environment variable.
-- Packaging and the Workshop upload: [docs/workshop.md](docs/workshop.md). In-game checklists: [docs/testing.md](docs/testing.md).
+- Packaging and the Workshop upload: [docs/workshop.md](docs/workshop.md).
 
 ## How it works
 
