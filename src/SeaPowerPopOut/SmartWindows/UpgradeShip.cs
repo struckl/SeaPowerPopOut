@@ -61,9 +61,9 @@ internal static class UpgradeShip
             catch (Exception ex)
             {
                 if (!warned)
-                    ModLog.Warn($"Upgrade ship: {ex.Message}");
+                    Rig.Log.Warn($"Upgrade ship: {ex.Message}");
                 warned = true;
-                ModLog.Debug($"upgrade ship: {ex}");
+                Rig.Log.Debug($"upgrade ship: {ex}");
             }
         }
     }
@@ -106,7 +106,7 @@ internal static class UpgradeShip
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"upgrade ship: button style not copied: {ex.Message}");
+            Rig.Log.Debug($"upgrade ship: button style not copied: {ex.Message}");
         }
         button.Click += (s, e) =>
         {
@@ -116,11 +116,11 @@ internal static class UpgradeShip
             }
             catch (Exception ex)
             {
-                ModLog.Warn($"Upgrade ship (menu): {ex.Message}");
+                Rig.Log.Warn($"Upgrade ship (menu): {ex.Message}");
             }
         };
         panel.Children.Insert(panel.Children.IndexOf(reference) + 1, button);
-        ModLog.Debug("upgrade ship: button added");
+        Rig.Log.Debug("upgrade ship: button added");
         return button;
     }
 

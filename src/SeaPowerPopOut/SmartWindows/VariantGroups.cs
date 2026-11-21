@@ -47,11 +47,11 @@ internal static class VariantGroups
                     }
                 }
             }
-            ModLog.Debug($"smart windows: {arranged} class group(s) with loadout variants arranged");
+            Rig.Log.Debug($"smart windows: {arranged} class group(s) with loadout variants arranged");
         }
         catch (Exception ex)
         {
-            ModLog.Warn($"Unit Reference loadout variants not arranged: {ex.Message}");
+            Rig.Log.Warn($"Unit Reference loadout variants not arranged: {ex.Message}");
         }
     }
 

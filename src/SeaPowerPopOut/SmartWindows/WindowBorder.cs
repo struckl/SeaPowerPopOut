@@ -29,14 +29,14 @@ internal static class WindowBorder
     {
         if (!TryColor(out Color color))
         {
-            ModLog.Warn($"Window border colour '{SmartSettings.BorderColor.Value}' is not #RRGGBB or #AARRGGBB.");
+            Rig.Log.Warn($"Window border colour '{SmartSettings.BorderColor.Value}' is not #RRGGBB or #AARRGGBB.");
             return;
         }
 
         Grid root = TitleBar.FindRootGrid(window);
         if (root == null)
         {
-            ModLog.Debug($"{window.DataContext?.GetType().Name}: no root grid, no border");
+            Rig.Log.Debug($"{window.DataContext?.GetType().Name}: no root grid, no border");
             return;
         }
         Grid host = FindChrome(root);

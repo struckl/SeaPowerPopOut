@@ -30,7 +30,7 @@ internal static class DesktopBackdrop
             UnityEngine.Object.Destroy(root);
             root = null;
             picture = null;
-            ModLog.Debug("desktop mode: backdrop removed");
+            Rig.Log.Debug("desktop mode: backdrop removed");
         }
     }
 
@@ -49,7 +49,7 @@ internal static class DesktopBackdrop
         cam.allowMSAA = false;
         cam.useOcclusionCulling = false;
         AddPicture(cam);
-        ModLog.Debug("desktop mode: backdrop camera created");
+        Rig.Log.Debug("desktop mode: backdrop camera created");
     }
 
     private static void AddPicture(Camera cam)
@@ -72,7 +72,7 @@ internal static class DesktopBackdrop
             var texture = new Texture2D(2, 2, TextureFormat.RGBA32, true);
             if (!ImageConversion.LoadImage(texture, File.ReadAllBytes(file)))
             {
-                ModLog.Warn($"desktop mode: backdrop picture {file} cannot be read - plain grey.");
+                Rig.Log.Warn($"desktop mode: backdrop picture {file} cannot be read - plain grey.");
                 return;
             }
             texture.wrapMode = TextureWrapMode.Clamp;
@@ -90,11 +90,11 @@ internal static class DesktopBackdrop
             cam.cullingMask = 1 << PictureLayer;
             fittedW = 0;
             Fit();
-            ModLog.Debug($"desktop mode: backdrop picture {Path.GetFileName(file)} {texture.width}x{texture.height}");
+            Rig.Log.Debug($"desktop mode: backdrop picture {Path.GetFileName(file)} {texture.width}x{texture.height}");
         }
         catch (Exception ex)
         {
-            ModLog.Warn($"desktop mode: backdrop picture: {ex.Message}");
+            Rig.Log.Warn($"desktop mode: backdrop picture: {ex.Message}");
         }
     }
 

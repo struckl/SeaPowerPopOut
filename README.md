@@ -5,9 +5,9 @@ Puts the game's windows on a second monitor, and adds window handling on the mai
 | | |
 | --- | --- |
 | Questions | [R.A.T.S. Discord](https://discord.gg/CzuHd4f8Yf): help, ideas, talk; the first place to ask |
-| Version | `1.3.0` (2026-11-20) |
-| Game | Sea Power 0.9.1 (build 261112) and 0.8.7 tested in the game; one DLL for both |
-| Needs | [R.A.T.S. Keel](https://steamcommunity.com/sharedfiles/filedetails/?id=3835527459), the mod loader |
+| Version | `1.4.0` (unreleased) |
+| Game | Sea Power 0.9.3 (build 261116), the current main version; checked offline |
+| Needs | [R.A.T.S. Keel](https://steamcommunity.com/sharedfiles/filedetails/?id=3835527459), the mod loader, and R.A.T.S. Rigging, the part the R.A.T.S. mods share (a copy comes with this mod for now) |
 | Get it | [Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3826396311) (package about 250 KB) |
 | Settings | the gear button in a window, or `BepInEx\config\dev.sewerlabs.seapowerpopout.cfg` and `...smartwindows.cfg` |
 | Bug reports | [R.A.T.S. feedback board](https://hub.sewerlabs.dev/s/popout) |
@@ -64,7 +64,8 @@ Manual install: put `SeaPowerPopOut.dll` and `_info.ini` into `<Sea Power>\Sea P
 
 ## Building
 
-- Needs the .NET SDK 8, Sea Power installed and the [SeaPowerKeel](https://github.com/struckl/SeaPowerKeel) repo next to this one.
+- Needs the .NET SDK 8, Sea Power installed and the SeaPowerRigging repo (R.A.T.S. Rigging) next to this one.
+- One build for the game's current main version.
 
 ```bash
 dotnet build src/SeaPowerPopOut/SeaPowerPopOut.csproj -c Release -p:GameDir="C:\Program Files (x86)\Steam\steamapps\common\Sea Power"

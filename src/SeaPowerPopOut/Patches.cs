@@ -10,7 +10,7 @@ using GameWindow = SeapowerUI.Window;
 namespace SeaPowerPopOut;
 
 /// <summary>
-/// Every game method the mod hooks, declared by feature in the shared HookRegistry: a feature's targets are all resolved
+/// Every game method the mod hooks, declared by feature in Rig.Hooks (R.A.T.S. Rigging): a feature's targets are all resolved
 /// before it is patched, and a required one that is missing leaves the mod off.
 /// - <c>WindowHost.OpenNewWindow / CanCloseWindow / CloseWindow</c> - the main screen's window host learns that
 /// a window living on the pop-out screen is open there (the bottom-bar toggles stay lit and close it), and windows
@@ -21,12 +21,12 @@ namespace SeaPowerPopOut;
 /// so a click there doesn't also select, deselect or order something in the world.
 /// - <c>NoesisView.MousePosition</c> - puts the pointer of views on other monitors where the mouse really is (see
 /// <see cref="PointerHooks"/>). Optional: if it's missing, everything else still runs.
-/// - <c>MainGameViewModel.OnStart</c> / <c>GameMain.OnDestroy</c> - mission ready / mission unloading (shared MissionHooks).
+/// - <c>MainGameViewModel.OnStart</c> / <c>GameMain.OnDestroy</c> - mission ready / mission unloading (Rig.Mission).
 /// - <c>FormationManagerViewModel.SelectedTabIndex</c> - counts every tab, as the TabControl does (see
 /// <see cref="FormationTabs"/>). Optional.
 /// <para>Two stages. The window hooks must wait until NoesisGUI runs: patching a method JIT-compiles it, which runs
 /// its class's static constructor, and <c>WindowHost</c> / <c>Window</c> register Noesis dependency properties
-/// there - before Noesis is initialised that is a native crash on startup. The host (ModHost) applies them
+/// there - before Noesis is initialised that is a native crash on startup. The host (RigHost) applies them
 /// once the first game window host exists (the main menu has one).</para>
 /// </summary>
 internal static class Patches
@@ -34,23 +34,23 @@ internal static class Patches
     /// <summary>The window hooks' feature name: <see cref="PopOutScreen"/> goes on from there once they are in.</summary>
     public const string WindowsFeature = "Windows";
 
-    /// <summary>Declares every hook (ModEntry calls it at plugin load).</summary>
+    /// <summary>Declares every hook (Rig.Start calls it at plugin load).</summary>
     public static void Declare()
     {
-        MissionHooks.Declare();
-        HookRegistry.Add("Mouse", HookStage.Load, "mod inactive")
+        Rig.Mission.Declare();
+        Rig.Hooks.Add("Mouse", HookStage.Load, "mod inactive")
             .Hook("SeaPower.MouseControlState", "OnUpdate", Type.EmptyTypes, typeof(Patches), postfix: nameof(MouseUpdated));
 
         // A fix of the game's own formation manager tabs (see FormationTabs), on both screens. Without it everything
         // else still runs.
         if (FormationTabs.Resolve())
-            HookRegistry.Add("Formation tabs", HookStage.Load, "its tabs work as the game has them", optional: true)
+            Rig.Hooks.Add("Formation tabs", HookStage.Load, "its tabs work as the game has them", optional: true)
                 .Hook(FormationTabs.TypeName, "get_SelectedTabIndex", Type.EmptyTypes, typeof(Patches), prefix: nameof(GetTabIndex))
                 .Hook(FormationTabs.TypeName, "set_SelectedTabIndex", new[] { typeof(int) }, typeof(Patches), prefix: nameof(SetTabIndex));
         else
-            ModLog.Warn("Formation manager tab fix not applied (game updated?) - its tabs work as the game has them.");
+            Rig.Log.Warn("Formation manager tab fix not applied (game updated?) - its tabs work as the game has them.");
 
-        HookRegistry.Add(WindowsFeature, HookStage.AfterNoesis, "pop-out inactive")
+        Rig.Hooks.Add(WindowsFeature, HookStage.AfterNoesis, "pop-out inactive")
             .Hook("SeapowerUI.WindowHost", "OpenNewWindow", null, typeof(Patches), prefix: nameof(OpenNewWindow))
             .Hook("SeapowerUI.WindowHost", "CanCloseWindow", null, typeof(Patches), postfix: nameof(CanCloseWindow))
             .Hook("SeapowerUI.WindowHost", "CloseWindow", null, typeof(Patches), prefix: nameof(CloseWindow))
@@ -61,26 +61,26 @@ internal static class Patches
         // off - no resize cursor at the edges, drags jump, tooltips far from the cursor. Clicks go another way and land
         // right. Fixed for every view on another monitor (pop-out screen and the game's own second-monitor map). Without
         // this hook everything else still runs.
-        HookRegistry.Add("Pointer", HookStage.AfterNoesis, "on a monitor of another height than the game's the mouse sits off", optional: true)
+        Rig.Hooks.Add("Pointer", HookStage.AfterNoesis, "on a monitor of another height than the game's the mouse sits off", optional: true)
             .Hook("NoesisView", "MousePosition", Type.EmptyTypes, typeof(Patches), postfix: nameof(MousePosition));
     }
 
-    // From the moment the game closes nothing here touches Noesis (see ModHost.Quitting): the game's own code runs as without the mod.
+    // From the moment the game closes nothing here touches Noesis (see Rig.Mod.Quitting): the game's own code runs as without the mod.
     private static bool OpenNewWindow(WindowHost __instance, ExecutedCustomCommandArgs args) =>
-        ModHost.Quitting || (PopOutScreen.Instance?.HostOpening(__instance, args.Parameter) ?? true);
+        Rig.Mod.Quitting || (PopOutScreen.Instance?.HostOpening(__instance, args.Parameter) ?? true);
 
     private static void CanCloseWindow(WindowHost __instance, CanExecuteCustomCommandArgs args, ref bool __result)
     {
-        if (!__result && !ModHost.Quitting && PopOutScreen.Instance != null && PopOutScreen.Instance.HoldsFor(__instance, args.Parameter))
+        if (!__result && !Rig.Mod.Quitting && PopOutScreen.Instance != null && PopOutScreen.Instance.HoldsFor(__instance, args.Parameter))
             __result = true;
     }
 
     private static bool CloseWindow(WindowHost __instance, ExecutedCustomCommandArgs args) =>
-        ModHost.Quitting || (PopOutScreen.Instance?.HostClosing(__instance, args.Parameter) ?? true);
+        Rig.Mod.Quitting || (PopOutScreen.Instance?.HostClosing(__instance, args.Parameter) ?? true);
 
     private static void WindowLoaded(GameWindow __instance)
     {
-        if (ModHost.Quitting)
+        if (Rig.Mod.Quitting)
             return;
         PopOutScreen.Instance?.Decorate(__instance);
         SmartWindows.SmartFeatures.WindowLoaded(__instance, PopOutScreen.Instance == null || PopOutScreen.Instance.OnMainScreen(__instance));
@@ -90,7 +90,7 @@ internal static class Patches
 
     private static void MousePosition(NoesisView __instance, ref Vector3 __result)
     {
-        if (!ModHost.Quitting)
+        if (!Rig.Mod.Quitting)
             PointerFix.Apply(__instance, ref __result);
     }
 

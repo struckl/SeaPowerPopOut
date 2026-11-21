@@ -51,7 +51,7 @@ internal static class TimePanelDrag
             {
                 Attached.Add(grid, grid);
                 Attach(grid);
-                ModLog.Debug("smart windows: time panel is draggable");
+                Rig.Log.Debug("smart windows: time panel is draggable");
             }
             if (!dragging)
                 Place(grid);
@@ -59,7 +59,7 @@ internal static class TimePanelDrag
         catch (Exception ex)
         {
             nextCheck = UnityEngine.Time.unscaledTime + RetryInterval;
-            ModLog.Debug($"time panel: {ex.Message}");
+            Rig.Log.Debug($"time panel: {ex.Message}");
         }
     }
 
@@ -137,7 +137,7 @@ internal static class TimePanelDrag
                 }
                 e.Handled = true;
             }
-            catch (Exception ex) { ModLog.Debug($"time panel down: {ex.Message}"); }
+            catch (Exception ex) { Rig.Log.Debug($"time panel down: {ex.Message}"); }
         };
         grid.MouseMove += (s, e) =>
         {
@@ -155,7 +155,7 @@ internal static class TimePanelDrag
                 Canvas.SetRight(grid, right);
                 Canvas.SetTop(grid, top);
             }
-            catch (Exception ex) { ModLog.Debug($"time panel move: {ex.Message}"); }
+            catch (Exception ex) { Rig.Log.Debug($"time panel move: {ex.Message}"); }
         };
         grid.MouseLeftButtonUp += (s, e) =>
         {
@@ -174,7 +174,7 @@ internal static class TimePanelDrag
                 SmartSettings.TimePanelPosition.Value =
                     x.ToString(CultureInfo.InvariantCulture) + "," + y.ToString(CultureInfo.InvariantCulture);
             }
-            catch (Exception ex) { ModLog.Debug($"time panel up: {ex.Message}"); }
+            catch (Exception ex) { Rig.Log.Debug($"time panel up: {ex.Message}"); }
         };
     }
 }

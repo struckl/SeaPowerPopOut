@@ -130,7 +130,7 @@ internal static class WorldViewTexture
                 DrawInto(cam, camTexture);
         }
         Free(oldCam, oldShown);
-        ModLog.Debug($"desktop mode: World View texture {shownW}x{shownH}" + (camTexture != shownTexture ? $" (cameras draw {camW}x{camH})" : ""));
+        Rig.Log.Debug($"desktop mode: World View texture {shownW}x{shownH}" + (camTexture != shownTexture ? $" (cameras draw {camW}x{camH})" : ""));
     }
 
     private static int Side(float pixels) => Math.Max(16, Math.Min(MaxSide, (int)Math.Round(pixels)));
@@ -258,7 +258,7 @@ internal static class WorldViewTexture
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"desktop mode, pip frame request: {ex.Message}");
+            Rig.Log.Debug($"desktop mode, pip frame request: {ex.Message}");
         }
 
         if (view.ActualWidth <= 0f || view.ActualHeight <= 0f)

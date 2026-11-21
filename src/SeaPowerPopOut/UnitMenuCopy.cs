@@ -39,7 +39,7 @@ internal sealed class UnitMenuCopy
         ContextMenu homeMenu = homeCanvas?.ContextMenu;
         if (homeMenu == null || menuCanvas == null)
         {
-            ModLog.Warn("The game's unit menu wasn't found - right-clicking a unit on the pop-out monitor opens it on the main screen.");
+            Rig.Log.Warn("The game's unit menu wasn't found - right-clicking a unit on the pop-out monitor opens it on the main screen.");
             return null;
         }
         return new UnitMenuCopy(homeCanvas, homeMenu, menuCanvas);

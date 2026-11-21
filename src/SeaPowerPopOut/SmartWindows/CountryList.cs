@@ -36,7 +36,7 @@ internal static class CountryList
         matchSensor = AccessTools.Method(typeof(UnitTreeBrowserViewModel), "MatchesSensorTextSearch", new[] { typeof(MuseumSensorEntry), typeof(string) });
         if (setup == null || matchUnit == null || matchWeapon == null || matchSensor == null)
         {
-            ModLog.Warn("Unit Reference country list members not found (game updated?) - all countries stay listed.");
+            Rig.Log.Warn("Unit Reference country list members not found (game updated?) - all countries stay listed.");
             return false;
         }
         harmony.Patch(setup, postfix: new HarmonyMethod(typeof(CountryList), nameof(NationsBuilt)));
@@ -68,7 +68,7 @@ internal static class CountryList
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"country list: {ex.Message}");
+            Rig.Log.Debug($"country list: {ex.Message}");
         }
     }
 

@@ -40,7 +40,7 @@ internal static class LoadoutPanelOrder
         var method = AccessTools.Method("SeapowerUI.ViewModels.LinearCampaignTaskForceUnitLookup:GetAuthoredClassServiceYear");
         if (method == null)
         {
-            ModLog.Warn("Task Force Builder year lookup not found (game updated?) - the loadout panel keeps the game's order.");
+            Rig.Log.Warn("Task Force Builder year lookup not found (game updated?) - the loadout panel keeps the game's order.");
             return false;
         }
         yearOf = (Func<string, string, int>)Delegate.CreateDelegate(typeof(Func<string, string, int>), method);
@@ -66,7 +66,7 @@ internal static class LoadoutPanelOrder
             }
             catch (Exception ex)
             {
-                ModLog.Debug($"loadout panel order: {ex.Message}");
+                Rig.Log.Debug($"loadout panel order: {ex.Message}");
             }
         }
     }
@@ -89,7 +89,7 @@ internal static class LoadoutPanelOrder
             return;
         panel.Children.RemoveAt(at);
         panel.Children.Insert(versionsAt, loadouts);
-        ModLog.Debug(ownFirst ? "loadouts: own versions shown first" : "loadouts: other versions shown first");
+        Rig.Log.Debug(ownFirst ? "loadouts: own versions shown first" : "loadouts: other versions shown first");
     }
 
     /// <summary>

@@ -28,9 +28,9 @@ namespace SeaPowerPopOut;
 /// or drop-down they have open, so around them the desktop shows through and the windows float freely.</para>
 /// </summary>
 [DefaultExecutionOrder(10000)]   // LateUpdate after the NoesisViews: the cut-out follows this frame's layout
-internal sealed class PopOutScreen : ModHost
+internal sealed class PopOutScreen : RigHost
 {
-    internal static new PopOutScreen Instance => (PopOutScreen)ModHost.Instance;
+    internal static PopOutScreen Instance => (PopOutScreen)Rig.Mod.Host;
 
     // The map and its 3D inset stay on the main screen: they lean on its layout, and the game has its own options
     // to put the map or the world view on another monitor.
@@ -151,12 +151,12 @@ internal sealed class PopOutScreen : ModHost
     protected override void Tick()
     {
         SmartWindows.SmartFeatures.Update();
-        if (smartHarmony == null && HookRegistry.IsActive(Patches.WindowsFeature))
+        if (smartHarmony == null && Rig.Hooks.IsActive(Patches.WindowsFeature))
             ApplySmartHooks();
         while (deferred.Count > 0)
         {
             try { deferred.Dequeue()(); }
-            catch (Exception ex) { ModLog.Error($"{ex}"); }
+            catch (Exception ex) { Rig.Log.Error($"{ex}"); }
         }
         if (host != null)
         {
@@ -167,7 +167,7 @@ internal sealed class PopOutScreen : ModHost
                 UpdateScreen(force: false);
                 ReleaseLostClick();
             }
-            catch (Exception ex) { ModLog.Error($"screen update: {ex.Message}"); }
+            catch (Exception ex) { Rig.Log.Error($"screen update: {ex.Message}"); }
         }
         else if (Time.unscaledTime >= nextYieldCheck)
         {
@@ -192,12 +192,12 @@ internal sealed class PopOutScreen : ModHost
         catch (Exception ex)
         {
             if (shapeErrors++ < ShapeErrorsLogged)
-                ModLog.Error($"see-through: {ex}");
+                Rig.Log.Error($"see-through: {ex}");
         }
     }
 
     /// <summary>
-    /// The game closes (ModHost calls this from OnApplicationQuit, before any OnDestroy): the pop-out screen goes now, while
+    /// The game closes (RigHost calls this from OnApplicationQuit, before any OnDestroy): the pop-out screen goes now, while
     /// every Noesis view is still alive. The game's GameMain.OnDestroy (the mission-end hook) used to tear the screen down later,
     /// in the middle of the shutdown, when Noesis was being taken apart already - an access violation in Noesis.dll on quit
     /// (Keel report #6).
@@ -214,14 +214,14 @@ internal sealed class PopOutScreen : ModHost
 
     private void ApplySmartHooks()
     {
-        smartHarmony = new Harmony(ModInfo.Guid);
+        smartHarmony = new Harmony(Plugin.Guid);
         SmartWindows.SmartFeatures.Apply(smartHarmony);
 
         // Listed here rather than at plugin load, where Unity reported only the game's monitor.
         Display[] displays = Display.displays;
         for (int i = 0; i < displays.Length; i++)
-            ModLog.Info($"Monitor {i + 1}: {displays[i].systemWidth}x{displays[i].systemHeight}" + (i == 0 ? " (game)" : ""));
-        ModLog.Info(DisplayAvailable
+            Rig.Log.Info($"Monitor {i + 1}: {displays[i].systemWidth}x{displays[i].systemHeight}" + (i == 0 ? " (game)" : ""));
+        Rig.Log.Info(DisplayAvailable
             ? $"Window hooks in place. Pop-out monitor: {ChooseDisplay() + 1}"
             : "Window hooks in place. Only one monitor - the pop-out buttons stay hidden.");
     }
@@ -235,7 +235,7 @@ internal sealed class PopOutScreen : ModHost
                 TearDownScreen();
             if (MainHost == null)
             {
-                ModLog.Warn("The main screen's window host wasn't found - pop-out is off for this mission.");
+                Rig.Log.Warn("The main screen's window host wasn't found - pop-out is off for this mission.");
                 return;
             }
             // Windows the game opened while the mission UI was loading (the formation manager, if it starts open)
@@ -250,7 +250,7 @@ internal sealed class PopOutScreen : ModHost
         }
         catch (Exception ex)
         {
-            ModLog.Error($"mission start: {ex}");
+            Rig.Log.Error($"mission start: {ex}");
         }
     }
 
@@ -265,7 +265,7 @@ internal sealed class PopOutScreen : ModHost
         }
         catch (Exception ex)
         {
-            ModLog.Error($"mission end: {ex}");
+            Rig.Log.Error($"mission end: {ex}");
         }
     }
 
@@ -299,12 +299,12 @@ internal sealed class PopOutScreen : ModHost
             CopyNewResources();
             AddTo(host, content);
             WindowHostCommands.CloseWindowCommand.UpdateCanExecute();
-            ModLog.Debug($"{kind} opened on the pop-out screen");
+            Rig.Log.Debug($"{kind} opened on the pop-out screen");
             return false;
         }
         catch (Exception ex)
         {
-            ModLog.Error($"open window: {ex}");
+            Rig.Log.Error($"open window: {ex}");
             return true;
         }
     }
@@ -327,7 +327,7 @@ internal sealed class PopOutScreen : ModHost
         }
         catch (Exception ex)
         {
-            ModLog.Error($"close window: {ex}");
+            Rig.Log.Error($"close window: {ex}");
             return true;
         }
     }
@@ -365,7 +365,7 @@ internal sealed class PopOutScreen : ModHost
         }
         catch (Exception ex)
         {
-            ModLog.Error($"window decoration: {ex}");
+            Rig.Log.Error($"window decoration: {ex}");
         }
     }
 
@@ -406,7 +406,7 @@ internal sealed class PopOutScreen : ModHost
         if (remember)
             Layout.SetPopped(kind, toPopOut);
         WindowHostCommands.CloseWindowCommand.UpdateCanExecute();
-        ModLog.Info(toPopOut ? $"{kind} popped out to monitor {screenDisplay + 1}" : $"{kind} back on the main screen");
+        Rig.Log.Info(toPopOut ? $"{kind} popped out to monitor {screenDisplay + 1}" : $"{kind} back on the main screen");
     }
 
     private static void AddTo(WindowHost target, object content)
@@ -460,7 +460,7 @@ internal sealed class PopOutScreen : ModHost
     {
         if (host != null)
             return true;
-        if (Quitting)
+        if (Mod.Quitting)
             return false;
         int index = ChooseDisplay();
         if (index < 1 || MainHost == null)
@@ -479,7 +479,7 @@ internal sealed class PopOutScreen : ModHost
         }
         catch (Exception ex)
         {
-            ModLog.Error($"Could not open the pop-out screen: {ex}");
+            Rig.Log.Error($"Could not open the pop-out screen: {ex}");
             TearDownScreen();
             return false;
         }
@@ -555,9 +555,9 @@ internal sealed class PopOutScreen : ModHost
     private void LogOpened(int index, Display display)
     {
         if (Screen.fullScreenMode == FullScreenMode.ExclusiveFullScreen)
-            ModLog.Warn("The game runs in exclusive fullscreen: with a second monitor in use the picture of the world view " +
+            Rig.Log.Warn("The game runs in exclusive fullscreen: with a second monitor in use the picture of the world view " +
                         "can freeze there (Unity). Borderless windowed (Options > Graphics) avoids it.");
-        ModLog.Info($"Pop-out screen open on monitor {index + 1} ({display.renderingWidth}x{display.renderingHeight})" +
+        Rig.Log.Info($"Pop-out screen open on monitor {index + 1} ({display.renderingWidth}x{display.renderingHeight})" +
                     (index + 1 != Settings.Monitor.Value && GameDrawsOn(Settings.Monitor.Value - 1)
                         ? $" - monitor {Settings.Monitor.Value} shows the game's world view or map" : "") +
                     (shared ? ", over the game's own view (no free monitor)" : ""));
@@ -639,7 +639,7 @@ internal sealed class PopOutScreen : ModHost
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"mouse: {ex.Message}");
+            Rig.Log.Debug($"mouse: {ex.Message}");
         }
     }
 
@@ -654,7 +654,7 @@ internal sealed class PopOutScreen : ModHost
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"teardown: {ex.Message}");
+            Rig.Log.Debug($"teardown: {ex.Message}");
         }
         if (screen != null)
             Destroy(screen);
@@ -702,7 +702,7 @@ internal sealed class PopOutScreen : ModHost
         }
         catch (Exception ex)
         {
-            ModLog.Warn($"Tooltips and context menus may be cut off at the window edge on the pop-out monitor: {ex.Message}");
+            Rig.Log.Warn($"Tooltips and context menus may be cut off at the window edge on the pop-out monitor: {ex.Message}");
         }
     }
 
@@ -719,7 +719,7 @@ internal sealed class PopOutScreen : ModHost
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"overlay: {ex.Message}");
+            Rig.Log.Debug($"overlay: {ex.Message}");
         }
     }
 
@@ -753,7 +753,7 @@ internal sealed class PopOutScreen : ModHost
         pressed = false;
         releasedFrames = 0;
         screenView.MouseButtonUp((int)pointer.x, (int)pointer.y, MouseButton.Left);
-        ModLog.Debug("Mouse button released outside the pop-out windows");
+        Rig.Log.Debug("Mouse button released outside the pop-out windows");
     }
 
     private static string Kind(object content) => content?.GetType().Name ?? "";

@@ -64,7 +64,7 @@ internal sealed class TreeScroller
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"tree scroll: {ex.Message}");
+            Rig.Log.Debug($"tree scroll: {ex.Message}");
             done = model.Browser?.SelectedEntry;
         }
         return true;

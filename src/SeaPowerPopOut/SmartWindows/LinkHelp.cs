@@ -40,7 +40,7 @@ internal static class LinkHelp
         }
         catch (Exception ex)
         {
-            ModLog.Warn($"Link tooltips not available: {ex.Message}");
+            Rig.Log.Warn($"Link tooltips not available: {ex.Message}");
             return false;
         }
     }
@@ -54,7 +54,7 @@ internal static class LinkHelp
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"link help: {ex.Message}");
+            Rig.Log.Debug($"link help: {ex.Message}");
         }
     }
 

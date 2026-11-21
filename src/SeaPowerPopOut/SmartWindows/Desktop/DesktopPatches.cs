@@ -29,7 +29,7 @@ internal static class DesktopPatches
             || AccessTools.Method(typeof(CameraManager), nameof(CameraManager.RequestPipFrame)) == null
             || AccessTools.Field(typeof(CameraManager), "_camera") == null)
         {
-            ModLog.Warn("Desktop mode not available: the game's world view members were not found (game updated?).");
+            Rig.Log.Warn("Desktop mode not available: the game's world view members were not found (game updated?).");
             return false;
         }
 
@@ -52,7 +52,7 @@ internal static class DesktopPatches
     {
         if (target == null)
         {
-            ModLog.Warn($"Desktop mode: {what} hook not found (game updated?) - that part is left as the game has it.");
+            Rig.Log.Warn($"Desktop mode: {what} hook not found (game updated?) - that part is left as the game has it.");
             return;
         }
         harmony.Patch(target, prefix: prefix == null ? null : Hook(prefix), postfix: postfix == null ? null : Hook(postfix));
@@ -70,7 +70,7 @@ internal static class DesktopPatches
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"desktop mode, ShowPip3D: {ex.Message}");
+            Rig.Log.Debug($"desktop mode, ShowPip3D: {ex.Message}");
         }
     }
 
@@ -94,7 +94,7 @@ internal static class DesktopPatches
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"desktop mode, World View draw: {ex.Message}");
+            Rig.Log.Debug($"desktop mode, World View draw: {ex.Message}");
         }
         return false;
     }
@@ -120,7 +120,7 @@ internal static class DesktopPatches
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"desktop mode, mouse state: {ex.Message}");
+            Rig.Log.Debug($"desktop mode, mouse state: {ex.Message}");
         }
     }
 
@@ -144,7 +144,7 @@ internal static class DesktopPatches
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"desktop mode, switch key: {ex.Message}");
+            Rig.Log.Debug($"desktop mode, switch key: {ex.Message}");
         }
         return true;
     }
@@ -172,7 +172,7 @@ internal static class DesktopPatches
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"desktop mode, pip copy: {ex.Message}");
+            Rig.Log.Debug($"desktop mode, pip copy: {ex.Message}");
         }
         return true;
     }

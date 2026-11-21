@@ -89,7 +89,7 @@ internal sealed class MonitorWindow
             if (candidate == IntPtr.Zero && Time.unscaledTime > searchUntil)
             {
                 before = null;
-                ModLog.Info($"Window of monitor {display + 1} not found yet - it turns see-through once the mouse visits it.");
+                Rig.Log.Info($"Window of monitor {display + 1} not found yet - it turns see-through once the mouse visits it.");
             }
         }
         if (candidate == IntPtr.Zero)
@@ -103,7 +103,7 @@ internal sealed class MonitorWindow
         {
             // Cutting the game's own window to the popped-out windows would hand every click on the main screen to
             // the desktop.
-            ModLog.Warn($"Window found for monitor {display + 1} is the game's main window - left alone.");
+            Rig.Log.Warn($"Window found for monitor {display + 1} is the game's main window - left alone.");
             return;
         }
 
@@ -111,7 +111,7 @@ internal sealed class MonitorWindow
         before = null;
         applied = null;
         Native.GetWindowRect(hwnd, out Native.RECT rect);
-        ModLog.Info($"Window of monitor {display + 1}: {Native.ClassName(hwnd)} at {rect}");
+        Rig.Log.Info($"Window of monitor {display + 1}: {Native.ClassName(hwnd)} at {rect}");
     }
 
     /// <summary>
@@ -149,7 +149,7 @@ internal sealed class MonitorWindow
         if (!Native.SetShape(hwnd, parts))
         {
             shapeFailed = true;
-            ModLog.Warn($"Monitor {display + 1} can't be made see-through (SetWindowRgn failed) - it stays dark.");
+            Rig.Log.Warn($"Monitor {display + 1} can't be made see-through (SetWindowRgn failed) - it stays dark.");
             return;
         }
         applied = parts.ToArray();

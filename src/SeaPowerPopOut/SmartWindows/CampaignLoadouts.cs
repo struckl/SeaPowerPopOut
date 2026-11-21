@@ -23,7 +23,7 @@ internal static class CampaignLoadouts
         MethodInfo rebuild = AccessTools.Method(typeof(LinearCampaignTaskForceLoadoutsViewModel), "RebuildOptions");
         if (rebuild == null)
         {
-            ModLog.Warn("Task Force Builder loadout list not found (game updated?) - loadouts stay in the game's order.");
+            Rig.Log.Warn("Task Force Builder loadout list not found (game updated?) - loadouts stay in the game's order.");
             return false;
         }
         harmony.Patch(rebuild, postfix: new HarmonyMethod(typeof(CampaignLoadouts), nameof(Rebuilt)));
@@ -40,7 +40,7 @@ internal static class CampaignLoadouts
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"loadouts not sorted: {ex.Message}");
+            Rig.Log.Debug($"loadouts not sorted: {ex.Message}");
         }
     }
 

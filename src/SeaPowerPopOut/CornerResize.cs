@@ -35,7 +35,7 @@ internal static class CornerResize
             if (!loggedMissing)
             {
                 loggedMissing = true;
-                ModLog.Warn("SeapowerUI.ResizeThumb not found (game updated?) - no wider resize corners.");
+                Rig.Log.Warn("SeapowerUI.ResizeThumb not found (game updated?) - no wider resize corners.");
             }
             return;
         }

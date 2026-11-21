@@ -72,7 +72,7 @@ internal static class TreeDump
         sb.AppendLine().AppendLine($"=== {label}  {window.ActualWidth:0}x{window.ActualHeight:0}  at {window.X:0},{window.Y:0}");
         Walk(window, 0, sb);
         File.AppendAllText(file, sb.ToString());
-        ModLog.Info($"Window tree of {label} written to {file}");
+        Rig.Log.Info($"Window tree of {label} written to {file}");
     }
 
     private static void Walk(DependencyObject node, int depth, StringBuilder sb)

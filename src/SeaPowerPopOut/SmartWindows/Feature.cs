@@ -60,6 +60,6 @@ internal sealed class Feature
     {
         Active = Hook(harmony);
         if (Active && Hooked != null)
-            ModLog.Debug("smart windows: " + Hooked);
+            Rig.Log.Debug("smart windows: " + Hooked);
     }
 }

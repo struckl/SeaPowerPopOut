@@ -45,7 +45,7 @@ internal static class WorldViewKey
             if (warned != message)
             {
                 warned = message;
-                ModLog.Warn(message);
+                Rig.Log.Warn(message);
             }
             return;
         }
@@ -54,7 +54,7 @@ internal static class WorldViewKey
             return;
         DesktopGame.SetWorldViewOpen(!open.Value);
         DesktopSets.WorldViewChanged(!open.Value);
-        ModLog.Debug($"desktop mode: World View {(open.Value ? "closed" : "opened")} by the key {key}");
+        Rig.Log.Debug($"desktop mode: World View {(open.Value ? "closed" : "opened")} by the key {key}");
     }
 
     /// <summary>What the game uses the key for, or null when it is free.</summary>

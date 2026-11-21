@@ -49,6 +49,6 @@ internal static class Layout
         placements.MarkSaved();
         Settings.PoppedWindows.Value = string.Join(",", Popped.OrderBy(k => k));
         Settings.WindowPlacement.Value = placements.Serialize();
-        ModLog.Debug($"layout saved: popped [{Settings.PoppedWindows.Value}]");
+        Rig.Log.Debug($"layout saved: popped [{Settings.PoppedWindows.Value}]");
     }
 }

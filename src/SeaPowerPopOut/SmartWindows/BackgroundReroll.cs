@@ -28,7 +28,7 @@ internal static class BackgroundReroll
     {
         changeBackground = BackgroundFilter.ChangeBackground;
         if (changeBackground == null)
-            ModLog.Warn("LoadScreen.ChangeBackground not found (game updated?) - the first background is not rerolled.");
+            Rig.Log.Warn("LoadScreen.ChangeBackground not found (game updated?) - the first background is not rerolled.");
         return changeBackground != null;
     }
 
@@ -51,12 +51,12 @@ internal static class BackgroundReroll
                 return;
             done = true;
             changeBackground.Invoke(screen, null);
-            ModLog.Debug("smart windows: first background picked again");
+            Rig.Log.Debug("smart windows: first background picked again");
         }
         catch (Exception ex)
         {
             done = true;
-            ModLog.Debug($"background reroll: {ex.Message}");
+            Rig.Log.Debug($"background reroll: {ex.Message}");
         }
     }
 }

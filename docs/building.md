@@ -5,9 +5,13 @@ Short form in the [README](../README.md).
 ## Building
 
 - Needs the .NET SDK 8 and Sea Power installed (the build references the game's assemblies).
-- Needs the Keel repo next to this one: the shared skeleton (entry point, host, log, settings, hook registry) is `SeaPowerKeel\shared`.
-  It is found through the workspace folder that holds `mods.json`; for a clone elsewhere use `-p:RatsWorkspace=<folder>`.
-- Anchor Chain's library comes from Keel's copy.
+- Needs the SeaPowerRigging repo (R.A.T.S. Rigging) next to this one: the start, host, log, settings and hook list are Rigging's.
+  It is found through the workspace folder that holds `mods.json`; for a clone elsewhere use `-p:RatsWorkspace=<folder>`
+  (`-p:RatsRigging=<folder>\` points at another copy of the Rigging repo).
+- Rigging is built on demand as a project reference; its `ref\` folder holds Anchor Chain's library.
+- One build, for the game's current main version: `SeaPowerPopOut.dll`, and the Workshop metadata says 0.9.0 or newer.
+- The plugin names Rigging with `[ACDependency]`; the package carries a built-in copy of `SeaPowerRigging.dll` for a while.
+  `tools/package.ps1` checks the DLL against the game and against Rigging (`tools/compat-check` in the workspace).
 
 ```bash
 dotnet build src/SeaPowerPopOut/SeaPowerPopOut.csproj -c Release -p:GameDir="C:\Program Files (x86)\Steam\steamapps\common\Sea Power"
@@ -37,9 +41,8 @@ dotnet build src/SeaPowerPopOut/SeaPowerPopOut.csproj -c Release -p:GameDir="C:\
 
 ```
 src/SeaPowerPopOut/
-  Plugin.cs           entry point (the shared ModEntry starts it)
-  ModInfo.cs          what the shared skeleton reads: GUID, name, version, log source
-  Patches.cs          every hook, declared in the shared HookRegistry
+  Plugin.cs, Rig.cs   entry point ([ACPlugin], started by Keel); the mod's R.A.T.S. Rigging object and its start
+  Patches.cs          every hook, declared in Rig.Hooks
   PopOutScreen.cs     the pop-out monitor, title-bar buttons, moving windows between screens; the mod's host
   ScreenCutOut.cs     what of the see-through monitor stays visible
   UnitMenuCopy.cs     the game's unit menu on the pop-out monitor

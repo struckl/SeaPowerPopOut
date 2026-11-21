@@ -29,7 +29,7 @@ internal static class DesktopSets
                 SmartSettings.DesktopSlots[i].Value = Preset(i).ToText();
             SmartSettings.DesktopActive.Value = 1;
             Apply(DesktopSet.Parse(SmartSettings.DesktopSlots[1].Value));
-            ModLog.Debug("desktop mode: built-in desktops stored, desktop 1 applied");
+            Rig.Log.Debug("desktop mode: built-in desktops stored, desktop 1 applied");
         }
         else
         {
@@ -50,11 +50,11 @@ internal static class DesktopSets
             string stored = SmartSettings.DesktopSlots[to].Value;
             bool first = string.IsNullOrEmpty(stored);
             Apply(first ? Preset(to) : DesktopSet.Parse(stored));
-            ModLog.Debug($"desktop mode: desktop {to} of {Count}" + (first ? " (built-in arrangement)" : ""));
+            Rig.Log.Debug($"desktop mode: desktop {to} of {Count}" + (first ? " (built-in arrangement)" : ""));
         }
         catch (Exception ex)
         {
-            ModLog.Warn($"desktop mode, switch: {ex.Message}");
+            Rig.Log.Warn($"desktop mode, switch: {ex.Message}");
         }
     }
 

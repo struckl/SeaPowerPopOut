@@ -43,7 +43,7 @@ internal static class ResizeCursors
             if (!loggedInstalled)
             {
                 loggedInstalled = true;
-                ModLog.Debug($"smart windows: resize cursors installed outside a mission ({cursors.Count} cursors)");
+                Rig.Log.Debug($"smart windows: resize cursors installed outside a mission ({cursors.Count} cursors)");
             }
         }
         catch (Exception ex)
@@ -51,7 +51,7 @@ internal static class ResizeCursors
             if (!loggedInstalled)
             {
                 loggedInstalled = true;
-                ModLog.Warn("Resize cursors unavailable: " + ex.Message);
+                Rig.Log.Warn("Resize cursors unavailable: " + ex.Message);
             }
         }
     }
@@ -71,7 +71,7 @@ internal static class ResizeCursors
             IniHandler ini = Utils.openIniFile("/ui/" + folder, "/Settings_UI_Tactical.ini", false, false);
             if (ini == null)
             {
-                ModLog.Debug($"smart windows: /ui/{folder}/Settings_UI_Tactical.ini not found, no cursors from it");
+                Rig.Log.Debug($"smart windows: /ui/{folder}/Settings_UI_Tactical.ini not found, no cursors from it");
                 continue;
             }
             Dictionary<string, string> section = ini.GetSectionKeyValues("Cursors");
@@ -98,7 +98,7 @@ internal static class ResizeCursors
         }
         catch (Exception ex)
         {
-            ModLog.Debug("resize cursor: " + ex.Message);
+            Rig.Log.Debug("resize cursor: " + ex.Message);
         }
     }
 }

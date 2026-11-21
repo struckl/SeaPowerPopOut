@@ -78,7 +78,7 @@ internal static class UnitReferenceLayout
 
         if (!FindBlock(window, view, vm, out FrameworkElement block, out Grid container))
         {
-            ModLog.Debug("Unit Reference: no grid holding the tree and its toggle button found");
+            Rig.Log.Debug("Unit Reference: no grid holding the tree and its toggle button found");
             return true;
         }
 
@@ -171,7 +171,7 @@ internal static class UnitReferenceLayout
             vm.PropertyChanged += (s, e) => TreeToggled(vm, e);
             if (!SmartSettings.TreeShown.Value && vm.MuseumEntriesVisible)
                 vm.MuseumEntriesVisible = false;
-            ModLog.Debug($"Unit Reference: tree {block.Width:0} px, splitter added");
+            Rig.Log.Debug($"Unit Reference: tree {block.Width:0} px, splitter added");
         }
 
         private void Dragged(object sender, DragDeltaEventArgs e)

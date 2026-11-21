@@ -50,7 +50,7 @@ internal static class WindowMemory
     {
         string[] names = WindowNames.Of(window);
         string pattern = Patterns.Match(names);
-        ModLog.Debug($"window loaded: {string.Join(" / ", names)} -> {pattern ?? "not remembered"}");
+        Rig.Log.Debug($"window loaded: {string.Join(" / ", names)} -> {pattern ?? "not remembered"}");
         if (pattern == null)
             return;
 
@@ -88,7 +88,7 @@ internal static class WindowMemory
         layouts.MarkSaved();
         dirtySince = -1f;
         SmartSettings.Flush(now: true);
-        ModLog.Debug("smart windows: layouts saved");
+        Rig.Log.Debug("smart windows: layouts saved");
     }
 
     /// <summary>The remembered layouts as they are now (a copy, for a desktop snapshot).</summary>
@@ -128,7 +128,7 @@ internal static class WindowMemory
         // gone after that. The remembered place is absolute, so the anchor must not act on it.
         bool bottom = window.AnchorBottom, right = window.AnchorRight;
         if (HostArea.ReleaseAnchors(window))
-            ModLog.Debug($"smart windows: anchors of {window.Name} released (bottom {bottom}, right {right})");
+            Rig.Log.Debug($"smart windows: anchors of {window.Name} released (bottom {bottom}, right {right})");
         WinRect screen = HostArea.Of(window);
         float width = float.IsNaN(saved.W) ? window.ActualWidth : saved.W;
         var target = new WinRect(saved.X, saved.Y, width, float.IsNaN(saved.H) ? window.ActualHeight : saved.H);

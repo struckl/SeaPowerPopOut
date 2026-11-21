@@ -46,11 +46,11 @@ internal static class LogCleanup
                     // in use or locked: leave it
                 }
             }
-            ModLog.Debug($"smart windows: {deleted} old log file(s) deleted from {folder}");
+            Rig.Log.Debug($"smart windows: {deleted} old log file(s) deleted from {folder}");
         }
         catch (Exception ex)
         {
-            ModLog.Warn($"Old logs not deleted: {ex.Message}");
+            Rig.Log.Warn($"Old logs not deleted: {ex.Message}");
         }
     }
 

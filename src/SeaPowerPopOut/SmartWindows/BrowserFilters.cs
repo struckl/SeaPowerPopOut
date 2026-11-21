@@ -21,7 +21,7 @@ internal static class BrowserFilters
         MethodInfo update = Encyclopedia.UpdateFiltered;
         if (update == null || !ArmedFilter.Resolve())
         {
-            ModLog.Warn("Unit Reference filter update not found (game updated?) - 'Armed only' and the country list stay as the game has them.");
+            Rig.Log.Warn("Unit Reference filter update not found (game updated?) - 'Armed only' and the country list stay as the game has them.");
             return false;
         }
         harmony.Patch(update, postfix: new HarmonyMethod(typeof(BrowserFilters), nameof(Updated)));

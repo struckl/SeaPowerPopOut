@@ -45,7 +45,7 @@ internal static class ArmedFilter
             }
             catch (Exception ex)
             {
-                ModLog.Warn($"Unit Reference not refreshed: {ex.InnerException?.Message ?? ex.Message}");
+                Rig.Log.Warn($"Unit Reference not refreshed: {ex.InnerException?.Message ?? ex.Message}");
             }
         }
     }
@@ -62,7 +62,7 @@ internal static class ArmedFilter
         }
         catch (Exception ex)
         {
-            ModLog.Warn($"Unit Reference 'Armed only' failed: {ex.Message}");
+            Rig.Log.Warn($"Unit Reference 'Armed only' failed: {ex.Message}");
         }
     }
 

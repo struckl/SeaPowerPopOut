@@ -83,8 +83,7 @@ internal static class TitleMenu
     // Our own R.A.T.S. mods: their windows are built like the game's, so they pop out and take a look like the game's.
     private static readonly HashSet<string> OwnMods = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
-        "SeaPowerSensorViews", "SeaPowerSensorViewsFlat", "SeaPowerRadio", "SeaPowerRadioFlat", "SeaPowerTopo", "SeaPowerTopoFlat",
-        "SeaPowerBorders", "SeaPowerBordersFlat", "SeaPowerCommandTools", "SeaPowerCommandToolsFlat", "SeaPowerKeel", "SeaPowerPopOut",
+        "SeaPowerSensorViews", "SeaPowerRadio", "SeaPowerTopo", "SeaPowerBorders", "SeaPowerCommandTools", "SeaPowerKeel", "SeaPowerPopOut",
     };
     private static readonly HashSet<string> LeftAlone = new HashSet<string>();
 
@@ -105,7 +104,7 @@ internal static class TitleMenu
         if (OwnMods.Contains(name))
             return true;
         if (LeftAlone.Add(type.FullName ?? type.Name))
-            ModLog.Info($"{type.Name} ({name}) is another mod's window: its title bar is left as it is (no pop-out menu).");
+            Rig.Log.Info($"{type.Name} ({name}) is another mod's window: its title bar is left as it is (no pop-out menu).");
         return false;
     }
 
@@ -195,7 +194,7 @@ internal static class TitleMenu
                 }
                 catch (Exception ex)
                 {
-                    ModLog.Debug($"title menu: {ex.Message}");
+                    Rig.Log.Debug($"title menu: {ex.Message}");
                 }
             };
             body.Children.Add(row);

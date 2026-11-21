@@ -40,7 +40,7 @@ internal static class BrowserMemory
         if (stateField == null || nationField == null || dateField == null || categoryField == null || finish == null
             || Array.IndexOf(setters, null) >= 0)
         {
-            ModLog.Warn("Unit Reference browser members not found (game updated?) - its choices are not remembered.");
+            Rig.Log.Warn("Unit Reference browser members not found (game updated?) - its choices are not remembered.");
             return false;
         }
 

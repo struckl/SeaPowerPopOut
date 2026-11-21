@@ -32,7 +32,7 @@ internal static class BackgroundFilter
         loadScreenImages = AccessTools.Field(typeof(LoadScreen), "imagePaths");
         if (getAllFiles == null)
         {
-            ModLog.Warn("FileManager.GetAllFiles not found (game updated?) - mod backgrounds do not replace the game's.");
+            Rig.Log.Warn("FileManager.GetAllFiles not found (game updated?) - mod backgrounds do not replace the game's.");
             return false;
         }
         harmony.Patch(getAllFiles, postfix: new HarmonyMethod(typeof(BackgroundFilter), nameof(FilesListed)));
@@ -41,7 +41,7 @@ internal static class BackgroundFilter
         return true;
     }
 
-    // 'path' is a parameter of GetAllFiles in both game builds (the globe build has one more, optional, parameter).
+    // Harmony fills 'path' by name from GetAllFiles' own parameter.
     private static void FilesListed(string path, List<string> __result)
     {
         if (BackgroundPaths.IsBackgroundFolder(path))
@@ -61,11 +61,11 @@ internal static class BackgroundFilter
                 return;
             int dropped = BackgroundPaths.DropGamePictures(pictures, special[1].FullName);
             if (dropped > 0)
-                ModLog.Debug($"smart windows: {dropped} game background(s) left out, {pictures.Count} from mods");
+                Rig.Log.Debug($"smart windows: {dropped} game background(s) left out, {pictures.Count} from mods");
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"backgrounds: {ex.Message}");
+            Rig.Log.Debug($"backgrounds: {ex.Message}");
         }
     }
 }

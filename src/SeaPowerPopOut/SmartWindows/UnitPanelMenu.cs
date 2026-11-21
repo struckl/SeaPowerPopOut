@@ -34,12 +34,12 @@ internal static class UnitPanelMenu
         try
         {
             view.PreviewMouseRightButtonDown += RightDown;
-            ModLog.Debug("unit panel menu: mission view hooked");
+            Rig.Log.Debug("unit panel menu: mission view hooked");
         }
         catch (Exception ex)
         {
             Feature.Stop();
-            ModLog.Warn($"Unit panel menu not available: {ex.Message}");
+            Rig.Log.Warn($"Unit panel menu not available: {ex.Message}");
         }
     }
 
@@ -52,7 +52,7 @@ internal static class UnitPanelMenu
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"unit panel menu: {ex.Message}");
+            Rig.Log.Debug($"unit panel menu: {ex.Message}");
         }
     }
 
@@ -60,7 +60,7 @@ internal static class UnitPanelMenu
     private static bool OverFlagOrName(FrameworkElement view, MouseButtonEventArgs e)
     {
         DependencyObject hit = VisualTreeHelper.HitTest(view, e.GetPosition(view)).VisualHit ?? e.Source as DependencyObject;
-        System.Text.StringBuilder seen = ModSettings.Verbose ? new System.Text.StringBuilder() : null;
+        System.Text.StringBuilder seen = Rig.Settings.Verbose ? new System.Text.StringBuilder() : null;
         for (int i = 0; hit != null && i < ParentsToCheck; i++, hit = VisualTreeHelper.GetParent(hit))
         {
             string path = hit is Image ? Bindings.PathOf(hit, Image.SourceProperty)
@@ -70,7 +70,7 @@ internal static class UnitPanelMenu
                 return true;
         }
         if (seen != null)
-            ModLog.Debug($"unit panel menu: right click on {seen}");
+            Rig.Log.Debug($"unit panel menu: right click on {seen}");
         return false;
     }
 
@@ -81,7 +81,7 @@ internal static class UnitPanelMenu
         ISelectableObject subject = Globals._mainGameViewModel?.SelectedObject?.Value;
         if (subject == null || menu == null)
         {
-            ModLog.Debug($"unit panel menu: no subject ({subject == null}) or no menu");
+            Rig.Log.Debug($"unit panel menu: no subject ({subject == null}) or no menu");
             return;
         }
 
@@ -89,7 +89,7 @@ internal static class UnitPanelMenu
         var items = source?.GetContextMenuItems();
         if (items == null)
         {
-            ModLog.Debug($"unit panel menu: no menu for {subject.GetType().Name} (source {source?.GetType().Name ?? "none"})");
+            Rig.Log.Debug($"unit panel menu: no menu for {subject.GetType().Name} (source {source?.GetType().Name ?? "none"})");
             return;
         }
 

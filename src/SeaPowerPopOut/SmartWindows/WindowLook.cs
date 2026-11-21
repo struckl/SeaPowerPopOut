@@ -86,7 +86,7 @@ internal static class WindowLook
             }
             catch (Exception ex)
             {
-                ModLog.Debug($"look: {ex.Message}");
+                Rig.Log.Debug($"look: {ex.Message}");
             }
         }
     }
@@ -119,7 +119,7 @@ internal static class WindowLook
             }
             catch (Exception ex)
             {
-                ModLog.Debug($"look: {ex.Message}");
+                Rig.Log.Debug($"look: {ex.Message}");
             }
             s.Next = Time.unscaledTime + RecheckSeconds;
         }

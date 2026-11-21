@@ -67,7 +67,7 @@ internal static class UnitStatusReference
         var constructors = AccessTools.GetDeclaredConstructors(typeof(UnitStatusViewModel));
         if (StatusTabHost.UnitField == null || switchUnit == null || ensureContent == null || disposeContent == null || constructors.Count == 0)
         {
-            ModLog.Warn("Unit Status members not found (game updated?) - the Reference tab is not available.");
+            Rig.Log.Warn("Unit Status members not found (game updated?) - the Reference tab is not available.");
             return false;
         }
         foreach (ConstructorInfo constructor in constructors)
@@ -89,7 +89,7 @@ internal static class UnitStatusReference
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"reference tab: {ex}");
+            Rig.Log.Debug($"reference tab: {ex}");
         }
     }
 
@@ -101,7 +101,7 @@ internal static class UnitStatusReference
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"reference tab: {ex.Message}");
+            Rig.Log.Debug($"reference tab: {ex.Message}");
         }
     }
 
@@ -114,7 +114,7 @@ internal static class UnitStatusReference
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"reference tab: {ex.Message}");
+            Rig.Log.Debug($"reference tab: {ex.Message}");
         }
     }
 
@@ -127,7 +127,7 @@ internal static class UnitStatusReference
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"reference tab: {ex.Message}");
+            Rig.Log.Debug($"reference tab: {ex.Message}");
         }
     }
 
@@ -171,11 +171,11 @@ internal static class UnitStatusReference
             state.Vm = page;
             state.View = new ObjectInformationView { DataContext = page };
             tab.Content = state.View;
-            ModLog.Debug($"reference tab: {ini} #{variant}{(string.IsNullOrEmpty(loadout) ? "" : $" [{loadout}]")}");
+            Rig.Log.Debug($"reference tab: {ini} #{variant}{(string.IsNullOrEmpty(loadout) ? "" : $" [{loadout}]")}");
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"reference tab: {ex}");
+            Rig.Log.Debug($"reference tab: {ex}");
             DropContent(state);
             tab.ContentError = Loc.Get("ref_tab_error");
         }
@@ -197,7 +197,7 @@ internal static class UnitStatusReference
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"reference tab dispose: {ex.Message}");
+            Rig.Log.Debug($"reference tab dispose: {ex.Message}");
         }
     }
 
@@ -231,7 +231,7 @@ internal static class UnitStatusReference
             catch (Exception ex)
             {
                 place.Failed = true;
-                ModLog.Debug($"reference tab: {ex}");
+                Rig.Log.Debug($"reference tab: {ex}");
             }
         }
     }
@@ -283,11 +283,11 @@ internal static class UnitStatusReference
     {
         Border host = StatusTabHost.Create(view, vm, bindingFirst: true, out FrameworkElement anchor);
         if (anchor == null)
-            ModLog.Warn("Reference tab: no place of another tab's content found in the Unit Status window (list 'Unit Status*' under Dump window trees to see its layout).");
+            Rig.Log.Warn("Reference tab: no place of another tab's content found in the Unit Status window (list 'Unit Status*' under Dump window trees to see its layout).");
         else if (host == null)
-            ModLog.Warn("Reference tab: no panel above another tab's content.");
+            Rig.Log.Warn("Reference tab: no panel above another tab's content.");
         else
-            ModLog.Debug($"reference tab: host added next to {anchor.GetType().Name}");
+            Rig.Log.Debug($"reference tab: host added next to {anchor.GetType().Name}");
         return host;
     }
 

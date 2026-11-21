@@ -34,7 +34,7 @@ internal static class MenuFixes
         MethodInfo getMissions = AccessTools.Method(typeof(ScenarioMenuViewModel), nameof(ScenarioMenuViewModel.GetMissions));
         if (getMissions == null)
         {
-            ModLog.Warn("ScenarioMenuViewModel.GetMissions not found (game updated?) - '_Custom Mission' stays in the list.");
+            Rig.Log.Warn("ScenarioMenuViewModel.GetMissions not found (game updated?) - '_Custom Mission' stays in the list.");
             return false;
         }
         harmony.Patch(getMissions, postfix: new HarmonyMethod(typeof(MenuFixes), nameof(MissionsListed)));
@@ -48,7 +48,7 @@ internal static class MenuFixes
         MethodInfo load = AccessTools.Method(typeof(MissionEditorViewModel), nameof(MissionEditorViewModel.LoadMission));
         if (pickerMode == null || initialise == null || load == null)
         {
-            ModLog.Warn("Mission editor file picker members not found (game updated?) - its folder is not remembered.");
+            Rig.Log.Warn("Mission editor file picker members not found (game updated?) - its folder is not remembered.");
             return false;
         }
         harmony.Patch(load, prefix: new HarmonyMethod(typeof(MenuFixes), nameof(MissionOpened)));
@@ -77,7 +77,7 @@ internal static class MenuFixes
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"mission folder not remembered: {ex.Message}");
+            Rig.Log.Debug($"mission folder not remembered: {ex.Message}");
         }
     }
 
@@ -96,7 +96,7 @@ internal static class MenuFixes
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"mission picker folder not applied: {ex.Message}");
+            Rig.Log.Debug($"mission picker folder not applied: {ex.Message}");
         }
     }
 }

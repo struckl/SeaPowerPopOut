@@ -93,7 +93,7 @@ internal static class LookMenu
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"look menu: {ex.Message}");
+            Rig.Log.Debug($"look menu: {ex.Message}");
         }
     }
 

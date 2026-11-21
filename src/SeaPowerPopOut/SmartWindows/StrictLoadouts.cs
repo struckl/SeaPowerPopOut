@@ -57,7 +57,7 @@ internal static class StrictLoadouts
         if (load == null || merge == null || family == null || seed == null || restrictionField == null || allowAllProperty == null ||
             hasFixedLoadout == null || campaignInstance == null || persistentData == null)
         {
-            ModLog.Warn("Task Force Builder members not found (game updated?) - Strict loadouts not available.");
+            Rig.Log.Warn("Task Force Builder members not found (game updated?) - Strict loadouts not available.");
             return false;
         }
 
@@ -71,7 +71,7 @@ internal static class StrictLoadouts
         }
         catch (Exception ex)
         {
-            ModLog.Warn($"Strict loadouts check box not available: {ex.Message}");
+            Rig.Log.Warn($"Strict loadouts check box not available: {ex.Message}");
         }
         return true;
     }
@@ -119,11 +119,11 @@ internal static class StrictLoadouts
                 if (variants.Count == 0)
                     __result.RemoveAt(g);
             }
-            ModLog.Debug($"strict loadouts: {left} variant(s) left out of the builder list, {__result.Count} group(s) kept");
+            Rig.Log.Debug($"strict loadouts: {left} variant(s) left out of the builder list, {__result.Count} group(s) kept");
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"strict loadouts (list): {ex.Message}");
+            Rig.Log.Debug($"strict loadouts (list): {ex.Message}");
         }
     }
 
@@ -209,7 +209,7 @@ internal static class StrictLoadouts
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"strict loadouts (versions): {ex.Message}");
+            Rig.Log.Debug($"strict loadouts (versions): {ex.Message}");
         }
     }
 
@@ -234,11 +234,11 @@ internal static class StrictLoadouts
             box.Click += (s, a) => staged = box.IsChecked == true;
             panel.Children.Insert(panel.Children.IndexOf(limit) + 1, box);
             Boxes.Add(panel, box);
-            ModLog.Debug("smart windows: Strict loadouts check box added to the campaign start screen");
+            Rig.Log.Debug("smart windows: Strict loadouts check box added to the campaign start screen");
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"strict loadouts check box: {ex.Message}");
+            Rig.Log.Debug($"strict loadouts check box: {ex.Message}");
         }
     }
 }

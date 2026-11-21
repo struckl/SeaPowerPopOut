@@ -57,7 +57,7 @@ internal static class UpgradeGame
         Type crew = AccessTools.TypeByName("SeapowerUI.ViewModels.LinearCampaignTaskForceCrewSkillRules");
         if (rules == null || crew == null)
         {
-            ModLog.Warn("Upgrade ship: campaign rule classes not found (game updated?) - feature off.");
+            Rig.Log.Warn("Upgrade ship: campaign rule classes not found (game updated?) - feature off.");
             return;
         }
 
@@ -90,7 +90,7 @@ internal static class UpgradeGame
             CampaignGame.CountsAgainstCapMethod, fleetCap, scarcityCap, openIni, loadoutCap, minCredits, skillName, crewField, creditsField };
         if (!CampaignDismiss.Resolve() || needed.Any(m => m == null))
         {
-            ModLog.Warn("Upgrade ship: a game member was not found (game updated?) - feature off.");
+            Rig.Log.Warn("Upgrade ship: a game member was not found (game updated?) - feature off.");
             return;
         }
         ok = true;
@@ -233,7 +233,7 @@ internal static class UpgradeGame
                 moved.Add(new KeyValuePair<Item, int>(air, n));
         }
 
-        ModLog.Info($"Upgrade ship: {c.Name} ({SkillName(c.OldSkill)}, {(c.Decommission ? "decommission" : "dismiss")} +{c.RefundBase}) -> {selected.InspectionTitle}");
+        Rig.Log.Info($"Upgrade ship: {c.Name} ({SkillName(c.OldSkill)}, {(c.Decommission ? "decommission" : "dismiss")} +{c.RefundBase}) -> {selected.InspectionTitle}");
         if (c.Decommission)
         {
             object[] args = { c.Item, c.RefundBase, false, true };
@@ -249,7 +249,7 @@ internal static class UpgradeGame
         Call(addSelected, vm, false);
         if (vm.PendingPurchaseItems.Count <= before)
         {
-            ModLog.Warn("Upgrade ship: the Builder did not take the new ship (the old one is sold, its points are back).");
+            Rig.Log.Warn("Upgrade ship: the Builder did not take the new ship (the old one is sold, its points are back).");
             return "up_notbought";
         }
 
@@ -265,7 +265,7 @@ internal static class UpgradeGame
         string problem = null;
         if (vm.PendingPurchaseItems.Count > 0)
         {
-            ModLog.Warn($"Upgrade ship: the purchase was not confirmed ({vm.PendingPurchaseItems.Count} item(s) wait in the Builder).");
+            Rig.Log.Warn($"Upgrade ship: the purchase was not confirmed ({vm.PendingPurchaseItems.Count} item(s) wait in the Builder).");
             problem = "up_notconfirmed";
         }
         if (newId != null)
@@ -295,11 +295,11 @@ internal static class UpgradeGame
                     done++;
                 }
             }
-            ModLog.Info($"Upgrade ship: {done} aircraft moved to the new ship");
+            Rig.Log.Info($"Upgrade ship: {done} aircraft moved to the new ship");
         }
         catch (Exception ex)
         {
-            ModLog.Warn($"Upgrade ship (aircraft): {ex.Message}");
+            Rig.Log.Warn($"Upgrade ship (aircraft): {ex.Message}");
         }
     }
 

@@ -42,7 +42,7 @@ internal static class CampaignSwapPrice
         if (evaluate == null || CampaignGame.OpenIniMethod == null || CampaignGame.CountsAgainstCapMethod == null || rosterCost == null || copyEmptyState == null || capHeadroom == null || formatText == null ||
             capPoints == null || availablePoints == null)
         {
-            ModLog.Warn("Task Force hull swap pricing not found (game updated?) - swap prices stay as the game computes them.");
+            Rig.Log.Warn("Task Force hull swap pricing not found (game updated?) - swap prices stay as the game computes them.");
             return false;
         }
         harmony.Patch(evaluate, postfix: new HarmonyMethod(typeof(CampaignSwapPrice), nameof(Evaluated)));
@@ -72,11 +72,11 @@ internal static class CampaignSwapPrice
             costDelta += perUnitChange;
             replacement = fixedItem;
             Verdict(__instance, item, costDelta, ref blockedReason, ref __result);
-            ModLog.Debug($"hull swap {item.UnitType} -> {newUnitType}: roster price {roster}, price difference now {costDelta}");
+            Rig.Log.Debug($"hull swap {item.UnitType} -> {newUnitType}: roster price {roster}, price difference now {costDelta}");
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"hull swap price not fixed: {ex.Message}");
+            Rig.Log.Debug($"hull swap price not fixed: {ex.Message}");
         }
     }
 

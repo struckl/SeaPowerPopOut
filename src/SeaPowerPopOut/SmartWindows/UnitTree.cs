@@ -29,17 +29,17 @@ internal static class UnitTree
         if (setter == null || Encyclopedia.BrowserConstructor == null)
         {
             if (sort)
-                ModLog.Warn("Unit Reference tree entries not found (game updated?) - the tree stays in the game's order.");
+                Rig.Log.Warn("Unit Reference tree entries not found (game updated?) - the tree stays in the game's order.");
             if (group)
-                ModLog.Warn("Unit Reference tree entries not found (game updated?) - loadout variants stay as the game labels them.");
+                Rig.Log.Warn("Unit Reference tree entries not found (game updated?) - loadout variants stay as the game labels them.");
             return false;
         }
         harmony.Patch(Encyclopedia.BrowserConstructor, postfix: new HarmonyMethod(typeof(UnitTree), nameof(Constructed)));
         harmony.Patch(setter, postfix: new HarmonyMethod(typeof(UnitTree), nameof(EntriesSet)));
         if (sort)
-            ModLog.Debug("smart windows: Unit Reference tree sorted by date");
+            Rig.Log.Debug("smart windows: Unit Reference tree sorted by date");
         if (group)
-            ModLog.Debug("smart windows: Unit Reference loadout variants labelled and grouped");
+            Rig.Log.Debug("smart windows: Unit Reference loadout variants labelled and grouped");
         return true;
     }
 

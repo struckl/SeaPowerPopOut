@@ -19,7 +19,7 @@ internal static class TreeWheelGuard
         TreeView tree = FindTree(view);
         if (tree == null)
         {
-            ModLog.Debug("Unit Reference: no tree view found for the wheel guard");
+            Rig.Log.Debug("Unit Reference: no tree view found for the wheel guard");
             return;
         }
         var win = new WeakReference<GameWindow>(window);
@@ -32,7 +32,7 @@ internal static class TreeWheelGuard
             }
             catch (Exception ex)
             {
-                ModLog.Debug($"tree wheel: {ex.Message}");
+                Rig.Log.Debug($"tree wheel: {ex.Message}");
             }
         };
     }

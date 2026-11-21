@@ -42,7 +42,7 @@ internal static class CampaignDismiss
         MethodInfo refund = CampaignGame.DismissRefundMethod;
         if (canDismiss == null || refund == null || !Resolve())
         {
-            ModLog.Warn("Task Force dismiss members not found (game updated?) - damaged ships cannot be dismissed.");
+            Rig.Log.Warn("Task Force dismiss members not found (game updated?) - damaged ships cannot be dismissed.");
             return false;
         }
 
@@ -61,7 +61,7 @@ internal static class CampaignDismiss
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"dismiss damaged (allowed): {ex.Message}");
+            Rig.Log.Debug($"dismiss damaged (allowed): {ex.Message}");
         }
     }
 
@@ -75,7 +75,7 @@ internal static class CampaignDismiss
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"dismiss damaged (refund): {ex.Message}");
+            Rig.Log.Debug($"dismiss damaged (refund): {ex.Message}");
         }
     }
 

@@ -53,7 +53,7 @@ internal static class Loc
         }
         catch (Exception ex)
         {
-            ModLog.Warn($"Language file {path}: {ex.Message}");
+            Rig.Log.Warn($"Language file {path}: {ex.Message}");
             return new Dictionary<string, string>();
         }
     }

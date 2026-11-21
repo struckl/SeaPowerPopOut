@@ -37,7 +37,7 @@ internal static class PointerFix
         float k = real / mouse;                       // mouse pixels -> pixels of the picture (1 unless scaled)
         float seen = camera.pixelHeight;              // what NoesisView flips with
         if (Logged.Add(index))
-            ModLog.Info($"Pointer on monitor {index + 1}: camera {camera.pixelWidth}x{camera.pixelHeight}, monitor " +
+            Rig.Log.Info($"Pointer on monitor {index + 1}: camera {camera.pixelWidth}x{camera.pixelHeight}, monitor " +
                         $"{display.systemWidth}x{display.systemHeight} (rendering {display.renderingWidth}x{display.renderingHeight}), " +
                         $"game window {Screen.width}x{Screen.height}; first mouse position {position.x:0},{position.y:0}");
         position.x *= k;

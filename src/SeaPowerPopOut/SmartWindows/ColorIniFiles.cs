@@ -52,7 +52,7 @@ internal static class ColorIniFiles
         pickerContext = AccessTools.PropertyGetter(typeof(FilePickerViewModel), "Context");
         if (pickerContext == null)
         {
-            ModLog.Warn("FilePickerViewModel.Context not found (game updated?) - ini files are not coloured.");
+            Rig.Log.Warn("FilePickerViewModel.Context not found (game updated?) - ini files are not coloured.");
             return false;
         }
         if (!ColorText.TryParse(SmartSettings.IniColor.Value, out brushA, out brushR, out brushG, out brushB))
@@ -80,7 +80,7 @@ internal static class ColorIniFiles
             }
             catch (Exception ex)
             {
-                ModLog.Debug($"ini colour: {ex.Message}");
+                Rig.Log.Debug($"ini colour: {ex.Message}");
                 All.RemoveAt(i);
             }
         }

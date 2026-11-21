@@ -56,7 +56,7 @@ internal sealed class TreeCollapse
         }
         catch (Exception ex)
         {
-            ModLog.Warn($"Unit Reference: tree {(treeVisible ? "show" : "hide")} adjustments failed: {ex.Message}");
+            Rig.Log.Warn($"Unit Reference: tree {(treeVisible ? "show" : "hide")} adjustments failed: {ex.Message}");
         }
     }
 
@@ -102,7 +102,7 @@ internal sealed class TreeCollapse
         FrameworkElement anchor = FindSearchBox();
         if (anchor == null)
         {
-            ModLog.Debug("Unit Reference: search box not found, search panel stays");
+            Rig.Log.Debug("Unit Reference: search box not found, search panel stays");
             return;
         }
 
@@ -130,7 +130,7 @@ internal sealed class TreeCollapse
         }
         if (common == null || !(panel is FrameworkElement panelElement) || ContainsToggle(panelElement))
         {
-            ModLog.Debug("Unit Reference: search panel cannot be separated from the tree, it stays");
+            Rig.Log.Debug("Unit Reference: search panel cannot be separated from the tree, it stays");
             return;
         }
 

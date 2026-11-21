@@ -30,7 +30,7 @@ internal static class MessageClickThrough
         }
         catch (Exception ex)
         {
-            ModLog.Warn($"Message click-through not available: {ex.Message}");
+            Rig.Log.Warn($"Message click-through not available: {ex.Message}");
             return false;
         }
     }
@@ -45,11 +45,11 @@ internal static class MessageClickThrough
                 return;
             Done.Add(list, list);
             list.IsHitTestVisible = false;
-            ModLog.Debug("smart windows: the messages list no longer blocks clicks");
+            Rig.Log.Debug("smart windows: the messages list no longer blocks clicks");
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"message click-through: {ex.Message}");
+            Rig.Log.Debug($"message click-through: {ex.Message}");
         }
     }
 }

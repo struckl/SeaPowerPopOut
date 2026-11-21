@@ -23,7 +23,7 @@ internal static class EarliestVariant
         MethodInfo pick = AccessTools.Method(typeof(UnitTreeBrowserViewModel), "SelectBestGroupEntry");
         if (pick == null)
         {
-            ModLog.Warn("Unit Reference variant choice not found (game updated?) - a class click selects as the game does.");
+            Rig.Log.Warn("Unit Reference variant choice not found (game updated?) - a class click selects as the game does.");
             return false;
         }
         harmony.Patch(pick, postfix: new HarmonyMethod(typeof(EarliestVariant), nameof(Picked)));

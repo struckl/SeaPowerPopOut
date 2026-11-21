@@ -88,12 +88,12 @@ internal static class UpgradeMenu
             {
                 string problem = UpgradeGame.Perform(vm, c);
                 if (problem != null)
-                    ModLog.Warn($"Upgrade ship: {Loc.Get(problem)}");
+                    Rig.Log.Warn($"Upgrade ship: {Loc.Get(problem)}");
             }
             catch (Exception ex)
             {
-                ModLog.Warn($"Upgrade ship failed: {ex.Message}");
-                ModLog.Debug($"upgrade ship: {ex}");
+                Rig.Log.Warn($"Upgrade ship failed: {ex.Message}");
+                Rig.Log.Debug($"upgrade ship: {ex}");
             }
         };
 

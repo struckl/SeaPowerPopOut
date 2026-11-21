@@ -16,7 +16,7 @@ internal static class ScreenResources
     {
         var flat = new ResourceDictionary();
         CopyInto(source, flat, 0);
-        ModLog.Debug($"{flat.Count} resources copied for the pop-out screen");
+        Rig.Log.Debug($"{flat.Count} resources copied for the pop-out screen");
         return flat;
     }
 

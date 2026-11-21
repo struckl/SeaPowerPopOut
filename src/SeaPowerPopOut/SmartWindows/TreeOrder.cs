@@ -21,11 +21,11 @@ internal static class TreeOrder
                 if (SortByDate(folder.MuseumEntries))
                     sorted++;
             }
-            ModLog.Debug($"smart windows: {sorted} unit type(s) sorted by date");
+            Rig.Log.Debug($"smart windows: {sorted} unit type(s) sorted by date");
         }
         catch (Exception ex)
         {
-            ModLog.Warn($"Unit Reference tree not sorted: {ex.Message}");
+            Rig.Log.Warn($"Unit Reference tree not sorted: {ex.Message}");
         }
     }
 

@@ -29,7 +29,7 @@ internal static class LoadoutList
         MethodInfo getter = AccessTools.PropertyGetter(typeof(ObjectInformationViewModel), nameof(ObjectInformationViewModel.HasMultipleLoadouts));
         if (getter == null)
         {
-            ModLog.Warn("Unit Reference loadout list not found (game updated?) - loadouts are shown for aircraft only.");
+            Rig.Log.Warn("Unit Reference loadout list not found (game updated?) - loadouts are shown for aircraft only.");
             return false;
         }
         harmony.Patch(getter, postfix: new HarmonyMethod(typeof(LoadoutList), nameof(HasMultiple)));
@@ -38,7 +38,7 @@ internal static class LoadoutList
             harmony.Patch(update, prefix: new HarmonyMethod(typeof(LoadoutList), nameof(BeforeUpdate)),
                 finalizer: new HarmonyMethod(typeof(LoadoutList), nameof(AfterUpdate)));
         else
-            ModLog.Debug("UpdateLoadoutsForEntry not found: a loadout unit lists only its own loadout");
+            Rig.Log.Debug("UpdateLoadoutsForEntry not found: a loadout unit lists only its own loadout");
         return true;
     }
 
@@ -63,7 +63,7 @@ internal static class LoadoutList
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"loadout list: {ex.Message}");
+            Rig.Log.Debug($"loadout list: {ex.Message}");
         }
     }
 

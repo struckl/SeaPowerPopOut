@@ -26,7 +26,7 @@ internal static class ExtendedSearch
         var matcher = Encyclopedia.MatchesText;
         if (matcher == null)
         {
-            ModLog.Warn("Unit Reference text match not found (game updated?) - search stays as the game has it.");
+            Rig.Log.Warn("Unit Reference text match not found (game updated?) - search stays as the game has it.");
             return false;
         }
         harmony.Patch(matcher, postfix: new HarmonyMethod(typeof(ExtendedSearch), nameof(Matched)));

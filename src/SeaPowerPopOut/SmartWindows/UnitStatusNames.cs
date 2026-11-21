@@ -24,7 +24,7 @@ internal static class UnitStatusNames
         MethodInfo switchUnit = AccessTools.Method(typeof(UnitStatusViewModel), "SwitchUnit");
         if (switchUnit == null || StatusTabHost.UnitField == null || StatusTabHost.SetUnitName == null)
         {
-            ModLog.Warn("Unit Status members not found (game updated?) - the header keeps the short unit name.");
+            Rig.Log.Warn("Unit Status members not found (game updated?) - the header keeps the short unit name.");
             return false;
         }
         harmony.Patch(switchUnit, postfix: new HarmonyMethod(typeof(UnitStatusNames), nameof(UnitSwitched)));
@@ -42,7 +42,7 @@ internal static class UnitStatusNames
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"full unit name: {ex.Message}");
+            Rig.Log.Debug($"full unit name: {ex.Message}");
         }
     }
 }

@@ -46,7 +46,7 @@ internal static class DamageControlLayout
         var constructors = AccessTools.GetDeclaredConstructors(typeof(DamageControlView));
         if (constructors.Count == 0)
         {
-            ModLog.Warn("Damage Control view not found (game updated?) - its minimum height stays as the game has it.");
+            Rig.Log.Warn("Damage Control view not found (game updated?) - its minimum height stays as the game has it.");
             return false;
         }
         foreach (ConstructorInfo constructor in constructors)
@@ -74,7 +74,7 @@ internal static class DamageControlLayout
             return false;
         if (grid.RowDefinitions.Count <= SectionRow)
         {
-            ModLog.Debug("Damage Control: not the expected rows, left alone");
+            Rig.Log.Debug("Damage Control: not the expected rows, left alone");
             return true;
         }
 
@@ -122,7 +122,7 @@ internal static class DamageControlLayout
         }
         setup.Grid.MinHeight = 0f;
         setup.Row.MinHeight = wanted / ScreenScale(view) + setup.RowMargin;
-        ModLog.Debug($"smart windows: Damage Control sections at least {wanted:0} px");
+        Rig.Log.Debug($"smart windows: Damage Control sections at least {wanted:0} px");
     }
 
     /// <summary>The first grid with a minimum height in the top levels of the tab (lists and scrollers are not entered).</summary>

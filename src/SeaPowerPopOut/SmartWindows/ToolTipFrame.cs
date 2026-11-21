@@ -27,7 +27,7 @@ internal static class ToolTipFrame
         }
         catch (Exception ex)
         {
-            ModLog.Warn($"Tooltip frames not available: {ex.Message}");
+            Rig.Log.Warn($"Tooltip frames not available: {ex.Message}");
             return false;
         }
     }
@@ -41,7 +41,7 @@ internal static class ToolTipFrame
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"tooltip frame: {ex.Message}");
+            Rig.Log.Debug($"tooltip frame: {ex.Message}");
         }
     }
 

@@ -61,7 +61,7 @@ internal static class TrackState
         if (constructors.Count == 0 || StatusTabHost.UnitField == null || setHasUnit == null || StatusTabHost.SetUnitName == null
             || StatusTabHost.SelectFirstTab == null)
         {
-            ModLog.Warn("Unit Status members not found (game updated?) - no Track State tab.");
+            Rig.Log.Warn("Unit Status members not found (game updated?) - no Track State tab.");
             return false;
         }
         foreach (ConstructorInfo constructor in constructors)
@@ -92,7 +92,7 @@ internal static class TrackState
             }
             catch (Exception ex)
             {
-                ModLog.Debug($"track state: {ex.Message}");
+                Rig.Log.Debug($"track state: {ex.Message}");
             }
         }
     }
@@ -185,7 +185,7 @@ internal static class TrackState
         if (state.Host != null)
             return true;
         state.HostFailed = true;
-        ModLog.Warn("Unit Status: no place for the Track State tab found (game updated?) - the tab stays empty.");
+        Rig.Log.Warn("Unit Status: no place for the Track State tab found (game updated?) - the tab stays empty.");
         return false;
     }
 
@@ -203,11 +203,11 @@ internal static class TrackState
             state.Body = body;
             if (state.TookOver && !string.IsNullOrEmpty(info.Name))
                 StatusTabHost.SetUnitName.Invoke(status, new object[] { info.Name });
-            ModLog.Debug($"track state: {info.Name} shown in Unit Status");
+            Rig.Log.Debug($"track state: {info.Name} shown in Unit Status");
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"track state: {ex}");
+            Rig.Log.Debug($"track state: {ex}");
             state.Failed = true;
         }
     }
@@ -227,7 +227,7 @@ internal static class TrackState
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"track state dispose: {ex.Message}");
+            Rig.Log.Debug($"track state dispose: {ex.Message}");
         }
     }
 

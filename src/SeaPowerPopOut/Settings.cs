@@ -21,7 +21,7 @@ internal static class Settings
 
     public static ConfigEntry<bool> WideCorners;
 
-    /// <summary>Binds the entries after the shared "1. General" section (ModSettings).</summary>
+    /// <summary>Binds the entries after Rig.Settings has opened the file and bound "1. General".</summary>
     public static void Bind(ConfigFile file)
     {
         Monitor = file.Bind("2. Pop-out screen", "Monitor", 0,

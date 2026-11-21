@@ -55,10 +55,10 @@ internal static class DesktopMode
         }
         catch (Exception ex)
         {
-            ModLog.Warn($"Desktop mode not available: {ex.Message}");
+            Rig.Log.Warn($"Desktop mode not available: {ex.Message}");
         }
         if (hooked)
-            ModLog.Info("Desktop mode is on: the 3D world is drawn into the World View window.");
+            Rig.Log.Info("Desktop mode is on: the 3D world is drawn into the World View window.");
         return hooked;
     }
 
@@ -82,7 +82,7 @@ internal static class DesktopMode
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"desktop mode, window: {ex.Message}");
+            Rig.Log.Debug($"desktop mode, window: {ex.Message}");
         }
     }
 
@@ -113,7 +113,7 @@ internal static class DesktopMode
         }
         catch (Exception ex)
         {
-            ModLog.Debug($"desktop mode, update: {ex.Message}");
+            Rig.Log.Debug($"desktop mode, update: {ex.Message}");
         }
     }
 
@@ -139,7 +139,7 @@ internal static class DesktopMode
             return;
         vm.Map.IsFullscreen = false;
         NotifyPip?.Invoke(vm, null);
-        ModLog.Debug("desktop mode: map put back into its window");
+        Rig.Log.Debug("desktop mode: map put back into its window");
     }
 
     private static void Reset(MainGameViewModel vm)
@@ -163,7 +163,7 @@ internal static class DesktopMode
             NotifyPip?.Invoke(vm, null);
         }
         mapKnown = true;
-        ModLog.Debug($"desktop mode: map window found (world view detached: {vm.WorldViewDetached}, open: {vm.PipOpen})");
+        Rig.Log.Debug($"desktop mode: map window found (world view detached: {vm.WorldViewDetached}, open: {vm.PipOpen})");
     }
 
     /// <summary>
@@ -176,7 +176,7 @@ internal static class DesktopMode
             return;
         bool bottom = window.AnchorBottom, right = window.AnchorRight;
         if (HostArea.ReleaseAnchors(window))
-            ModLog.Debug($"desktop mode: {what} window anchors (bottom {bottom}, right {right}) released");
+            Rig.Log.Debug($"desktop mode: {what} window anchors (bottom {bottom}, right {right}) released");
     }
 
     /// <summary>
@@ -200,7 +200,7 @@ internal static class DesktopMode
             Math.Max(screen.Y, Math.Min(want.Y, screen.Bottom - h)), w, h);
         window.X = fixedRect.X;
         window.Y = fixedRect.Y;
-        ModLog.Debug($"desktop mode: World View window moved onto the screen ({now.X:0},{now.Y:0} -> {fixedRect.X:0},{fixedRect.Y:0})");
+        Rig.Log.Debug($"desktop mode: World View window moved onto the screen ({now.X:0},{now.Y:0} -> {fixedRect.X:0},{fixedRect.Y:0})");
     }
 
     /// <summary>Only a window that is mostly off the screen is moved; then all of it comes back (as far as it fits).</summary>

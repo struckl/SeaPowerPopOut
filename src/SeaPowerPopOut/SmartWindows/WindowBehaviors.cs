@@ -22,7 +22,7 @@ internal static class WindowBehaviors
         Thumb header = window.HeaderThumb;
         if (header == null)
         {
-            ModLog.Debug($"{window.DataContext?.GetType().Name}: no title bar thumb, double-click maximize skipped");
+            Rig.Log.Debug($"{window.DataContext?.GetType().Name}: no title bar thumb, double-click maximize skipped");
             return;
         }
         header.PreviewMouseLeftButtonDown += (s, e) =>

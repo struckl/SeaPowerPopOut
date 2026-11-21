@@ -37,7 +37,7 @@ internal static class KeepOpenedUnit
             c => c.GetParameters().Length >= 2 && c.GetParameters()[1].Name == "initialIniRef");
         if (reveal == null || update == null || opening == null)
         {
-            ModLog.Warn("Unit Reference tree members not found (game updated?) - the opened unit is not kept in the tree.");
+            Rig.Log.Warn("Unit Reference tree members not found (game updated?) - the opened unit is not kept in the tree.");
             return false;
         }
 
@@ -65,7 +65,7 @@ internal static class KeepOpenedUnit
         }
         catch (Exception ex)
         {
-            ModLog.Debug("keep opened unit: " + ex.Message);
+            Rig.Log.Debug("keep opened unit: " + ex.Message);
         }
     }
 
@@ -79,7 +79,7 @@ internal static class KeepOpenedUnit
         }
         catch (Exception ex)
         {
-            ModLog.Debug("keep opened unit: " + ex.Message);
+            Rig.Log.Debug("keep opened unit: " + ex.Message);
         }
     }
 

@@ -394,7 +394,7 @@ internal static class SmartSettings
         }
         catch (Exception ex)
         {
-            ModLog.Warn($"Smart Windows config not saved: {ex.Message}");
+            Rig.Log.Warn($"Smart Windows config not saved: {ex.Message}");
         }
     }
 }

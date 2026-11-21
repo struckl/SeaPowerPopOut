@@ -42,7 +42,7 @@ internal static class Encyclopedia
     {
         if (BrowserConstructor == null || Initializing == null)
         {
-            ModLog.Warn("Unit Reference browser members not found (game updated?) - its choices are not remembered.");
+            Rig.Log.Warn("Unit Reference browser members not found (game updated?) - its choices are not remembered.");
             return false;
         }
         harmony.Patch(BrowserConstructor, postfix: new HarmonyMethod(typeof(Encyclopedia), nameof(Constructed)));
