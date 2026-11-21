@@ -1,7 +1,4 @@
-1.3.0: a switch for every Smart Windows feature, three fixes.
-- Every Smart Windows feature has its own on/off switch (config and settings panel, all on by default)
-- "Upgrade ship" no longer depends on "Dismiss damaged ships": same list either way
-- Fixed: a crash in Noesis.dll when closing the game (Keel report #6)
-- Fixed: Pop-Out's button on other mods' windows (Acoustic ID, board post #1)
-- Fixed: the "Upgrade ship" list could be cut off on the pop-out monitor
-- Inside: Pop-Out runs on the shared R.A.T.S. mod skeleton
+1.4.0: needs R.A.T.S. Rigging, one build for the current game.
+- Needs the new Workshop item R.A.T.S. Rigging, the part the R.A.T.S. mods share; a copy comes with this mod, so nothing has to be done, and a notice on the main menu offers the Rigging item
+- One build for the game's current main version (0.9.x); the 0.8.7 flat-map build is gone
+- Inside: the shared code is the Rigging library; every setting, text and key is unchanged

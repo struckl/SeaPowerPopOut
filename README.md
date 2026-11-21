@@ -7,7 +7,7 @@ Puts the game's windows on a second monitor, and adds window handling on the mai
 | Questions | [R.A.T.S. Discord](https://discord.gg/CzuHd4f8Yf): help, ideas, talk; the first place to ask |
 | Version | `1.4.0` (unreleased) |
 | Game | Sea Power 0.9.3 (build 261116), the current main version; checked offline |
-| Needs | [R.A.T.S. Keel](https://steamcommunity.com/sharedfiles/filedetails/?id=3835527459), the mod loader, and R.A.T.S. Rigging, the part the R.A.T.S. mods share (a copy comes with this mod for now) |
+| Needs | [R.A.T.S. Keel](https://steamcommunity.com/sharedfiles/filedetails/?id=3835527459), the mod loader, and [R.A.T.S. Rigging](https://steamcommunity.com/sharedfiles/filedetails/?id=RIGGING_ID), the part the R.A.T.S. mods share (a copy comes with this mod for now) |
 | Get it | [Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3826396311) (package about 250 KB) |
 | Settings | the gear button in a window, or `BepInEx\config\dev.sewerlabs.seapowerpopout.cfg` and `...smartwindows.cfg` |
 | Bug reports | [R.A.T.S. feedback board](https://hub.sewerlabs.dev/s/popout) |
@@ -34,9 +34,10 @@ Full detail: [docs/features.md](docs/features.md).
 ## Install
 
 1. Install R.A.T.S. Keel, the mod loader: subscribe, switch it on in the Mods menu, copy its one stub file once.
-2. Subscribe to [R.A.T.S. Pop-Out Windows](https://steamcommunity.com/sharedfiles/filedetails/?id=3826396311) on the Workshop.
-3. Connect the second monitor before you start the game.
-4. In a mission, click the pop-out mark left of the X in a window's title bar and choose "Pop out to monitor".
+2. Subscribe to [R.A.T.S. Pop-Out Windows](https://steamcommunity.com/sharedfiles/filedetails/?id=3826396311) on the Workshop; its required item [R.A.T.S. Rigging](https://steamcommunity.com/sharedfiles/filedetails/?id=RIGGING_ID) comes with it.
+3. Already have Pop-Out? Nothing to do: a copy of Rigging is built into the mod for now, and a notice on the main menu offers the Rigging item.
+4. Connect the second monitor before you start the game.
+5. In a mission, click the pop-out mark left of the X in a window's title bar and choose "Pop out to monitor".
 
 Manual install: put `SeaPowerPopOut.dll` and `_info.ini` into `<Sea Power>\Sea Power_Data\StreamingAssets\SeaPowerPopOut\`.
 
