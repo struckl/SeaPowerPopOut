@@ -7,7 +7,7 @@ Puts the game's windows on a second monitor, and adds window handling on the mai
 | Questions | [R.A.T.S. Discord](https://discord.gg/CzuHd4f8Yf): help, ideas, talk; the first place to ask |
 | Version | `1.3.0` (2026-11-20) |
 | Game | Sea Power 0.9.1 (build 261112) and 0.8.7 tested in the game; one DLL for both |
-| Needs | a mod loader: [R.A.T.S. Keel](https://steamcommunity.com/sharedfiles/filedetails/?id=3835527459) or [Anchor Chain](https://steamcommunity.com/sharedfiles/filedetails/?id=3380210757), either one |
+| Needs | [R.A.T.S. Keel](https://steamcommunity.com/sharedfiles/filedetails/?id=3835527459), the mod loader |
 | Get it | [Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3826396311) (package about 250 KB) |
 | Settings | the gear button in a window, or `BepInEx\config\dev.sewerlabs.seapowerpopout.cfg` and `...smartwindows.cfg` |
 | Bug reports | [R.A.T.S. feedback board](https://hub.sewerlabs.dev/s/popout) |
@@ -33,9 +33,7 @@ Full detail: [docs/features.md](docs/features.md).
 
 ## Install
 
-1. Install a mod loader, either one.
-   - R.A.T.S. Keel: subscribe, switch it on in the Mods menu, copy its one stub file once.
-   - Anchor Chain: follow its [installation guide](https://seapower-modders.github.io/AnchorChain/install-anchor-chain.html).
+1. Install R.A.T.S. Keel, the mod loader: subscribe, switch it on in the Mods menu, copy its one stub file once.
 2. Subscribe to [R.A.T.S. Pop-Out Windows](https://steamcommunity.com/sharedfiles/filedetails/?id=3826396311) on the Workshop.
 3. Connect the second monitor before you start the game.
 4. In a mission, click the pop-out mark left of the X in a window's title bar and choose "Pop out to monitor".
@@ -63,7 +61,6 @@ Manual install: put `SeaPowerPopOut.dll` and `_info.ini` into `<Sea Power>\Sea P
 - Needs a second monitor for the pop-out part; the Smart Windows features work without one.
 - Exclusive fullscreen with a second monitor can freeze the world view: use borderless windowed (Options > Graphics).
 - No game files are changed. Uninstall by unsubscribing or deleting the folder.
-- Under Anchor Chain it was run on 0.8.7 only; Anchor Chain does not start on the globe builds yet.
 
 ## Building
 

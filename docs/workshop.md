@@ -44,7 +44,7 @@ Start Sea Power > Mods > Create Mod:
 | Description | [workshop/description.bbcode](../workshop/description.bbcode) |
 | Preview image | `StreamingAssets\SeaPowerPopOut\preview.jpg` (put there by `package.ps1`: the picker only browses StreamingAssets and only takes .jpg; Steam wants it under 1 MB) |
 | Tags | Scripting |
-| Dependencies | `3380210757` (Anchor Chain) - shows as a required item on the Workshop page |
+| Dependencies | `3835527459` (R.A.T.S. Keel) - shows as a required item on the Workshop page |
 | Visibility | first upload **Hidden** (or Friends only); Public once the subscribed copy is tested |
 | Change log | the CHANGELOG entry |
 

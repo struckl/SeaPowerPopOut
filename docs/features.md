@@ -90,7 +90,7 @@ Based on rgreat's [Smart Windows](https://steamcommunity.com/sharedfiles/filedet
 - One DLL serves the flat 0.8.7 map and the 3D-globe builds: `modtool compat` finds no reference that one game has and the other lacks.
 - Run in the game: 0.8.7 (Smart Windows, desktop mode) and the globe builds (pop-out, formation manager menu; latest 0.9.1, build 261112, on 12 November 2026, under Keel).
   See `CHANGELOG.md` for what each run covered.
-- Both loaders: it uses the Anchor Chain entry point, which Keel runs as well. Under Anchor Chain it was run on 0.8.7 only; Anchor Chain does not start on the globe builds yet.
+- Loader: R.A.T.S. Keel. It uses the Anchor Chain entry point, which Keel carries on.
 - Needs a second monitor for the pop-out part. The Smart Windows features work without one.
 - Exclusive fullscreen: with a second monitor in use, the world view can freeze. Use borderless windowed (Options > Graphics); the log warns when the game runs exclusive.
 - No game files are changed. Uninstall by unsubscribing or deleting the folder.
