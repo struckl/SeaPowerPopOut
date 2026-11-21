@@ -5,7 +5,7 @@ Short form in the [README](../README.md).
 ## Building
 
 - Needs the .NET SDK 8 and Sea Power installed (the build references the game's assemblies).
-- Needs the R.A.T.S. Core repo next to this one: the shared skeleton (entry point, host, log, settings, hook registry) is `SeaPowerCore`.
+- Needs the R.A.T.S. Shared repo next to this one: the shared skeleton (entry point, host, log, settings, hook registry) is `SeaPowerShared`.
   It is found through the workspace folder that holds `mods.json`; for a clone elsewhere use `-p:RatsWorkspace=<folder>`.
 - Anchor Chain's library comes from Keel's copy.
 

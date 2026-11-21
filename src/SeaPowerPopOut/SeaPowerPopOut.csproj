@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!--The common part (framework, game references, deploy, the shared source files) comes from the R.A.T.S. Core repo: SeaPowerCore\Rats.Mod.props in the workspace. One DLL runs on both game versions: no flat-map build.
-      -p:RatsWorkspace=<workspace> builds from a clone outside it, -p:RatsCore=<folder>\ against another copy of the Core repo.-->
+  <!--The common part (framework, game references, deploy, the shared source files) comes from the R.A.T.S. shared repo: SeaPowerShared\Rats.Mod.props in the workspace. One DLL runs on both game versions: no flat-map build.
+      -p:RatsWorkspace=<workspace> builds from a clone outside it, -p:RatsShared=<folder>\ against another copy of the shared repo.-->
   <PropertyGroup>
     <AssemblyName>SeaPowerPopOut</AssemblyName>
     <RootNamespace>SeaPowerPopOut</RootNamespace>
@@ -9,10 +9,10 @@
     <Version>1.3.0</Version>
     <RatsSingleBuild>true</RatsSingleBuild>
     <RatsWorkspace Condition="'$(RatsWorkspace)' == ''">$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), mods.json))</RatsWorkspace>
-    <RatsCore Condition="'$(RatsCore)' == ''">$([MSBuild]::EnsureTrailingSlash('$(RatsWorkspace)'))SeaPowerCore\</RatsCore>
+    <RatsShared Condition="'$(RatsShared)' == ''">$([MSBuild]::EnsureTrailingSlash('$(RatsWorkspace)'))SeaPowerShared\</RatsShared>
   </PropertyGroup>
 
-  <Import Project="$(RatsCore)Rats.Mod.props" />
+  <Import Project="$(RatsShared)Rats.Mod.props" />
 
   <ItemGroup>
     <Reference Include="UnityEngine.ImageConversionModule"><HintPath>$(ManagedDir)\UnityEngine.ImageConversionModule.dll</HintPath><Private>false</Private></Reference>
