@@ -7,7 +7,7 @@
     <AssemblyName>SeaPowerPopOut</AssemblyName>
     <RootNamespace>SeaPowerPopOut</RootNamespace>
     <Product>Moves Sea Power's windows onto another monitor.</Product>
-    <Version>1.4.0</Version>
+    <Version>1.4.1</Version>
     <RatsWorkspace Condition="'$(RatsWorkspace)' == ''">$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), mods.json))</RatsWorkspace>
     <RatsRigging Condition="'$(RatsRigging)' == ''">$([MSBuild]::EnsureTrailingSlash('$(RatsWorkspace)'))SeaPowerRigging\</RatsRigging>
   </PropertyGroup>

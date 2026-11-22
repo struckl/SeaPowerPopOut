@@ -13,7 +13,7 @@ public class Plugin : IAnchorChainMod
 {
     public const string Guid = "dev.sewerlabs.seapowerpopout";
     public const string Name = "R.A.T.S. Pop-Out Windows";
-    public const string Version = "1.4.0";
+    public const string Version = "1.4.1";
 
     public void TriggerEntryPoint() => Start();
 
