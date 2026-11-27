@@ -4,7 +4,7 @@ using AnchorChain;
 namespace SeaPowerPopOut;
 
 /// <summary>
-/// Entry point. R.A.T.S. Keel finds the class by its attribute and calls TriggerEntryPoint. The start itself is R.A.T.S. Rigging's:
+/// Entry point. Keel finds the class by its attribute and calls TriggerEntryPoint. The start itself is R.A.T.S. Rigging's:
 /// the plugin names it as a dependency, so Keel starts it first and keeps this mod out when it is missing or too old.
 /// </summary>
 [ACPlugin(Guid, Name, Version)]

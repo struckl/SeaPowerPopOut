@@ -89,7 +89,7 @@ Based on rgreat's [Smart Windows](https://steamcommunity.com/sharedfiles/filedet
 - `_info.ini` declares Sea Power 0.9.0 up to every 0.9.x.
 - One build for the game's current main version (0.9.3, build 261116): `modtool compat` finds nothing missing in it.
 - Not run in the game on 0.9.3 yet; the last run was 0.9.1 (pop-out, formation manager menu), before the move to Rigging.
-- Loader: R.A.T.S. Keel. It uses the Anchor Chain entry point, which Keel carries on.
+- Loader: Keel. It uses the Anchor Chain entry point, which Keel carries on.
 - Also needs R.A.T.S. Rigging, the part the R.A.T.S. mods share; a copy comes with this mod for now.
 - Needs a second monitor for the pop-out part. The Smart Windows features work without one.
 - Exclusive fullscreen: with a second monitor in use, the world view can freeze. Use borderless windowed (Options > Graphics); the log warns when the game runs exclusive.
